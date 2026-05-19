@@ -26,6 +26,7 @@ import (
 	profilev1 "github.com/next-ecosystem/next/gen/go/profile/v1"
 	"github.com/next-ecosystem/next/packages/go/telemetry"
 	"github.com/next-ecosystem/next/services/profile-service/internal/api"
+	"github.com/next-ecosystem/next/services/profile-service/internal/consumer"
 	"github.com/next-ecosystem/next/services/profile-service/internal/eventbus"
 	"github.com/next-ecosystem/next/services/profile-service/internal/store"
 )
@@ -119,7 +120,15 @@ func run() error {
 		return err
 	}
 
-	errCh := make(chan error, 2)
+	// Kafka consumer: react to auth.user.registered.v1 by materialising a profile.
+	// The constitution mandates "the bus, not the database, is the integration
+	// point" — this is the canonical inter-service handoff.
+	errCh := make(chan error, 3)
+	if cfg.KafkaBrokers != "" {
+		authConsumer := consumer.NewAuthUserRegistered(consumer.Config{Brokers: cfg.KafkaBrokers}, pg)
+		go func() { errCh <- authConsumer.Run(ctx) }()
+	}
+
 	go func() { errCh <- httpSrv.ListenAndServe() }()
 	go func() { errCh <- grpcSrv.Serve(grpcLis) }()
 
