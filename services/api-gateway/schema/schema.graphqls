@@ -1,0 +1,111 @@
+# NEXT external GraphQL surface. Phase 4 minimum: identity + profile.
+# Federation will land when we have ≥3 subgraphs to compose.
+
+"""
+ISO-8601 timestamp string.
+"""
+scalar DateTime
+
+"""
+The user's tier — defines what scopes they can use and what surfaces they see.
+"""
+enum Tier {
+  AUTHENTICATED
+  CREATOR
+  PARTNER
+  STAFF
+}
+
+"""
+A NEXT user. id is the canonical ID owned by auth-service.
+Handle, displayName, bio, follower counts come from profile-service.
+"""
+type User {
+  id: ID!
+  handle: String!
+  displayName: String!
+  bio: String!
+  tier: Tier!
+  followers: Int!
+  following: Int!
+  createdAt: DateTime!
+  updatedAt: DateTime!
+}
+
+"""
+One edge in the social graph.
+"""
+type FollowEdge {
+  userId: ID!
+  handle: String!
+  followedAt: DateTime!
+}
+
+type FollowersConnection {
+  edges: [FollowEdge!]!
+  nextCursor: String
+}
+
+# ---- Queries -----
+
+type Query {
+  """
+  Health check. Returns "ok".
+  """
+  health: String!
+
+  """
+  Look up a user by canonical ID. Returns null if not found.
+  """
+  user(id: ID!): User
+
+  """
+  Paginated followers of a user.
+  """
+  followers(userId: ID!, first: Int = 25, after: String): FollowersConnection!
+
+  """
+  Paginated following list.
+  """
+  following(userId: ID!, first: Int = 25, after: String): FollowersConnection!
+}
+
+# ---- Mutations -----
+
+"""
+RegisterUserInput drives auth-service.RegisterUser. The matching profile
+is materialized asynchronously by profile-service via the
+auth.user.registered.v1 Kafka event.
+"""
+input RegisterUserInput {
+  handle: String!
+  displayName: String
+}
+
+type RegisterUserResult {
+  user: User!
+}
+
+input FollowInput {
+  followerId: ID!
+  followeeId: ID!
+}
+
+type Mutation {
+  """
+  Register a new user. The returned User may have null profile fields
+  for a brief window while the consumer materializes it; clients should
+  refetch if needed.
+  """
+  registerUser(input: RegisterUserInput!): RegisterUserResult!
+
+  """
+  Idempotent follow.
+  """
+  follow(input: FollowInput!): Boolean!
+
+  """
+  Idempotent unfollow.
+  """
+  unfollow(input: FollowInput!): Boolean!
+}

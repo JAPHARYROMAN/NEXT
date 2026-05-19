@@ -1,0 +1,35 @@
+# gqlgen config for the NEXT api-gateway.
+# Single graph for Phase 4; federation lands when we have more subgraphs.
+
+schema:
+  - schema/*.graphqls
+
+exec:
+  filename: internal/gql/generated/generated.go
+  package: generated
+
+model:
+  filename: internal/gql/model/models_gen.go
+  package: model
+
+resolver:
+  layout: follow-schema
+  dir: internal/gql/resolver
+  package: resolver
+  filename_template: "{name}.resolvers.go"
+
+autobind:
+  - "github.com/next-ecosystem/next/services/api-gateway/internal/gql/model"
+
+models:
+  ID:
+    model:
+      - github.com/99designs/gqlgen/graphql.ID
+  Int:
+    model:
+      - github.com/99designs/gqlgen/graphql.Int
+      - github.com/99designs/gqlgen/graphql.Int64
+      - github.com/99designs/gqlgen/graphql.Int32
+  DateTime:
+    model:
+      - github.com/99designs/gqlgen/graphql.Time
