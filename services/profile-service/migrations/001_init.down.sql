@@ -1,0 +1,10 @@
+DROP TRIGGER IF EXISTS follows_inc ON follows;
+DROP TRIGGER IF EXISTS follows_dec ON follows;
+DROP TRIGGER IF EXISTS profiles_touch ON profiles;
+DROP FUNCTION IF EXISTS follows_after_insert();
+DROP FUNCTION IF EXISTS follows_after_delete();
+DROP FUNCTION IF EXISTS touch_updated_at();
+DROP TABLE IF EXISTS blocks;
+DROP TABLE IF EXISTS mutes;
+DROP TABLE IF EXISTS follows;
+DROP TABLE IF EXISTS profiles;
