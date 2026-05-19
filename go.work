@@ -20,4 +20,5 @@ use (
 	./services/recommendation-service
 	./services/search-service
 	./services/upload-service
+	./scripts/e2e-register
 )
