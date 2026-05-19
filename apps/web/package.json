@@ -35,7 +35,7 @@
   },
   "devDependencies": {
     "@next/config": "workspace:*",
-    "@next/eslint-plugin-next": "catalog:next",
+    "@next/eslint-plugin-next": "^15.1.0",
     "@playwright/test": "catalog:",
     "@tailwindcss/typography": "catalog:",
     "@types/node": "^22.7.5",
