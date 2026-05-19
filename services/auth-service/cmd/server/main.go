@@ -2,12 +2,12 @@
 //
 // Boot sequence:
 //  1. Parse config from environment.
-//  2. Initialise OpenTelemetry (traces + metrics).
+//  2. Initialise OpenTelemetry.
 //  3. Open Postgres + Redis pools.
-//  4. Open Kafka producer.
-//  5. Construct domain services + handlers.
-//  6. Start HTTP server (:8080), gRPC server (:7070), metrics server (:9090).
-//  7. Listen for SIGTERM; drain and shutdown.
+//  4. Register the gRPC SessionService.
+//  5. Start HTTP (:8080), gRPC (:7070).
+//  6. Optionally emit one auth.lifecycle.started event so the Kafka path is exercised.
+//  7. Wait for SIGTERM, drain, shut down.
 package main
 
 import (
@@ -18,39 +18,49 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"sync/atomic"
 	"syscall"
 	"time"
 
 	"github.com/caarlos0/env/v11"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"github.com/google/uuid"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/redis/go-redis/v9"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
 	"go.opentelemetry.io/contrib/instrumentation/net/http/otelhttp"
 	"google.golang.org/grpc"
-	"google.golang.org/grpc/health"
 	healthpb "google.golang.org/grpc/health/grpc_health_v1"
 
+	authv1 "github.com/next-ecosystem/next/gen/go/auth/v1"
 	"github.com/next-ecosystem/next/packages/go/telemetry"
+	"github.com/next-ecosystem/next/services/auth-service/internal/api"
+	"github.com/next-ecosystem/next/services/auth-service/internal/lifecycle"
+	"github.com/next-ecosystem/next/services/auth-service/internal/store"
 )
 
-const serviceName = "auth-service"
+const (
+	serviceName      = "auth-service"
+	serviceNamespace = "next-identity"
+)
+
+// version is overwritten at build time via -ldflags="-X main.version=...".
+var version = "0.0.0-dev"
 
 type config struct {
 	Env          string `env:"NEXT_ENV" envDefault:"dev"`
-	Version      string `env:"VERSION" envDefault:"0.0.0"`
 	HTTPAddr     string `env:"HTTP_ADDR" envDefault:":8080"`
 	GRPCAddr     string `env:"GRPC_ADDR" envDefault:":7070"`
-	MetricsAddr  string `env:"METRICS_ADDR" envDefault:":9090"`
 	OTLPEndpoint string `env:"OTEL_EXPORTER_OTLP_ENDPOINT" envDefault:""`
 	PostgresURL  string `env:"POSTGRES_URL,required"`
 	RedisURL     string `env:"REDIS_URL,required"`
-	KafkaBrokers string `env:"KAFKA_BROKERS,required"`
+	KafkaBrokers string `env:"KAFKA_BROKERS" envDefault:""`
+	EmitStartup  bool   `env:"AUTH_EMIT_STARTUP_EVENT" envDefault:"true"`
 }
 
 func main() {
-	logger := slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}))
-	slog.SetDefault(logger)
-
+	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo})))
 	if err := run(); err != nil {
 		slog.Error("fatal", "err", err)
 		os.Exit(1)
@@ -68,35 +78,90 @@ func run() error {
 
 	shutdownTel, err := telemetry.Init(ctx, telemetry.Config{
 		Service:      serviceName,
-		Namespace:    "next-identity",
+		Namespace:    serviceNamespace,
 		Environment:  cfg.Env,
-		Version:      cfg.Version,
+		Version:      version,
 		OTLPEndpoint: cfg.OTLPEndpoint,
 	})
 	if err != nil {
 		return err
 	}
 	defer func() {
-		shutdownCtx, c := context.WithTimeout(context.Background(), 5*time.Second)
-		defer c()
-		_ = shutdownTel(shutdownCtx)
+		c, x := context.WithTimeout(context.Background(), 5*time.Second)
+		defer x()
+		_ = shutdownTel(c)
 	}()
 
-	httpSrv := newHTTPServer(cfg)
-	grpcSrv := newGRPCServer()
-	metricsSrv := newMetricsServer(cfg.MetricsAddr)
+	pgPool, err := pgxpool.New(ctx, cfg.PostgresURL)
+	if err != nil {
+		return err
+	}
+	defer pgPool.Close()
+	pg := store.NewPostgres(pgPool)
+
+	rdOpts, err := redis.ParseURL(cfg.RedisURL)
+	if err != nil {
+		return err
+	}
+	rdClient := redis.NewClient(rdOpts)
+	defer func() { _ = rdClient.Close() }()
+	rd := store.NewRedis(rdClient)
+
+	var ready atomic.Bool
+	go func() {
+		probeCtx, probeCancel := context.WithTimeout(ctx, 10*time.Second)
+		defer probeCancel()
+		if err := pg.Ping(probeCtx); err != nil {
+			slog.Error("postgres ping failed at startup", "err", err)
+			return
+		}
+		if err := rd.Ping(probeCtx); err != nil {
+			slog.Error("redis ping failed at startup", "err", err)
+			return
+		}
+		ready.Store(true)
+		slog.Info("dependencies healthy; service marked ready")
+	}()
+
+	sessionSvc := api.NewSessionService(pg, rd)
+
+	httpSrv := newHTTPServer(cfg, pg, rd, &ready)
+	grpcSrv := newGRPCServer(sessionSvc)
 
 	grpcLis, err := net.Listen("tcp", cfg.GRPCAddr)
 	if err != nil {
 		return err
 	}
 
-	errCh := make(chan error, 3)
+	errCh := make(chan error, 2)
 	go func() { errCh <- httpSrv.ListenAndServe() }()
 	go func() { errCh <- grpcSrv.Serve(grpcLis) }()
-	go func() { errCh <- metricsSrv.ListenAndServe() }()
 
-	slog.Info("started", "service", serviceName, "http", cfg.HTTPAddr, "grpc", cfg.GRPCAddr)
+	slog.Info("auth-service started",
+		"version", version,
+		"http", cfg.HTTPAddr,
+		"grpc", cfg.GRPCAddr,
+		"env", cfg.Env,
+	)
+
+	if cfg.EmitStartup && cfg.KafkaBrokers != "" {
+		go func() {
+			emitCtx, emitCancel := context.WithTimeout(ctx, 5*time.Second)
+			defer emitCancel()
+			if err := lifecycle.EmitStartup(emitCtx, lifecycle.Config{
+				Brokers:  cfg.KafkaBrokers,
+				ClientID: serviceName,
+				Service:  serviceName,
+				Version:  version,
+				Env:      cfg.Env,
+				EventID:  uuid.NewString(),
+			}); err != nil {
+				slog.Warn("startup event emit failed", "err", err)
+			} else {
+				slog.Info("startup event emitted to kafka")
+			}
+		}()
+	}
 
 	select {
 	case <-ctx.Done():
@@ -109,14 +174,12 @@ func run() error {
 
 	shutdownCtx, cancelShutdown := context.WithTimeout(context.Background(), 30*time.Second)
 	defer cancelShutdown()
-
 	_ = httpSrv.Shutdown(shutdownCtx)
 	grpcSrv.GracefulStop()
-	_ = metricsSrv.Shutdown(shutdownCtx)
 	return nil
 }
 
-func newHTTPServer(cfg config) *http.Server {
+func newHTTPServer(cfg config, pg *store.Postgres, rd *store.Redis, ready *atomic.Bool) *http.Server {
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID, middleware.Recoverer, middleware.Compress(5))
 
@@ -124,13 +187,25 @@ func newHTTPServer(cfg config) *http.Server {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte("ok"))
 	})
-	r.Get("/readyz", func(w http.ResponseWriter, _ *http.Request) {
-		// Real implementation pings Postgres + Redis with a short deadline.
+
+	r.Get("/readyz", func(w http.ResponseWriter, req *http.Request) {
+		if !ready.Load() {
+			http.Error(w, "warming up", http.StatusServiceUnavailable)
+			return
+		}
+		ctx, cancel := context.WithTimeout(req.Context(), 500*time.Millisecond)
+		defer cancel()
+		if err := pg.Ping(ctx); err != nil {
+			http.Error(w, "postgres unreachable", http.StatusServiceUnavailable)
+			return
+		}
+		if err := rd.Ping(ctx); err != nil {
+			http.Error(w, "redis unreachable", http.StatusServiceUnavailable)
+			return
+		}
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte("ready"))
 	})
-
-	// OIDC + OAuth handlers mounted by internal/api wiring (omitted in scaffold).
 
 	return &http.Server{
 		Addr:              cfg.HTTPAddr,
@@ -142,20 +217,20 @@ func newHTTPServer(cfg config) *http.Server {
 	}
 }
 
-func newGRPCServer() *grpc.Server {
+func newGRPCServer(sessionSvc authv1.SessionServiceServer) *grpc.Server {
 	s := grpc.NewServer(
 		grpc.StatsHandler(otelgrpc.NewServerHandler()),
 	)
-	healthpb.RegisterHealthServer(s, health.NewServer())
-	// SessionService + KeyService registered here in the real wiring.
+	authv1.RegisterSessionServiceServer(s, sessionSvc)
+
+	healthpb.RegisterHealthServer(s, &grpcHealth{})
 	return s
 }
 
-func newMetricsServer(addr string) *http.Server {
-	mux := http.NewServeMux()
-	// Prometheus handler registered by the OTel SDK's metrics reader bridge.
-	mux.HandleFunc("/", func(w http.ResponseWriter, _ *http.Request) {
-		w.WriteHeader(http.StatusOK)
-	})
-	return &http.Server{Addr: addr, Handler: mux, ReadHeaderTimeout: 5 * time.Second}
+type grpcHealth struct {
+	healthpb.UnimplementedHealthServer
+}
+
+func (h *grpcHealth) Check(_ context.Context, _ *healthpb.HealthCheckRequest) (*healthpb.HealthCheckResponse, error) {
+	return &healthpb.HealthCheckResponse{Status: healthpb.HealthCheckResponse_SERVING}, nil
 }
