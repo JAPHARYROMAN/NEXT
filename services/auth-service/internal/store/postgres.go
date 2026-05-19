@@ -32,6 +32,30 @@ func (p *Postgres) Ping(ctx context.Context) error {
 	return p.pool.Ping(ctx)
 }
 
+// RegisterUser inserts a fresh user. If id == uuid.Nil, Postgres mints one
+// via the DEFAULT. Returns the persisted ID and ErrAlreadyExists if id collides.
+//
+// Auth-service does NOT persist the handle long-term — that's profile-service's
+// concern. The handle is passed straight through to the registration event so
+// profile-service can materialize a profile.
+func (p *Postgres) RegisterUser(ctx context.Context, id uuid.UUID, handle string) (uuid.UUID, error) {
+	var out uuid.UUID
+	var err error
+	if id == uuid.Nil {
+		err = p.pool.QueryRow(ctx,
+			`INSERT INTO users (handle) VALUES ($1) RETURNING id`, handle,
+		).Scan(&out)
+	} else {
+		err = p.pool.QueryRow(ctx,
+			`INSERT INTO users (id, handle) VALUES ($1, $2) RETURNING id`, id, handle,
+		).Scan(&out)
+	}
+	if err != nil {
+		return uuid.Nil, fmt.Errorf("register user: %w", err)
+	}
+	return out, nil
+}
+
 // Session models a row of the sessions table.
 type Session struct {
 	ID         uuid.UUID

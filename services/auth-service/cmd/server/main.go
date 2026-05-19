@@ -25,7 +25,6 @@ import (
 	"github.com/caarlos0/env/v11"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
-	"github.com/google/uuid"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/redis/go-redis/v9"
 	"go.opentelemetry.io/contrib/instrumentation/google.golang.org/grpc/otelgrpc"
@@ -36,7 +35,7 @@ import (
 	authv1 "github.com/next-ecosystem/next/gen/go/auth/v1"
 	"github.com/next-ecosystem/next/packages/go/telemetry"
 	"github.com/next-ecosystem/next/services/auth-service/internal/api"
-	"github.com/next-ecosystem/next/services/auth-service/internal/lifecycle"
+	"github.com/next-ecosystem/next/services/auth-service/internal/eventbus"
 	"github.com/next-ecosystem/next/services/auth-service/internal/store"
 )
 
@@ -123,10 +122,23 @@ func run() error {
 		slog.Info("dependencies healthy; service marked ready")
 	}()
 
+	// Long-lived Kafka producer. Used for both the lifecycle heartbeat at boot
+	// and the canonical auth.user.registered.v1 fired by UserService.
+	var producer *eventbus.Producer
+	if cfg.KafkaBrokers != "" {
+		producer, err = eventbus.New(eventbus.Config{Brokers: cfg.KafkaBrokers, ClientID: serviceName})
+		if err != nil {
+			slog.Warn("kafka producer init failed; continuing without event emission", "err", err)
+		} else {
+			defer func() { _ = producer.Close() }()
+		}
+	}
+
 	sessionSvc := api.NewSessionService(pg, rd)
+	userSvc := api.NewUserService(pg, producer)
 
 	httpSrv := newHTTPServer(cfg, pg, rd, &ready)
-	grpcSrv := newGRPCServer(sessionSvc)
+	grpcSrv := newGRPCServer(sessionSvc, userSvc)
 
 	grpcLis, err := net.Listen("tcp", cfg.GRPCAddr)
 	if err != nil {
@@ -144,17 +156,14 @@ func run() error {
 		"env", cfg.Env,
 	)
 
-	if cfg.EmitStartup && cfg.KafkaBrokers != "" {
+	if cfg.EmitStartup && producer != nil {
 		go func() {
 			emitCtx, emitCancel := context.WithTimeout(ctx, 5*time.Second)
 			defer emitCancel()
-			if err := lifecycle.EmitStartup(emitCtx, lifecycle.Config{
-				Brokers:  cfg.KafkaBrokers,
-				ClientID: serviceName,
-				Service:  serviceName,
-				Version:  version,
-				Env:      cfg.Env,
-				EventID:  uuid.NewString(),
+			if err := producer.EmitLifecycleStarted(emitCtx, eventbus.LifecycleStarted{
+				Service: serviceName,
+				Version: version,
+				Env:     cfg.Env,
 			}); err != nil {
 				slog.Warn("startup event emit failed", "err", err)
 			} else {
@@ -217,12 +226,12 @@ func newHTTPServer(cfg config, pg *store.Postgres, rd *store.Redis, ready *atomi
 	}
 }
 
-func newGRPCServer(sessionSvc authv1.SessionServiceServer) *grpc.Server {
+func newGRPCServer(sessionSvc authv1.SessionServiceServer, userSvc authv1.UserServiceServer) *grpc.Server {
 	s := grpc.NewServer(
 		grpc.StatsHandler(otelgrpc.NewServerHandler()),
 	)
 	authv1.RegisterSessionServiceServer(s, sessionSvc)
-
+	authv1.RegisterUserServiceServer(s, userSvc)
 	healthpb.RegisterHealthServer(s, &grpcHealth{})
 	return s
 }
