@@ -3,12 +3,13 @@
 
 services:
   postgres:
+    # Host port 5433 — avoids collisions with any native Postgres service on 5432.
     image: postgres:16.4-alpine
     environment:
       POSTGRES_USER: next
       POSTGRES_PASSWORD: next
       POSTGRES_DB: next
-    ports: ["5432:5432"]
+    ports: ["5433:5432"]
     volumes: [pgdata:/var/lib/postgresql/data]
     healthcheck:
       test: ["CMD", "pg_isready", "-U", "next"]
@@ -17,18 +18,22 @@ services:
       retries: 10
 
   redis:
+    # Host port 6380 — same reason; native Redis often takes 6379.
     image: redis:7.4-alpine
-    ports: ["6379:6379"]
+    ports: ["6380:6379"]
     command: ["redis-server", "--appendonly", "yes"]
 
   kafka:
+    # Two listeners: PLAINTEXT for in-cluster (other compose services use kafka:9092),
+    # EXTERNAL for host-side clients (auth-service running on the host uses
+    # localhost:9094). Same broker either way.
     image: apache/kafka:3.8.0
     environment:
       KAFKA_NODE_ID: "1"
       KAFKA_PROCESS_ROLES: "broker,controller"
-      KAFKA_LISTENERS: "PLAINTEXT://:9092,CONTROLLER://:9093"
-      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092"
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,CONTROLLER:PLAINTEXT"
+      KAFKA_LISTENERS: "PLAINTEXT://:9092,EXTERNAL://:9094,CONTROLLER://:9093"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://kafka:9092,EXTERNAL://localhost:9094"
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: "PLAINTEXT:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT"
       KAFKA_CONTROLLER_LISTENER_NAMES: "CONTROLLER"
       KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:9093"
       KAFKA_INTER_BROKER_LISTENER_NAME: "PLAINTEXT"
@@ -36,7 +41,7 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: "1"
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: "1"
       CLUSTER_ID: "next-local-cluster"
-    ports: ["9092:9092"]
+    ports: ["9092:9092", "9094:9094"]
     volumes: [kafkadata:/var/lib/kafka/data]
 
   schema-registry:
@@ -79,7 +84,10 @@ services:
     image: jaegertracing/all-in-one:1.62.0
     environment:
       COLLECTOR_OTLP_ENABLED: "true"
-    ports: ["16686:16686", "4317"]
+    # 16686 = Jaeger UI; 4319 (host) -> 4317 (container) is Jaeger's own OTLP gRPC
+    # receiver. We expose it under a different host port so the otel-collector can
+    # keep the canonical 4317.
+    ports: ["16686:16686", "4319:4317"]
 
   prometheus:
     image: prom/prometheus:v2.55.0
