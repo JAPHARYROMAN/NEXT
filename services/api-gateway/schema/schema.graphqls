@@ -55,6 +55,12 @@ type Query {
   health: String!
 
   """
+  Returns the authenticated user, or null when no valid JWT is present.
+  The User type is fetched from profile-service using the subject claim.
+  """
+  me: User
+
+  """
   Look up a user by canonical ID. Returns null if not found.
   """
   user(id: ID!): User

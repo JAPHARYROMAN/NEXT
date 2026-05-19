@@ -15,6 +15,7 @@ import (
 
 	authv1 "github.com/next-ecosystem/next/gen/go/auth/v1"
 	profilev1 "github.com/next-ecosystem/next/gen/go/profile/v1"
+	"github.com/next-ecosystem/next/services/api-gateway/internal/authz"
 	"github.com/next-ecosystem/next/services/api-gateway/internal/gql/generated"
 	"github.com/next-ecosystem/next/services/api-gateway/internal/gql/model"
 )
@@ -32,9 +33,6 @@ func (r *mutationResolver) RegisterUser(ctx context.Context, input model.Registe
 		return nil, translateGRPCError(err)
 	}
 
-	// Best-effort fetch of the freshly-materialized profile. The auth event
-	// triggers profile-service async, so on the very first request after
-	// registration the profile may not be there yet — we return what auth knows.
 	profile, _ := r.tryFetchProfile(ctx, authResp.GetUserId(), 1*time.Second)
 	if profile == nil {
 		profile = &model.User{
@@ -82,15 +80,24 @@ func (r *queryResolver) Health(_ context.Context) (string, error) {
 	return "ok", nil
 }
 
+// Me is the resolver for the me field.
+// Returns the user identified by the verified JWT's subject claim, or null
+// when the request is anonymous.
+func (r *queryResolver) Me(ctx context.Context) (*model.User, error) {
+	claims := authz.ClaimsFromContext(ctx)
+	if claims == nil || claims.Subject == "" {
+		return nil, nil
+	}
+	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
+	defer cancel()
+	return r.tryFetchProfile(ctx, claims.Subject, 0)
+}
+
 // User is the resolver for the user field.
 func (r *queryResolver) User(ctx context.Context, id string) (*model.User, error) {
 	ctx, cancel := context.WithTimeout(ctx, 3*time.Second)
 	defer cancel()
-	prof, err := r.tryFetchProfile(ctx, id, 0)
-	if err != nil {
-		return nil, err
-	}
-	return prof, nil
+	return r.tryFetchProfile(ctx, id, 0)
 }
 
 // Followers is the resolver for the followers field.
@@ -134,10 +141,6 @@ type queryResolver struct{ *Resolver }
 
 // ---- Helpers ---------------------------------------------------------------
 
-// tryFetchProfile returns the materialised profile if it exists. When `wait`
-// is non-zero, polls every 100ms until the profile appears or the budget runs out.
-// On NotFound after polling, returns (nil, nil) so the caller can render a
-// best-effort response.
 func (r *Resolver) tryFetchProfile(ctx context.Context, userID string, wait time.Duration) (*model.User, error) {
 	deadline := time.Now().Add(wait)
 	for {
@@ -228,7 +231,6 @@ func translateGRPCError(err error) error {
 			return errors.New("forbidden")
 		}
 	}
-	// Internal: don't leak the backend error to clients.
 	return errors.New("internal error")
 }
 

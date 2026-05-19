@@ -28,6 +28,7 @@ import (
 	authv1 "github.com/next-ecosystem/next/gen/go/auth/v1"
 	profilev1 "github.com/next-ecosystem/next/gen/go/profile/v1"
 	"github.com/next-ecosystem/next/packages/go/telemetry"
+	"github.com/next-ecosystem/next/services/api-gateway/internal/authz"
 	"github.com/next-ecosystem/next/services/api-gateway/internal/gql/generated"
 	"github.com/next-ecosystem/next/services/api-gateway/internal/gql/resolver"
 )
@@ -47,6 +48,9 @@ type config struct {
 	ProfileGRPC  string `env:"PROFILE_GRPC_ADDR" envDefault:"localhost:17071"`
 	EnablePlayground bool `env:"ENABLE_PLAYGROUND" envDefault:"true"`
 	CORSOrigins  string `env:"CORS_ORIGINS" envDefault:"http://localhost:3000"`
+	JWTIssuer    string `env:"JWT_ISSUER" envDefault:"https://auth.next.local"`
+	JWTAudience  string `env:"JWT_AUDIENCE" envDefault:"next-api"`
+	JWKSURI      string `env:"JWKS_URI" envDefault:"http://localhost:18080/.well-known/jwks.json"`
 }
 
 func main() {
@@ -102,9 +106,21 @@ func run() error {
 	var ready atomic.Bool
 	ready.Store(true) // gateway has no dependencies to probe at startup beyond gRPC dials (already done).
 
+	jwtMW, err := authz.New(authz.Config{
+		Issuer:   cfg.JWTIssuer,
+		Audience: cfg.JWTAudience,
+		JWKSURI:  cfg.JWKSURI,
+	})
+	if err != nil {
+		slog.Warn("jwt middleware init failed; continuing without auth verification", "err", err)
+	}
+
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID, middleware.Recoverer, middleware.Compress(5))
 	r.Use(corsMiddleware(cfg.CORSOrigins))
+	if jwtMW != nil {
+		r.Use(jwtMW)
+	}
 
 	r.Get("/healthz", func(w http.ResponseWriter, _ *http.Request) {
 		w.WriteHeader(http.StatusOK)
