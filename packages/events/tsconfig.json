@@ -1,0 +1,4 @@
+{
+  "extends": "@next/config/tsconfig/library",
+  "include": ["src/**/*", "schemas/**/*"]
+}

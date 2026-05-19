@@ -1,0 +1,34 @@
+{
+  "name": "@next/events",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Event schemas, producer, and consumer helpers for the NEXT Kafka bus.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./producer": "./src/producer.ts",
+    "./consumer": "./src/consumer.ts",
+    "./topics": "./src/topics.ts",
+    "./schemas": "./schemas/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit",
+    "codegen": "buf generate"
+  },
+  "dependencies": {
+    "@bufbuild/protobuf": "catalog:",
+    "@opentelemetry/api": "catalog:",
+    "kafkajs": "^2.2.4",
+    "zod": "catalog:"
+  },
+  "devDependencies": {
+    "@next/config": "workspace:*",
+    "@next/logger": "workspace:*",
+    "@next/types": "workspace:*",
+    "typescript": "catalog:"
+  }
+}

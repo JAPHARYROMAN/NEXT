@@ -1,0 +1,22 @@
+{
+  "name": "@next/auth-sdk",
+  "version": "0.1.0",
+  "private": true,
+  "description": "OAuth2 + OIDC client and server helpers. JWKS-cached JWT verification with rotation support.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./server": "./src/server.ts",
+    "./client": "./src/client.ts"
+  },
+  "scripts": { "lint": "eslint src", "typecheck": "tsc --noEmit" },
+  "dependencies": {
+    "@next/types": "workspace:*",
+    "jose": "^5.9.6",
+    "zod": "catalog:"
+  },
+  "devDependencies": { "@next/config": "workspace:*", "typescript": "catalog:" }
+}

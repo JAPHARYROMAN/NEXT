@@ -1,0 +1,26 @@
+{
+  "name": "NEXT dev container",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-24.04",
+  "features": {
+    "ghcr.io/devcontainers/features/docker-in-docker:2": {},
+    "ghcr.io/devcontainers/features/github-cli:1": {}
+  },
+  "postCreateCommand": "curl https://mise.run | sh && ~/.local/bin/mise install && pnpm install --frozen-lockfile",
+  "remoteUser": "vscode",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "bradlc.vscode-tailwindcss",
+        "golang.go",
+        "rust-lang.rust-analyzer",
+        "ms-python.python",
+        "charliermarsh.ruff",
+        "hashicorp.terraform",
+        "bufbuild.vscode-buf"
+      ]
+    }
+  },
+  "forwardPorts": [3000, 3010, 3020, 3030, 5432, 6379, 9092, 8081, 8123, 9200, 6333, 16686, 3001, 9090]
+}

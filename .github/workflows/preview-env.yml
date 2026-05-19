@@ -1,0 +1,41 @@
+name: Preview environment
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, closed]
+    paths: ["apps/**", "services/**"]
+
+permissions:
+  contents: read
+  pull-requests: write
+  deployments: write
+
+jobs:
+  spin-up:
+    if: github.event.action != 'closed'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Create preview namespace
+        run: |
+          NAMESPACE=preview-pr-${{ github.event.pull_request.number }}
+          echo "Creating $NAMESPACE in the dev cluster"
+          # kubectl + ArgoCD ApplicationSet generates a per-PR app set.
+      - uses: actions/github-script@v7
+        with:
+          script: |
+            const url = `https://pr-${context.payload.pull_request.number}.preview.next.io`;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🌱 Preview ready: ${url}`
+            });
+
+  tear-down:
+    if: github.event.action == 'closed'
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - run: echo "Deleting preview-pr-${{ github.event.pull_request.number }}"
+        # In practice: argocd app delete preview-pr-<N> --cascade

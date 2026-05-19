@@ -1,0 +1,59 @@
+---
+apiVersion: karpenter.k8s.aws/v1
+kind: EC2NodeClass
+metadata:
+  name: default
+spec:
+  amiFamily: AL2023
+  amiSelectorTerms:
+    - alias: al2023@latest
+  role: KarpenterNodeRole-next
+  subnetSelectorTerms:
+    - tags: { karpenter.sh/discovery: "next-${ENV}" }
+  securityGroupSelectorTerms:
+    - tags: { karpenter.sh/discovery: "next-${ENV}" }
+  blockDeviceMappings:
+    - deviceName: /dev/xvda
+      ebs:
+        volumeType: gp3
+        volumeSize: 100Gi
+        deleteOnTermination: true
+        encrypted: true
+  metadataOptions:
+    httpEndpoint: enabled
+    httpTokens: required
+    httpPutResponseHopLimit: 2
+  tags:
+    project: next
+    karpenter.sh/discovery: "next-${ENV}"
+---
+apiVersion: karpenter.k8s.aws/v1
+kind: EC2NodeClass
+metadata:
+  name: gpu
+spec:
+  amiFamily: AL2023
+  amiSelectorTerms:
+    - alias: al2023@latest
+  role: KarpenterNodeRole-next
+  subnetSelectorTerms:
+    - tags: { karpenter.sh/discovery: "next-${ENV}" }
+  securityGroupSelectorTerms:
+    - tags: { karpenter.sh/discovery: "next-${ENV}" }
+  blockDeviceMappings:
+    - deviceName: /dev/xvda
+      ebs:
+        volumeType: gp3
+        volumeSize: 200Gi
+        deleteOnTermination: true
+        encrypted: true
+  metadataOptions:
+    httpEndpoint: enabled
+    httpTokens: required
+    httpPutResponseHopLimit: 2
+  userData: |
+    #!/bin/bash
+    /etc/eks/bootstrap.sh --container-runtime containerd
+  tags:
+    project: next
+    workload: ai

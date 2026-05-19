@@ -1,0 +1,62 @@
+{
+  "title": "NEXT — Service Golden Signals",
+  "uid": "next-golden",
+  "schemaVersion": 39,
+  "version": 1,
+  "tags": ["next", "service", "golden-signals"],
+  "templating": {
+    "list": [
+      {
+        "name": "service",
+        "type": "query",
+        "datasource": "Prometheus",
+        "query": "label_values(http_requests_total, service)",
+        "includeAll": false,
+        "current": { "text": "api-gateway", "value": "api-gateway" }
+      }
+    ]
+  },
+  "panels": [
+    {
+      "title": "Request rate",
+      "type": "timeseries",
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "sum by (code) (rate(http_requests_total{service=\"$service\"}[1m]))", "legendFormat": "{{code}}" }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 0 }
+    },
+    {
+      "title": "Error rate",
+      "type": "timeseries",
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "sum(rate(http_requests_total{service=\"$service\", code=~\"5..\"}[1m])) / sum(rate(http_requests_total{service=\"$service\"}[1m]))", "legendFormat": "5xx ratio" }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 0 }
+    },
+    {
+      "title": "Latency P50 / P95 / P99",
+      "type": "timeseries",
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "histogram_quantile(0.50, sum by (le) (rate(http_request_duration_seconds_bucket{service=\"$service\"}[5m])))", "legendFormat": "p50" },
+        { "expr": "histogram_quantile(0.95, sum by (le) (rate(http_request_duration_seconds_bucket{service=\"$service\"}[5m])))", "legendFormat": "p95" },
+        { "expr": "histogram_quantile(0.99, sum by (le) (rate(http_request_duration_seconds_bucket{service=\"$service\"}[5m])))", "legendFormat": "p99" }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 0, "y": 8 }
+    },
+    {
+      "title": "Saturation (CPU / memory)",
+      "type": "timeseries",
+      "datasource": "Prometheus",
+      "targets": [
+        { "expr": "sum by (pod) (rate(container_cpu_usage_seconds_total{namespace=~\"next-.*\", pod=~\"$service-.*\"}[1m]))", "legendFormat": "{{pod}} cpu" },
+        { "expr": "sum by (pod) (container_memory_working_set_bytes{namespace=~\"next-.*\", pod=~\"$service-.*\"})", "legendFormat": "{{pod}} mem" }
+      ],
+      "gridPos": { "h": 8, "w": 12, "x": 12, "y": 8 }
+    }
+  ],
+  "time": { "from": "now-3h", "to": "now" },
+  "refresh": "30s"
+}

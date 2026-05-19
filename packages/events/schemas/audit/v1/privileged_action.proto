@@ -1,0 +1,28 @@
+syntax = "proto3";
+
+package next.events.audit.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+import "google/protobuf/struct.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/next/events/audit/v1;auditeventsv1";
+
+// PrivilegedAction — emitted by every service before completing a privileged action.
+// Retained 7 years. Partition key: actor_id.
+message PrivilegedAction {
+  string event_id    = 1 [(buf.validate.field).string.uuid = true];
+  google.protobuf.Timestamp emitted_at = 2;
+
+  string actor_id    = 3 [(buf.validate.field).string.min_len = 26];
+  string actor_tier  = 4;  // staff / partner / creator / authenticated
+  string action      = 5 [(buf.validate.field).string.min_len = 1];
+  string target_id   = 6;
+  string target_kind = 7;  // user / video / payment / case / ...
+
+  string service     = 8 [(buf.validate.field).string.min_len = 1];
+  string request_id  = 9;
+  string ip_country  = 10;
+
+  google.protobuf.Struct metadata = 11;  // free-form, validated by the emitter
+}

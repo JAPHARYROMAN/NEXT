@@ -1,0 +1,9 @@
+apiVersion: v2
+name: ml-serving
+description: Triton + vLLM serving template for NEXT AI workloads. GPU-aware.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+maintainers:
+  - { name: NEXT ML Platform, email: ml-platform@next.example }
+kubeVersion: ">=1.30.0"

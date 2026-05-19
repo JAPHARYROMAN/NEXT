@@ -1,0 +1,40 @@
+# ArgoCD app-of-apps. Bootstrapping this Application bootstraps every NEXT workload.
+
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: next-root
+  namespace: argocd
+spec:
+  generators:
+    - git:
+        repoURL: https://github.com/next-ecosystem/next.git
+        revision: HEAD
+        directories:
+          - path: infrastructure/kubernetes/apps/*
+  template:
+    metadata:
+      name: '{{path.basename}}'
+      labels:
+        managed-by: argocd-applicationset
+        app.kubernetes.io/part-of: next
+    spec:
+      project: next
+      source:
+        repoURL: https://github.com/next-ecosystem/next.git
+        targetRevision: HEAD
+        path: '{{path}}'
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: '{{path.basename | replace "-service" "" | prepend "next-"}}'
+      syncPolicy:
+        automated:
+          prune: true
+          selfHeal: true
+        retry:
+          limit: 5
+          backoff: { duration: 30s, factor: 2, maxDuration: 10m }
+        syncOptions:
+          - CreateNamespace=false
+          - ServerSideApply=true
+          - PruneLast=true

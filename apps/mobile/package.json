@@ -1,0 +1,45 @@
+{
+  "name": "@next/mobile",
+  "version": "0.1.0",
+  "private": true,
+  "description": "NEXT mobile app. Expo + React Native with native modules for video.",
+  "license": "Apache-2.0",
+  "main": "expo-router/entry",
+  "scripts": {
+    "start": "expo start",
+    "android": "expo run:android",
+    "ios": "expo run:ios",
+    "build:ios": "eas build --platform ios",
+    "build:android": "eas build --platform android",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@next/api-client": "workspace:*",
+    "@next/auth-sdk": "workspace:*",
+    "@next/design-system": "workspace:*",
+    "@next/feature-flags": "workspace:*",
+    "@next/types": "workspace:*",
+    "@next/ui": "workspace:*",
+    "@tanstack/react-query": "catalog:",
+    "expo": "~52.0.0",
+    "expo-router": "~4.0.0",
+    "expo-secure-store": "~14.0.0",
+    "expo-updates": "~0.26.0",
+    "react": "catalog:",
+    "react-native": "0.76.0",
+    "react-native-mmkv": "^3.1.0",
+    "react-native-reanimated": "~3.16.0",
+    "react-native-screens": "~4.1.0",
+    "zustand": "catalog:"
+  },
+  "devDependencies": {
+    "@babel/core": "^7.25.0",
+    "@next/config": "workspace:*",
+    "@types/react": "catalog:",
+    "jest": "^29.7.0",
+    "jest-expo": "~52.0.0",
+    "typescript": "catalog:"
+  }
+}

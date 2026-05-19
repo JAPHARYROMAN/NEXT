@@ -1,0 +1,75 @@
+# kube-prometheus-stack Helm values for NEXT.
+
+prometheus:
+  prometheusSpec:
+    retention: 15d
+    retentionSize: 200GiB
+    replicas: 2
+    shards: 2
+    enableAdminAPI: false
+    walCompression: true
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: gp3
+          accessModes: [ReadWriteOnce]
+          resources: { requests: { storage: 500Gi } }
+    resources:
+      requests: { cpu: "2",  memory: 8Gi }
+      limits:   { cpu: "4",  memory: 16Gi }
+    serviceMonitorSelectorNilUsesHelmValues: false
+    podMonitorSelectorNilUsesHelmValues: false
+    ruleSelectorNilUsesHelmValues: false
+    externalLabels:
+      cluster: next-prod-us-east-1
+      env: prod
+    remoteWrite:
+      # In v2 we ship to Grafana Mimir (or AMP) for long-term retention.
+      - url: http://mimir-gateway.next-observability/api/v1/push
+        queueConfig:
+          capacity: 10000
+          maxSamplesPerSend: 2000
+          maxShards: 50
+
+alertmanager:
+  alertmanagerSpec:
+    replicas: 3
+    storage:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: gp3
+          accessModes: [ReadWriteOnce]
+          resources: { requests: { storage: 20Gi } }
+  config:
+    route:
+      group_by: [namespace, alertname]
+      group_wait: 30s
+      group_interval: 5m
+      repeat_interval: 12h
+      receiver: slack-default
+      routes:
+        - matchers: [severity="page"]
+          receiver: pagerduty
+        - matchers: [severity="warning"]
+          receiver: slack-warnings
+    receivers:
+      - name: pagerduty
+        pagerduty_configs:
+          - service_key: "${PAGERDUTY_KEY}"
+      - name: slack-warnings
+        slack_configs:
+          - api_url: "${SLACK_WEBHOOK_WARNINGS}"
+            channel: "#oncall-warnings"
+      - name: slack-default
+        slack_configs:
+          - api_url: "${SLACK_WEBHOOK_DEFAULT}"
+            channel: "#oncall-info"
+
+grafana:
+  enabled: false   # provisioned separately via the grafana/ chart with as-code dashboards
+
+defaultRules:
+  create: true
+  rules:
+    etcd: false   # EKS hides etcd
+    kubeProxy: false

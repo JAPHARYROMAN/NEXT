@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package next.events.payment.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/next/events/payment/v1;paymenteventsv1";
+
+// IntentSucceeded — emitted on a confirmed payment.
+// Partition key: wallet_id (payer's).
+message IntentSucceeded {
+  string event_id     = 1 [(buf.validate.field).string.uuid = true];
+  google.protobuf.Timestamp emitted_at = 2;
+  string intent_id    = 3 [(buf.validate.field).string.uuid = true];
+  string wallet_id    = 4 [(buf.validate.field).string.min_len = 26];
+  string payer_user_id = 5 [(buf.validate.field).string.min_len = 26];
+  string payee_user_id = 6;     // may be empty for non-creator destinations
+  Money  amount       = 7 [(buf.validate.field).required = true];
+  Kind   kind         = 8;
+  string processor_id = 9;       // external processor reference (Stripe etc.)
+  google.protobuf.Timestamp confirmed_at = 10;
+
+  enum Kind {
+    KIND_UNSPECIFIED = 0;
+    KIND_TIP         = 1;
+    KIND_SUBSCRIPTION = 2;
+    KIND_PURCHASE     = 3;
+    KIND_PAYOUT       = 4;
+  }
+}
+
+message Money {
+  string currency = 1 [(buf.validate.field).string.len = 3]; // ISO 4217
+  int64  amount_minor = 2; // amount in minor units (cents)
+}

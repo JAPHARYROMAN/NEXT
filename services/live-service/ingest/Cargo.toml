@@ -1,0 +1,17 @@
+[package]
+name = "next-live-ingest"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+
+[[bin]]
+name = "ingest"
+path = "src/main.rs"
+
+[dependencies]
+tokio = { workspace = true }
+tracing = { workspace = true }
+anyhow = { workspace = true }
+next-telemetry = { path = "../../../packages/rust/telemetry" }
+next-eventbus = { path = "../../../packages/rust/eventbus" }

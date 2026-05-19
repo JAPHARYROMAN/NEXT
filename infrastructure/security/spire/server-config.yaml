@@ -1,0 +1,31 @@
+# SPIRE Server config (excerpt). Issues SPIFFE IDs to workloads.
+# Trust domain matches the cluster's environment.
+
+server:
+  trust_domain: "next.${ENV}.local"
+  data_dir: /run/spire/data
+  log_level: INFO
+  default_x509_svid_ttl: 1h
+  default_jwt_svid_ttl: 5m
+  ca_subject:
+    country: ["US"]
+    organization: ["NEXT Ecosystem"]
+    common_name: "next-${ENV} SPIRE Server"
+
+plugins:
+  DataStore:
+    sql:
+      database_type: "postgres"
+      connection_string: "${SPIRE_DB_URL}"
+  NodeAttestor:
+    k8s_psat:
+      clusters:
+        next-${ENV}:
+          service_account_allow_list: ["spire:spire-agent"]
+  KeyManager:
+    aws_kms:
+      region: us-east-1
+      key_policy_file: /run/spire/key-policy.json
+  Notifier:
+    k8sbundle:
+      namespace: next-security

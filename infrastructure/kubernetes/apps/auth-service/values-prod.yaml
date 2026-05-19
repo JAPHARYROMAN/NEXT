@@ -1,0 +1,54 @@
+# auth-service — prod values consumed by the next-service chart.
+
+nameOverride: auth-service
+fullnameOverride: auth-service
+
+image:
+  repository: ghcr.io/next-ecosystem/next
+  tag: ""   # injected by ArgoCD Image Updater
+
+serviceAccount:
+  create: true
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::ACCOUNT_ID:role/next-prod-auth-service
+
+replicaCount: 6
+
+resources:
+  requests: { cpu: 200m, memory: 256Mi }
+  limits:   { cpu: 2000m, memory: 1Gi }
+
+env:
+  NEXT_ENV: prod
+  POSTGRES_URL: "postgres://auth@next-prod-auth.cluster-xxx.us-east-1.rds.amazonaws.com:5432/auth?sslmode=require"
+  REDIS_URL:    "rediss://next-prod-auth.cache.amazonaws.com:6379"
+
+externalSecrets:
+  - name: auth-postgres
+    secretStore: vault
+    data:
+      - secretKey: POSTGRES_PASSWORD
+        remoteRef: { key: kv/data/prod/auth/postgres, property: password }
+  - name: auth-signing-keys
+    secretStore: vault
+    data:
+      - secretKey: JWT_SIGNING_KEY
+        remoteRef: { key: kv/data/prod/auth/signing-key, property: pem }
+
+autoscaling:
+  enabled: true
+  minReplicas: 6
+  maxReplicas: 60
+  metrics:
+    - type: Resource
+      resource: { name: cpu, target: { type: Utilization, averageUtilization: 60 } }
+
+istio:
+  enabled: true
+  mtls: { mode: STRICT }
+  authz:
+    - from:
+        - source:
+            principals:
+              - "cluster.local/ns/next-platform/sa/api-gateway"
+              - "cluster.local/ns/next-identity/sa/profile-service"

@@ -1,0 +1,25 @@
+{{- if .Values.istio.enabled }}
+apiVersion: security.istio.io/v1
+kind: PeerAuthentication
+metadata:
+  name: {{ include "next-service.fullname" . }}
+  labels: {{- include "next-service.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels: {{- include "next-service.selectorLabels" . | nindent 6 }}
+  mtls:
+    mode: {{ .Values.istio.mtls.mode }}
+{{- if .Values.istio.authz }}
+---
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: {{ include "next-service.fullname" . }}
+  labels: {{- include "next-service.labels" . | nindent 4 }}
+spec:
+  selector:
+    matchLabels: {{- include "next-service.selectorLabels" . | nindent 6 }}
+  action: ALLOW
+  rules: {{- toYaml .Values.istio.authz | nindent 4 }}
+{{- end }}
+{{- end }}

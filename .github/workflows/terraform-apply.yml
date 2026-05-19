@@ -1,0 +1,42 @@
+name: Terraform apply
+
+on:
+  push:
+    branches: [main]
+    paths: ["infrastructure/terraform/**"]
+  workflow_dispatch:
+    inputs:
+      env:
+        type: choice
+        options: [dev, staging, prod]
+        required: true
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  apply:
+    name: apply ${{ matrix.env }}
+    runs-on: ubuntu-24.04
+    environment:
+      name: ${{ matrix.env }}-terraform   # GitHub environment with required reviewers for staging/prod
+    strategy:
+      max-parallel: 1
+      matrix:
+        env:
+          - dev
+          - staging
+          - prod
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets[format('AWS_ACCOUNT_{0}', matrix.env)] }}:role/next-terraform-apply
+          aws-region: us-east-1
+
+      - working-directory: infrastructure/terraform/environments/${{ matrix.env }}
+        run: |
+          terraform init -input=false
+          terraform apply -input=false -auto-approve

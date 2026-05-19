@@ -1,0 +1,22 @@
+# Default-deny network policy + Istio AuthorizationPolicy per namespace.
+# Services must explicitly allow ingress; otherwise traffic is rejected.
+
+---
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-ingress
+  namespace: next-platform
+spec:
+  podSelector: {}
+  policyTypes: [Ingress]
+---
+apiVersion: security.istio.io/v1
+kind: AuthorizationPolicy
+metadata:
+  name: default-deny
+  namespace: next-platform
+spec:
+  {}                 # empty spec = deny everything not explicitly allowed
+---
+# (Repeat the same two resources per next-* namespace via Kustomize overlay.)

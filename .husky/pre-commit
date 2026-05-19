@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+# NEXT — pre-commit guardrails. Fast checks only; full validation runs in CI.
+
+pnpm exec lint-staged

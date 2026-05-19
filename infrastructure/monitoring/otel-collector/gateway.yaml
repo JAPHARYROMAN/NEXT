@@ -1,0 +1,95 @@
+# OpenTelemetry Collector — gateway tier. Receives OTLP from agents,
+# does tail-based sampling, scrubs PII, fans out to Prometheus / Tempo / Loki.
+
+apiVersion: opentelemetry.io/v1beta1
+kind: OpenTelemetryCollector
+metadata:
+  name: gateway
+  namespace: next-observability
+spec:
+  mode: deployment
+  replicas: 3
+  image: otel/opentelemetry-collector-contrib:0.112.0
+  resources:
+    requests: { cpu: 500m, memory: 1Gi }
+    limits:   { cpu: 2,    memory: 4Gi }
+  config:
+    receivers:
+      otlp:
+        protocols:
+          grpc: { endpoint: 0.0.0.0:4317, max_recv_msg_size_mib: 32 }
+          http: { endpoint: 0.0.0.0:4318 }
+
+    processors:
+      batch:
+        send_batch_size: 8192
+        timeout: 5s
+
+      memory_limiter:
+        check_interval: 1s
+        limit_percentage: 80
+        spike_limit_percentage: 20
+
+      # Drop PII fields tagged by services.
+      attributes/drop_pii:
+        actions:
+          - key: user.email
+            action: delete
+          - key: user.phone
+            action: delete
+          - key: client.ip
+            action: hash
+          - pattern: ^next\.pii\..*$
+            action: delete
+
+      # Tail sampling: 1% baseline + 100% errors + 100% high latency.
+      tail_sampling:
+        decision_wait: 10s
+        num_traces: 50000
+        expected_new_traces_per_sec: 1000
+        policies:
+          - name: errors
+            type: status_code
+            status_code: { status_codes: [ERROR] }
+          - name: slow
+            type: latency
+            latency: { threshold_ms: 1000 }
+          - name: probabilistic
+            type: probabilistic
+            probabilistic: { sampling_percentage: 1 }
+
+      resource:
+        attributes:
+          - key: cluster
+            from_attribute: k8s.cluster.name
+            action: upsert
+
+    exporters:
+      prometheus:
+        endpoint: 0.0.0.0:8889
+      otlp/tempo:
+        endpoint: tempo-distributor.next-observability:4317
+        tls: { insecure: true }
+      loki:
+        endpoint: http://loki-gateway.next-observability/loki/api/v1/push
+
+    extensions:
+      health_check: {}
+      pprof: { endpoint: 0.0.0.0:1777 }
+      zpages: { endpoint: 0.0.0.0:55679 }
+
+    service:
+      extensions: [health_check, pprof, zpages]
+      pipelines:
+        traces:
+          receivers: [otlp]
+          processors: [memory_limiter, attributes/drop_pii, resource, tail_sampling, batch]
+          exporters: [otlp/tempo]
+        metrics:
+          receivers: [otlp]
+          processors: [memory_limiter, resource, batch]
+          exporters: [prometheus]
+        logs:
+          receivers: [otlp]
+          processors: [memory_limiter, attributes/drop_pii, resource, batch]
+          exporters: [loki]

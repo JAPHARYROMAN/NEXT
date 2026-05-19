@@ -1,0 +1,15 @@
+[package]
+name = "next-eventbus"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Kafka producer/consumer wrapper with OTel for NEXT Rust services."
+
+[dependencies]
+tokio = { workspace = true }
+rdkafka = { workspace = true }
+opentelemetry = { workspace = true }
+tracing = { workspace = true }
+prost = { workspace = true }
+thiserror = { workspace = true }

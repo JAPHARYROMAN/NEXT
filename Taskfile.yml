@@ -1,0 +1,164 @@
+# NEXT — polyglot task orchestrator (https://taskfile.dev)
+# Turbo handles JS/TS; this file orchestrates the cross-language workflow:
+# Go services, Rust services, Python AI systems, Terraform, K8s, Docker.
+
+version: "3"
+
+vars:
+  ENV: '{{.ENV | default "dev"}}'
+  AWS_REGION: '{{.AWS_REGION | default "us-east-1"}}'
+  CLUSTER_NAME: 'next-{{.ENV}}'
+
+includes:
+  go:
+    taskfile: ./services/Taskfile.yml
+    optional: true
+  ai:
+    taskfile: ./ai/Taskfile.yml
+    optional: true
+  infra:
+    taskfile: ./infrastructure/Taskfile.yml
+    optional: true
+
+tasks:
+  default:
+    desc: "Show available tasks"
+    cmds:
+      - task --list
+
+  # ---- Bootstrap ----
+  bootstrap:
+    desc: "Install all tooling + dependencies across the polyglot stack"
+    cmds:
+      - mise install
+      - pnpm install --frozen-lockfile
+      - task: bootstrap:go
+      - task: bootstrap:rust
+      - task: bootstrap:python
+
+  bootstrap:go:
+    desc: "Sync Go workspace modules"
+    cmds:
+      - go work sync
+      - go mod download
+
+  bootstrap:rust:
+    desc: "Fetch Rust workspace deps"
+    cmds:
+      - cargo fetch
+
+  bootstrap:python:
+    desc: "Sync Python workspaces via uv"
+    cmds:
+      - uv sync --all-packages
+
+  # ---- Build ----
+  build:
+    desc: "Build everything"
+    cmds:
+      - task: build:ts
+      - task: build:go
+      - task: build:rust
+      - task: build:python
+
+  build:ts:
+    cmds: ["pnpm turbo run build"]
+
+  build:go:
+    cmds: ["go build ./services/..."]
+
+  build:rust:
+    cmds: ["cargo build --release --workspace"]
+
+  build:python:
+    cmds: ["uv build --all-packages"]
+
+  # ---- Test ----
+  test:
+    desc: "Run all tests"
+    deps: [test:ts, test:go, test:rust, test:python]
+
+  test:ts:
+    cmds: ["pnpm turbo run test"]
+
+  test:go:
+    cmds: ["go test -race -coverprofile=coverage.out ./services/..."]
+
+  test:rust:
+    cmds: ["cargo test --workspace"]
+
+  test:python:
+    cmds: ["uv run pytest ai/"]
+
+  # ---- Codegen ----
+  codegen:
+    desc: "Regenerate proto / GraphQL / OpenAPI clients"
+    cmds:
+      - task: codegen:proto
+      - task: codegen:graphql
+
+  codegen:proto:
+    cmds: ["buf generate"]
+    sources: ["**/*.proto"]
+
+  codegen:graphql:
+    cmds: ["pnpm turbo run codegen"]
+
+  # ---- Lint ----
+  lint:
+    desc: "Lint everything"
+    deps: [lint:ts, lint:go, lint:rust, lint:python]
+
+  lint:ts:
+    cmds: ["pnpm turbo run lint"]
+
+  lint:go:
+    cmds: ["golangci-lint run ./..."]
+
+  lint:rust:
+    cmds: ["cargo clippy --workspace --all-targets -- -D warnings"]
+
+  lint:python:
+    cmds: ["uv run ruff check ai/", "uv run mypy ai/"]
+
+  # ---- Local dev environment ----
+  dev:up:
+    desc: "Boot local dev dependencies (postgres, redis, kafka, otel)"
+    cmds: ["docker compose -f docker-compose.yml up -d"]
+
+  dev:down:
+    desc: "Stop local dev dependencies"
+    cmds: ["docker compose -f docker-compose.yml down"]
+
+  dev:logs:
+    desc: "Tail local dev logs"
+    cmds: ["docker compose -f docker-compose.yml logs -f"]
+
+  # ---- Infrastructure ----
+  tf:plan:
+    desc: "Terraform plan for the active environment"
+    dir: infrastructure/terraform/environments/{{.ENV}}
+    cmds: ["terraform init", "terraform plan -out=tfplan"]
+
+  tf:apply:
+    desc: "Terraform apply (requires approval)"
+    dir: infrastructure/terraform/environments/{{.ENV}}
+    cmds: ["terraform apply tfplan"]
+
+  k8s:context:
+    desc: "Switch kubectl context to the active cluster"
+    cmds:
+      - aws eks update-kubeconfig --name {{.CLUSTER_NAME}} --region {{.AWS_REGION}}
+
+  argocd:sync:
+    desc: "Trigger ArgoCD sync for the platform app"
+    cmds: ["argocd app sync next-platform"]
+
+  # ---- Release ----
+  release:dry:
+    desc: "Preview a release without publishing"
+    cmds: ["pnpm changeset status --verbose"]
+
+  release:publish:
+    desc: "Build, version, and publish per changesets"
+    cmds: ["pnpm run release"]

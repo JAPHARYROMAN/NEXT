@@ -1,0 +1,64 @@
+syntax = "proto3";
+
+package next.auth.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/next/auth/v1;authv1";
+
+// SessionService is the internal RPC contract for auth-service.
+service SessionService {
+  // Validate the access token bound to the request and return parsed claims.
+  rpc Validate(ValidateRequest) returns (ValidateResponse);
+
+  // Revoke an active session.
+  rpc Revoke(RevokeRequest) returns (RevokeResponse);
+
+  // Refresh exchanges a refresh token for a new access + refresh pair.
+  rpc Refresh(RefreshRequest) returns (RefreshResponse);
+}
+
+message ValidateRequest {
+  string access_token = 1 [(buf.validate.field).string.min_len = 1];
+}
+
+message ValidateResponse {
+  string subject = 1;
+  string session_id = 2;
+  Tier tier = 3;
+  google.protobuf.Timestamp expires_at = 4;
+  repeated string scopes = 5;
+}
+
+message RevokeRequest {
+  string session_id = 1 [(buf.validate.field).string.min_len = 1];
+}
+message RevokeResponse {}
+
+message RefreshRequest {
+  string refresh_token = 1 [(buf.validate.field).string.min_len = 1];
+}
+
+message RefreshResponse {
+  string access_token = 1;
+  string refresh_token = 2;
+  google.protobuf.Timestamp access_token_expires_at = 3;
+}
+
+enum Tier {
+  TIER_UNSPECIFIED = 0;
+  TIER_ANONYMOUS = 1;
+  TIER_AUTHENTICATED = 2;
+  TIER_CREATOR = 3;
+  TIER_PARTNER = 4;
+  TIER_STAFF = 5;
+}
+
+// KeyService exposes the JWKS used by every verifier in the platform.
+service KeyService {
+  rpc JWKS(JWKSRequest) returns (JWKSResponse);
+}
+
+message JWKSRequest {}
+message JWKSResponse { string jwks_json = 1; }

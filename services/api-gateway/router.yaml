@@ -1,0 +1,66 @@
+# Apollo Router config for NEXT api-gateway. Mounted as a ConfigMap by the Helm chart.
+
+supergraph:
+  listen: 0.0.0.0:8080
+  introspection: false
+
+include_subgraph_errors:
+  all: false
+  subgraphs:
+    auth: true
+    profile: true
+
+headers:
+  all:
+    request:
+      - propagate:
+          named: "x-correlation-id"
+      - propagate:
+          named: "authorization"
+      - propagate:
+          matching: "^x-next-.*"
+
+authentication:
+  router:
+    jwt:
+      jwks:
+        - url: https://auth.next.io/.well-known/jwks.json
+      header_name: authorization
+      header_value_prefix: "Bearer "
+
+authorization:
+  require_authentication: false  # public surface area allows anonymous queries
+
+traffic_shaping:
+  router:
+    global_rate_limit:
+      capacity: 5000
+      interval: 1s
+    timeout: 30s
+  subgraphs:
+    "*":
+      timeout: 5s
+      compression: gzip
+
+apq:
+  router:
+    cache:
+      in_memory:
+        limit: 1000
+  subgraph:
+    all:
+      enabled: true
+
+telemetry:
+  exporters:
+    tracing:
+      common:
+        sampler: 0.01
+        parent_based_sampler: true
+      otlp:
+        endpoint: http://otel-collector.next-observability:4317
+        protocol: grpc
+    metrics:
+      otlp:
+        endpoint: http://otel-collector.next-observability:4317
+        protocol: grpc

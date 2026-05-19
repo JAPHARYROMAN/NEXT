@@ -1,0 +1,56 @@
+# =====================================================================
+# NEXT — root .dockerignore (per-service Dockerfiles may extend this)
+# =====================================================================
+**/node_modules
+**/.pnpm-store
+**/.next
+**/.turbo
+**/dist
+**/build
+**/out
+**/coverage
+**/.cache
+**/target
+**/__pycache__
+**/.venv
+**/venv
+**/.pytest_cache
+**/.mypy_cache
+**/.ruff_cache
+
+# VCS
+.git
+.gitignore
+.gitattributes
+
+# Editor
+.vscode
+.idea
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env
+.env*
+!.env.example
+secrets/
+
+# Docs / meta — not needed in container layer
+docs/
+*.md
+!README.md
+
+# Tests we don't run inside the image
+**/__tests__
+**/*.test.*
+**/*.spec.*
+playwright-report/
+test-results/
+
+# Terraform / infra not shipped in containers
+infrastructure/
+.terraform/
+*.tfstate*

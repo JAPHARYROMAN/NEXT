@@ -1,0 +1,64 @@
+# Non-SLO alert rules. SLO burn-rate alerts are generated from slo.yaml via Sloth.
+
+apiVersion: monitoring.coreos.com/v1
+kind: PrometheusRule
+metadata:
+  name: next-platform-rules
+  namespace: next-observability
+spec:
+  groups:
+    - name: platform.events
+      interval: 30s
+      rules:
+        - alert: KafkaConsumerLagHigh
+          expr: |
+            sum by (group, topic) (kafka_consumergroup_lag) > 50000
+          for: 10m
+          labels: { severity: page, team: owning_team }
+          annotations:
+            summary: "Consumer group {{`{{ $labels.group }}`}} lagging > 50k on {{`{{ $labels.topic }}`}}"
+            runbook: https://github.com/next-ecosystem/next/blob/main/docs/runbooks/kafka.md
+
+        - alert: KafkaDLQGrowing
+          expr: |
+            sum by (topic) (increase(kafka_topic_partition_current_offset{topic=~".*\\.dlq"}[15m])) > 100
+          for: 15m
+          labels: { severity: page }
+          annotations:
+            summary: "DLQ {{`{{ $labels.topic }}`}} growing"
+            runbook: https://github.com/next-ecosystem/next/blob/main/docs/runbooks/kafka.md
+
+    - name: platform.k8s
+      interval: 30s
+      rules:
+        - alert: PodCrashLooping
+          expr: rate(kube_pod_container_status_restarts_total[5m]) > 0.1
+          for: 5m
+          labels: { severity: warning }
+          annotations:
+            summary: "Pod {{`{{ $labels.pod }}`}} in {{`{{ $labels.namespace }}`}} is restarting"
+
+        - alert: NodeMemoryHigh
+          expr: |
+            (node_memory_MemAvailable_bytes / node_memory_MemTotal_bytes) < 0.1
+          for: 10m
+          labels: { severity: warning }
+          annotations:
+            summary: "Node {{`{{ $labels.instance }}`}} memory < 10 %"
+
+    - name: ml.serving
+      interval: 30s
+      rules:
+        - alert: InferenceQueueGrowing
+          expr: avg by (service) (nv_inference_queue_duration_us) > 50000
+          for: 5m
+          labels: { severity: page, team: ml-platform }
+          annotations:
+            summary: "Triton queue depth high on {{`{{ $labels.service }}`}}"
+
+        - alert: GPUMemoryHigh
+          expr: avg by (instance) (DCGM_FI_DEV_FB_USED / DCGM_FI_DEV_FB_TOTAL) > 0.9
+          for: 5m
+          labels: { severity: warning, team: ml-platform }
+          annotations:
+            summary: "GPU memory > 90 % on {{`{{ $labels.instance }}`}}"

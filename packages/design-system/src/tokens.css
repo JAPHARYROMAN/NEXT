@@ -1,0 +1,32 @@
+/* NEXT design tokens — applied by every app at the html root. */
+:root {
+  --next-font-sans: "Inter", "system-ui", -apple-system, "Segoe UI", sans-serif;
+  --next-font-display: "Inter Display", "Inter", "system-ui", sans-serif;
+  --next-font-mono: "JetBrains Mono", "SFMono-Regular", Consolas, monospace;
+}
+
+:root[data-theme="dark"], :root.dark {
+  --next-color-bg: 8 8 11;
+  --next-color-surface: 17 17 22;
+  --next-color-elevated: 26 26 33;
+  --next-color-fg: 247 247 250;
+  --next-color-muted: 163 163 177;
+  --next-color-subtle: 108 108 122;
+  --next-color-brand: 255 90 60;
+  --next-color-accent: 120 100 255;
+  --next-color-danger: 255 90 100;
+  --next-color-success: 60 200 140;
+}
+
+:root[data-theme="light"], :root.light {
+  --next-color-bg: 252 252 253;
+  --next-color-surface: 255 255 255;
+  --next-color-elevated: 247 247 250;
+  --next-color-fg: 15 15 20;
+  --next-color-muted: 90 90 105;
+  --next-color-subtle: 140 140 156;
+  --next-color-brand: 230 60 30;
+  --next-color-accent: 90 70 230;
+  --next-color-danger: 220 50 70;
+  --next-color-success: 40 170 120;
+}

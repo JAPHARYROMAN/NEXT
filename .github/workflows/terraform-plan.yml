@@ -1,0 +1,54 @@
+name: Terraform plan
+
+on:
+  pull_request:
+    paths: ["infrastructure/terraform/**", ".github/workflows/terraform-plan.yml"]
+
+permissions:
+  contents: read
+  pull-requests: write
+  id-token: write   # OIDC to AWS
+
+jobs:
+  plan:
+    name: plan ${{ matrix.env }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        env: [dev, staging, prod]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+      - uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::${{ secrets[format('AWS_ACCOUNT_{0}', matrix.env)] }}:role/next-terraform-plan
+          aws-region: us-east-1
+
+      - working-directory: infrastructure/terraform/environments/${{ matrix.env }}
+        run: |
+          terraform init -input=false
+          terraform validate
+          terraform plan -input=false -no-color -out=tfplan | tee plan.txt
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tfplan-${{ matrix.env }}
+          path: infrastructure/terraform/environments/${{ matrix.env }}/tfplan
+          retention-days: 7
+
+      - name: post plan summary
+        uses: actions/github-script@v7
+        if: github.event_name == 'pull_request'
+        with:
+          script: |
+            const fs = require('fs');
+            const env = '${{ matrix.env }}';
+            const plan = fs.readFileSync(`infrastructure/terraform/environments/${env}/plan.txt`, 'utf8');
+            const truncated = plan.length > 60000 ? plan.slice(-60000) : plan;
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `### Terraform plan — \`${env}\`\n\`\`\`\n${truncated}\n\`\`\``,
+            });

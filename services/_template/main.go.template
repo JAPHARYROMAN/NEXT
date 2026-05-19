@@ -1,0 +1,13 @@
+// Canonical main.go for a NEXT Go service.
+// Each service's cmd/server/main.go follows this skeleton — see auth-service for the
+// reference implementation. Variables marked {{SERVICE}} / {{NAMESPACE}} are replaced
+// at template render time.
+//
+// Responsibilities:
+//   1. Parse env via caarlos0/env.
+//   2. Init OTel (telemetry.Init).
+//   3. Open data deps (pg/redis/clickhouse) via packages/go/database.
+//   4. Open Kafka producer + consumer via packages/go/eventbus.
+//   5. Register gRPC services + chi HTTP routes (incl. /healthz, /readyz).
+//   6. Serve gRPC on :7070, HTTP on :8080, metrics on :9090.
+//   7. Graceful shutdown on SIGTERM with 30 s drain.

@@ -1,0 +1,90 @@
+# NEXT monorepo — pnpm workspace declaration
+# JS/TS workspaces. Go uses go.work, Rust uses Cargo workspace, Python uses uv workspace.
+packages:
+  - "apps/*"
+  - "packages/*"
+  - "services/*/clients/typescript"
+  - "tooling/*"
+
+# Catalog: single source of truth for dependency versions across the monorepo.
+# Workspaces reference catalog entries via `catalog:` protocol to guarantee alignment.
+catalog:
+  # React + Next.js
+  react: ^19.0.0
+  react-dom: ^19.0.0
+  next: ^15.1.0
+  "@types/react": ^19.0.0
+  "@types/react-dom": ^19.0.0
+
+  # TypeScript
+  typescript: ^5.6.3
+  tsx: ^4.19.1
+  tsup: ^8.3.0
+
+  # Styling
+  tailwindcss: ^3.4.13
+  "@tailwindcss/typography": ^0.5.15
+  postcss: ^8.4.47
+  autoprefixer: ^10.4.20
+
+  # Motion + 3D
+  framer-motion: ^11.11.0
+  three: ^0.170.0
+  "@react-three/fiber": ^8.17.10
+  "@react-three/drei": ^9.117.0
+  "@types/three": ^0.170.0
+
+  # GraphQL
+  graphql: ^16.9.0
+  "@apollo/client": ^3.11.10
+  "@apollo/server": ^4.11.0
+  "@apollo/gateway": ^2.9.0
+
+  # gRPC + Protobuf
+  "@grpc/grpc-js": ^1.12.2
+  "@grpc/proto-loader": ^0.7.13
+  "@bufbuild/protobuf": ^2.2.0
+
+  # State
+  zustand: ^5.0.0
+  "@tanstack/react-query": ^5.59.0
+
+  # Telemetry
+  "@opentelemetry/api": ^1.9.0
+  "@opentelemetry/sdk-node": ^0.54.0
+  "@opentelemetry/auto-instrumentations-node": ^0.52.0
+
+  # Logging
+  pino: ^9.5.0
+  "pino-pretty": ^11.3.0
+
+  # Validation
+  zod: ^3.23.8
+
+  # Testing
+  vitest: ^2.1.2
+  "@vitest/coverage-v8": ^2.1.2
+  "@testing-library/react": ^16.0.1
+  playwright: ^1.48.0
+  "@playwright/test": ^1.48.0
+
+  # Linting
+  eslint: ^9.12.0
+  "@typescript-eslint/parser": ^8.8.1
+  "@typescript-eslint/eslint-plugin": ^8.8.1
+  "eslint-config-prettier": ^9.1.0
+  "eslint-plugin-react": ^7.37.1
+  "eslint-plugin-react-hooks": ^5.0.0
+
+# pnpm-specific config
+peerDependencyRules:
+  ignoreMissing:
+    - "@types/react"
+    - "@types/react-dom"
+  allowedVersions:
+    react: "19"
+    react-dom: "19"
+
+# Enable strict peer dep resolution
+strict-peer-dependencies: false
+auto-install-peers: true

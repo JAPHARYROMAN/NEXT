@@ -1,0 +1,22 @@
+[package]
+name = "next-vector-indexer"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "Streams events from Kafka, calls Triton embedding, upserts into Qdrant."
+
+[[bin]]
+name = "indexer"
+path = "src/main.rs"
+
+[dependencies]
+tokio = { workspace = true }
+rdkafka = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+anyhow = { workspace = true }
+reqwest = { version = "0.12", features = ["json"] }
+next-telemetry = { path = "../../../packages/rust/telemetry" }
+next-eventbus = { path = "../../../packages/rust/eventbus" }

@@ -1,0 +1,45 @@
+# SLO definitions (Sloth format). Burn-rate alerts generated from these.
+# Each service owns its block; new SLO needs an ADR or runbook update.
+
+version: prometheus/v1
+service: api-gateway
+labels: { team: platform, tier: "0" }
+slos:
+  - name: gateway-availability
+    objective: 99.99
+    description: "External availability of the public API gateway."
+    sli:
+      events:
+        error_query: sum(rate(http_requests_total{service="api-gateway", code=~"5.."}[{{.window}}]))
+        total_query: sum(rate(http_requests_total{service="api-gateway"}[{{.window}}]))
+    alerting:
+      name: APIGatewayAvailabilityBurning
+      page_alert: { labels: { severity: page } }
+      ticket_alert: { labels: { severity: warning } }
+
+  - name: gateway-latency
+    objective: 99.0
+    description: "P95 latency < 150 ms."
+    sli:
+      events:
+        error_query: sum(rate(http_request_duration_seconds_bucket{service="api-gateway", le="0.15"}[{{.window}}])) - sum(rate(http_request_duration_seconds_bucket{service="api-gateway", le="+Inf"}[{{.window}}]))
+        total_query: sum(rate(http_request_duration_seconds_count{service="api-gateway"}[{{.window}}]))
+    alerting:
+      name: APIGatewayLatencyBurning
+      page_alert: { labels: { severity: page } }
+      ticket_alert: { labels: { severity: warning } }
+
+---
+version: prometheus/v1
+service: payment-service
+labels: { team: payments, tier: "1" }
+slos:
+  - name: tip-availability
+    objective: 99.99
+    sli:
+      events:
+        error_query: sum(rate(grpc_server_handled_total{service="payment-service", method="Tip", code!="OK"}[{{.window}}]))
+        total_query: sum(rate(grpc_server_handled_total{service="payment-service", method="Tip"}[{{.window}}]))
+    alerting:
+      name: PaymentTipBurning
+      page_alert: { labels: { severity: page } }

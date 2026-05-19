@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: auth-service
+  namespace: argocd
+spec:
+  project: next
+  source:
+    repoURL: https://github.com/next-ecosystem/next.git
+    targetRevision: HEAD
+    path: infrastructure/kubernetes/charts/next-service
+    helm:
+      releaseName: auth-service
+      valueFiles:
+        - ../../apps/auth-service/values-prod.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: next-identity
+  syncPolicy:
+    automated: { prune: true, selfHeal: true }
+    syncOptions: [CreateNamespace=false, ServerSideApply=true]

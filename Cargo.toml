@@ -1,0 +1,82 @@
+# NEXT — Rust workspace root.
+# Performance-critical services live here: media transcoding, recommendation hot-path,
+# live ingest, vector indexing accelerators.
+
+[workspace]
+resolver = "2"
+members = [
+    "services/media-service/transcoder",
+    "services/live-service/ingest",
+    "services/recommendation-service/ranker",
+    "ai/vector-pipelines/indexer",
+    "packages/rust/eventbus",
+    "packages/rust/telemetry",
+    "packages/rust/proto",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+rust-version = "1.82"
+authors = ["NEXT Ecosystem <eng@next.example>"]
+license = "Apache-2.0"
+repository = "https://github.com/next-ecosystem/next"
+
+[workspace.dependencies]
+# Async runtime
+tokio = { version = "1.41", features = ["full"] }
+tokio-stream = "0.1"
+futures = "0.3"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+prost = "0.13"
+prost-types = "0.13"
+
+# gRPC
+tonic = { version = "0.12", features = ["tls", "gzip"] }
+tonic-build = "0.12"
+
+# HTTP
+axum = { version = "0.7", features = ["macros", "tracing"] }
+hyper = { version = "1.5", features = ["full"] }
+tower = "0.5"
+tower-http = { version = "0.6", features = ["trace", "cors", "compression-gzip"] }
+
+# Telemetry
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["env-filter", "json"] }
+tracing-opentelemetry = "0.27"
+opentelemetry = "0.26"
+opentelemetry_sdk = { version = "0.26", features = ["rt-tokio"] }
+opentelemetry-otlp = { version = "0.26", features = ["grpc-tonic"] }
+
+# Errors
+thiserror = "2.0"
+anyhow = "1.0"
+
+# Config
+config = "0.14"
+dotenvy = "0.15"
+
+# Kafka
+rdkafka = { version = "0.36", features = ["tokio", "ssl"] }
+
+# Postgres
+sqlx = { version = "0.8", features = ["postgres", "runtime-tokio", "tls-rustls", "uuid", "chrono"] }
+
+# Redis
+redis = { version = "0.27", features = ["tokio-comp", "connection-manager"] }
+
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+strip = "symbols"
+panic = "abort"
+
+[profile.release-debug]
+inherits = "release"
+debug = true
+strip = "none"

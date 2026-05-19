@@ -1,0 +1,21 @@
+{
+  "name": "@next/feature-flags",
+  "version": "0.1.0",
+  "private": true,
+  "description": "OpenFeature client + typed flag registry. Backed by GrowthBook in production.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./flags": "./flags/index.ts"
+  },
+  "scripts": { "lint": "eslint src flags", "typecheck": "tsc --noEmit", "stale": "node ./scripts/find-stale-flags.mjs" },
+  "dependencies": {
+    "@openfeature/server-sdk": "^1.16.0",
+    "@openfeature/web-sdk": "^1.3.0",
+    "@growthbook/openfeature-provider": "^1.0.0"
+  },
+  "devDependencies": { "@next/config": "workspace:*", "typescript": "catalog:" }
+}

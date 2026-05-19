@@ -1,0 +1,18 @@
+{
+  "$schema": "https://unpkg.com/@changesets/config@3.0.0/schema.json",
+  "changelog": ["@changesets/changelog-github", { "repo": "next-ecosystem/next" }],
+  "commit": false,
+  "fixed": [],
+  "linked": [["@next/ui", "@next/design-system"]],
+  "access": "restricted",
+  "baseBranch": "main",
+  "updateInternalDependencies": "patch",
+  "ignore": [
+    "@next/web",
+    "@next/mobile",
+    "@next/admin",
+    "@next/studio",
+    "@next/tv",
+    "@next/immersive"
+  ]
+}

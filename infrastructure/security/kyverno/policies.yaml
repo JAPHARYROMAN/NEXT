@@ -1,0 +1,86 @@
+# Kyverno admission policies. Apply cluster-wide.
+
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-image-signature
+spec:
+  validationFailureAction: Enforce
+  background: true
+  rules:
+    - name: verify-cosign-signature
+      match:
+        any:
+          - resources:
+              kinds: [Pod]
+              namespaces: ["next-*"]
+      verifyImages:
+        - imageReferences:
+            - "ghcr.io/next-ecosystem/next/*"
+          attestors:
+            - entries:
+                - keyless:
+                    issuer: "https://token.actions.githubusercontent.com"
+                    subject: "https://github.com/next-ecosystem/next/.github/workflows/image-build.yml@refs/heads/main"
+                    rekor: { url: "https://rekor.sigstore.dev" }
+
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: disallow-latest-tag
+spec:
+  validationFailureAction: Enforce
+  rules:
+    - name: require-pinned-tag
+      match:
+        any: [{ resources: { kinds: [Pod], namespaces: ["next-*"] } }]
+      validate:
+        message: "Images must not use the :latest tag"
+        pattern:
+          spec:
+            containers:
+              - image: "!*:latest"
+
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: disallow-privileged
+spec:
+  validationFailureAction: Enforce
+  rules:
+    - name: no-privileged
+      match:
+        any: [{ resources: { kinds: [Pod], namespaces: ["next-*"] } }]
+      validate:
+        message: "Privileged containers are forbidden"
+        pattern:
+          spec:
+            =(securityContext):
+              =(privileged): "false"
+            containers:
+              - =(securityContext):
+                  =(privileged): "false"
+                  =(allowPrivilegeEscalation): "false"
+
+---
+apiVersion: kyverno.io/v1
+kind: ClusterPolicy
+metadata:
+  name: require-resource-limits
+spec:
+  validationFailureAction: Enforce
+  rules:
+    - name: require-cpu-mem
+      match:
+        any: [{ resources: { kinds: [Pod], namespaces: ["next-*"] } }]
+      validate:
+        message: "All containers must declare cpu + memory requests and limits"
+        pattern:
+          spec:
+            containers:
+              - resources:
+                  requests: { memory: "?*", cpu: "?*" }
+                  limits:   { memory: "?*", cpu: "?*" }

@@ -1,0 +1,117 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "ui": "tui",
+  "globalDependencies": [
+    "**/.env.*local",
+    "tsconfig.base.json",
+    ".nvmrc",
+    ".mise.toml"
+  ],
+  "globalEnv": [
+    "NODE_ENV",
+    "CI",
+    "VERCEL",
+    "VERCEL_ENV",
+    "NEXT_PUBLIC_*",
+    "OTEL_*"
+  ],
+  "remoteCache": {
+    "signature": true
+  },
+  "tasks": {
+    "build": {
+      "dependsOn": ["^build", "codegen"],
+      "outputs": [
+        ".next/**",
+        "!.next/cache/**",
+        "dist/**",
+        "build/**",
+        "out/**",
+        "storybook-static/**"
+      ],
+      "inputs": [
+        "src/**",
+        "app/**",
+        "pages/**",
+        "components/**",
+        "lib/**",
+        "public/**",
+        "*.config.*",
+        "package.json",
+        "tsconfig.json"
+      ]
+    },
+    "dev": {
+      "cache": false,
+      "persistent": true,
+      "dependsOn": ["^codegen"]
+    },
+    "lint": {
+      "dependsOn": ["^build"],
+      "outputs": [],
+      "inputs": [
+        "src/**",
+        "app/**",
+        "pages/**",
+        "components/**",
+        "lib/**",
+        ".eslintrc*",
+        "eslint.config.*"
+      ]
+    },
+    "typecheck": {
+      "dependsOn": ["^build", "codegen"],
+      "outputs": [],
+      "inputs": [
+        "src/**",
+        "app/**",
+        "pages/**",
+        "components/**",
+        "lib/**",
+        "tsconfig*.json"
+      ]
+    },
+    "test": {
+      "dependsOn": ["^build", "codegen"],
+      "outputs": ["coverage/**"],
+      "inputs": [
+        "src/**",
+        "tests/**",
+        "__tests__/**",
+        "vitest.config.*",
+        "jest.config.*"
+      ]
+    },
+    "test:unit": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/unit/**"]
+    },
+    "test:integration": {
+      "dependsOn": ["^build"],
+      "outputs": ["coverage/integration/**"],
+      "env": ["DATABASE_URL", "REDIS_URL", "KAFKA_BROKERS"]
+    },
+    "test:e2e": {
+      "dependsOn": ["^build"],
+      "outputs": ["playwright-report/**", "test-results/**"],
+      "env": ["BASE_URL", "E2E_*"]
+    },
+    "codegen": {
+      "outputs": [
+        "src/__generated__/**",
+        "src/generated/**",
+        "gen/**"
+      ],
+      "inputs": [
+        "**/*.graphql",
+        "**/*.proto",
+        "codegen.yml",
+        "codegen.ts",
+        "buf.gen.yaml"
+      ]
+    },
+    "clean": {
+      "cache": false
+    }
+  }
+}

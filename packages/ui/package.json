@@ -1,0 +1,35 @@
+{
+  "name": "@next/ui",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Cross-surface UI primitives. Web components in /web; React Native primitives in /native; shared headless logic in /core.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./web": "./src/web/index.ts",
+    "./native": "./src/native/index.ts",
+    "./core": "./src/core/index.ts"
+  },
+  "scripts": { "lint": "eslint src", "typecheck": "tsc --noEmit", "test": "vitest run" },
+  "peerDependencies": {
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "dependencies": {
+    "@next/design-system": "workspace:*",
+    "framer-motion": "catalog:",
+    "clsx": "^2.1.1"
+  },
+  "devDependencies": {
+    "@next/config": "workspace:*",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

@@ -1,0 +1,26 @@
+[package]
+name = "next-media-transcoder"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+description = "NEXT media transcoder. Pulls jobs from Kafka, transcodes via ffmpeg, writes to S3."
+
+[[bin]]
+name = "transcoder"
+path = "src/main.rs"
+
+[dependencies]
+tokio = { workspace = true }
+rdkafka = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+tracing = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+
+next-telemetry = { path = "../../../packages/rust/telemetry" }
+next-eventbus = { path = "../../../packages/rust/eventbus" }
+
+aws-config = "1.5"
+aws-sdk-s3 = "1.55"

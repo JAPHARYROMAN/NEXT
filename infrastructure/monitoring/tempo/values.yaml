@@ -1,0 +1,28 @@
+# Tempo Helm values — distributed mode, S3 backend, TraceQL enabled.
+
+tempo:
+  structuredConfig:
+    storage:
+      trace:
+        backend: s3
+        s3:
+          bucket: next-tempo-traces-prod
+          region: us-east-1
+    compactor:
+      compaction:
+        block_retention: 168h    # 7 days hot, then expire
+    metrics_generator:
+      processors: [service-graphs, span-metrics, local-blocks]
+      registry:
+        external_labels:
+          cluster: next-prod-us-east-1
+
+distributor: { replicas: 3 }
+ingester:    { replicas: 3, persistence: { enabled: true, size: 50Gi, storageClass: gp3 } }
+querier:     { replicas: 3 }
+queryFrontend: { replicas: 2 }
+compactor:   { replicas: 1 }
+
+resources:
+  requests: { cpu: 500m, memory: 2Gi }
+  limits:   { cpu: 2,    memory: 8Gi }

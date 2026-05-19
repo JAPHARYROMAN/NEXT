@@ -1,0 +1,8 @@
+{
+  "$schema": "https://json.schemastore.org/tsconfig",
+  "display": "NEXT base TypeScript configuration",
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist"
+  }
+}

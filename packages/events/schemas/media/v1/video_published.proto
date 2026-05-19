@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package next.events.media.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/next/events/media/v1;mediaeventsv1";
+
+// VideoPublished is emitted once a video has been transcoded and made discoverable.
+// Partition key on the wire: video_id.
+message VideoPublished {
+  string event_id        = 1 [(buf.validate.field).string.uuid = true];
+  google.protobuf.Timestamp emitted_at = 2 [(buf.validate.field).required = true];
+
+  string video_id        = 3 [(buf.validate.field).string.min_len = 26, (buf.validate.field).string.max_len = 26];
+  string creator_id      = 4 [(buf.validate.field).string.min_len = 26];
+  string title           = 5 [(buf.validate.field).string.min_len = 1, (buf.validate.field).string.max_len = 200];
+  Visibility visibility  = 6 [(buf.validate.field).enum.defined_only = true];
+  int64  duration_ms     = 7 [(buf.validate.field).int64.gte = 0];
+  int32  rendition_count = 8 [(buf.validate.field).int32.gte = 1];
+  google.protobuf.Timestamp published_at = 9;
+
+  enum Visibility {
+    VISIBILITY_UNSPECIFIED = 0;
+    VISIBILITY_PUBLIC      = 1;
+    VISIBILITY_UNLISTED    = 2;
+    VISIBILITY_PRIVATE     = 3;
+  }
+}

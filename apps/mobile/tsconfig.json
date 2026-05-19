@@ -1,0 +1,8 @@
+{
+  "extends": "@next/config/tsconfig/react-native",
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": { "@/*": ["./app/*", "./components/*", "./lib/*"] }
+  },
+  "include": ["app/**/*", "components/**/*", "lib/**/*", "app.config.ts"]
+}

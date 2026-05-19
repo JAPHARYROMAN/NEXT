@@ -1,0 +1,107 @@
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: next-platform
+  labels:
+    istio-injection: enabled
+    pod-security.kubernetes.io/enforce: restricted
+    domain: platform
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: next-identity
+  labels:
+    istio-injection: enabled
+    pod-security.kubernetes.io/enforce: restricted
+    domain: identity
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: next-media
+  labels:
+    istio-injection: enabled
+    pod-security.kubernetes.io/enforce: restricted
+    domain: media
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: next-discovery
+  labels:
+    istio-injection: enabled
+    pod-security.kubernetes.io/enforce: restricted
+    domain: discovery
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: next-social
+  labels:
+    istio-injection: enabled
+    pod-security.kubernetes.io/enforce: restricted
+    domain: social
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: next-payments
+  labels:
+    istio-injection: enabled
+    pod-security.kubernetes.io/enforce: restricted
+    domain: payments
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: next-messaging
+  labels:
+    istio-injection: enabled
+    pod-security.kubernetes.io/enforce: restricted
+    domain: messaging
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: next-trust-safety
+  labels:
+    istio-injection: enabled
+    pod-security.kubernetes.io/enforce: restricted
+    domain: trust-safety
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: next-data
+  labels:
+    istio-injection: enabled
+    pod-security.kubernetes.io/enforce: restricted
+    domain: data
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: next-ml
+  labels:
+    istio-injection: enabled
+    pod-security.kubernetes.io/enforce: baseline   # GPU drivers need extra privileges
+    domain: ml
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: next-observability
+  labels:
+    istio-injection: disabled    # Stay out of the mesh; we observe the mesh itself.
+    domain: platform
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: next-security
+  labels:
+    istio-injection: enabled
+    pod-security.kubernetes.io/enforce: restricted
+    domain: security

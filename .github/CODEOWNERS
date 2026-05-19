@@ -1,0 +1,76 @@
+# NEXT — CODEOWNERS
+# Each domain has a primary owner team. Placeholders use @next-ecosystem/<team>;
+# replace with real GitHub teams once the org is provisioned.
+
+# Default fallback — platform team owns anything not claimed below
+*                                       @next-ecosystem/platform
+
+# ---- Apps ----
+/apps/web/                              @next-ecosystem/web
+/apps/mobile/                           @next-ecosystem/mobile
+/apps/admin/                            @next-ecosystem/internal-tools
+/apps/studio/                           @next-ecosystem/creator
+/apps/tv/                               @next-ecosystem/tv
+/apps/immersive/                        @next-ecosystem/immersive
+
+# ---- Services ----
+/services/auth-service/                 @next-ecosystem/identity
+/services/profile-service/              @next-ecosystem/identity
+/services/media-service/                @next-ecosystem/media
+/services/upload-service/               @next-ecosystem/media
+/services/live-service/                 @next-ecosystem/streaming
+/services/feed-service/                 @next-ecosystem/feed
+/services/recommendation-service/       @next-ecosystem/discovery
+/services/search-service/               @next-ecosystem/discovery
+/services/community-service/            @next-ecosystem/social
+/services/payment-service/              @next-ecosystem/payments
+/services/notification-service/         @next-ecosystem/messaging
+/services/moderation-service/           @next-ecosystem/trust-safety
+/services/analytics-service/            @next-ecosystem/data
+/services/event-gateway/                @next-ecosystem/platform
+/services/api-gateway/                  @next-ecosystem/platform
+
+# ---- AI ----
+/ai/recommendation-engine/              @next-ecosystem/ml-discovery
+/ai/semantic-understanding/             @next-ecosystem/ml-core
+/ai/video-intelligence/                 @next-ecosystem/ml-media
+/ai/multimodal-pipelines/               @next-ecosystem/ml-core
+/ai/creator-copilot/                    @next-ecosystem/ml-creator
+/ai/moderation-models/                  @next-ecosystem/trust-safety @next-ecosystem/ml-core
+/ai/search-ranking/                     @next-ecosystem/ml-discovery
+/ai/vector-pipelines/                   @next-ecosystem/ml-platform
+
+# ---- Shared packages ----
+/packages/ui/                           @next-ecosystem/design-systems
+/packages/design-system/                @next-ecosystem/design-systems
+/packages/events/                       @next-ecosystem/platform
+/packages/auth-sdk/                     @next-ecosystem/identity
+/packages/logger/                       @next-ecosystem/platform
+/packages/telemetry/                    @next-ecosystem/platform
+/packages/database/                     @next-ecosystem/data
+/packages/api-client/                   @next-ecosystem/platform
+/packages/feature-flags/                @next-ecosystem/platform
+/packages/types/                        @next-ecosystem/platform
+/packages/config/                       @next-ecosystem/platform
+
+# ---- Infrastructure ----
+/infrastructure/                        @next-ecosystem/platform @next-ecosystem/sre
+/infrastructure/terraform/              @next-ecosystem/sre
+/infrastructure/kubernetes/              @next-ecosystem/sre
+/infrastructure/security/               @next-ecosystem/security @next-ecosystem/sre
+/infrastructure/secrets/                @next-ecosystem/security
+/infrastructure/monitoring/             @next-ecosystem/sre
+
+# ---- CI / Repo ----
+/.github/                               @next-ecosystem/platform @next-ecosystem/sre
+/.github/workflows/                     @next-ecosystem/platform @next-ecosystem/sre
+/Taskfile.yml                           @next-ecosystem/platform
+/turbo.json                             @next-ecosystem/platform
+/pnpm-workspace.yaml                    @next-ecosystem/platform
+/go.work                                @next-ecosystem/platform
+/Cargo.toml                             @next-ecosystem/platform
+/pyproject.toml                         @next-ecosystem/platform
+
+# ---- Docs / ADRs ----
+/docs/adr/                              @next-ecosystem/architecture
+/docs/runbooks/                         @next-ecosystem/sre

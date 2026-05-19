@@ -1,0 +1,110 @@
+---
+# next-service chart defaults. Per-service values files override.
+
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  repository: ghcr.io/next-ecosystem/next
+  tag: ""           # set from CI; required at install time
+  pullPolicy: IfNotPresent
+
+serviceAccount:
+  create: true
+  annotations: {}   # IRSA: eks.amazonaws.com/role-arn: arn:aws:iam::...
+
+replicaCount: 3
+
+podLabels: {}
+podAnnotations:
+  prometheus.io/scrape: "true"
+  prometheus.io/port: "9090"
+  prometheus.io/path: "/metrics"
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 128Mi
+  limits:
+    cpu: 1000m
+    memory: 512Mi
+
+probes:
+  liveness:
+    path: /healthz
+    port: 8080
+    initialDelaySeconds: 5
+    periodSeconds: 10
+  readiness:
+    path: /readyz
+    port: 8080
+    initialDelaySeconds: 5
+    periodSeconds: 5
+  startup:
+    path: /healthz
+    port: 8080
+    failureThreshold: 30
+    periodSeconds: 5
+
+ports:
+  http: 8080
+  grpc: 7070
+  metrics: 9090
+
+service:
+  type: ClusterIP
+
+env: {}
+envFrom: []
+
+externalSecrets: []
+# - name: db-credentials
+#   secretStore: vault
+#   data:
+#     - secretKey: POSTGRES_PASSWORD
+#       remoteRef:
+#         key: kv/data/<env>/<service>/postgres
+#         property: password
+
+autoscaling:
+  enabled: true
+  minReplicas: 3
+  maxReplicas: 30
+  metrics:
+    - type: Resource
+      resource:
+        name: cpu
+        target:
+          type: Utilization
+          averageUtilization: 70
+    - type: Pods
+      pods:
+        metric: { name: http_requests_per_second }
+        target: { type: AverageValue, averageValue: "200" }
+
+pdb:
+  enabled: true
+  minAvailable: 50%
+
+topologySpread:
+  enabled: true
+  maxSkew: 1
+  topologyKey: topology.kubernetes.io/zone
+
+nodeSelector: {}
+tolerations: []
+affinity: {}
+
+# Istio
+istio:
+  enabled: true
+  mtls:
+    mode: STRICT
+  authz: []   # list of from/to rules
+
+# Service monitor for Prometheus operator
+serviceMonitor:
+  enabled: true
+  interval: 30s
+  path: /metrics
+  port: metrics

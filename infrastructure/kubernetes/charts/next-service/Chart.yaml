@@ -1,0 +1,11 @@
+apiVersion: v2
+name: next-service
+description: Canonical Helm chart for a NEXT Go/Rust microservice.
+type: application
+version: 0.1.0
+appVersion: "0.1.0"
+icon: https://next.example/logo.png
+maintainers:
+  - name: NEXT Platform
+    email: platform@next.example
+kubeVersion: ">=1.30.0"

@@ -1,0 +1,64 @@
+---
+# ml-serving chart defaults. Overridden per model deployment.
+
+runtime: triton    # triton | vllm
+
+image:
+  triton:
+    repository: nvcr.io/nvidia/tritonserver
+    tag: "24.10-py3"
+  vllm:
+    repository: vllm/vllm-openai
+    tag: "v0.6.3"
+
+modelRepository:
+  type: s3
+  uri: s3://next-ml-prod/models/
+
+serviceAccount:
+  create: true
+  annotations: {}   # IRSA role with read on the model S3 prefix
+
+replicaCount: 2
+
+gpus:
+  requested: 1                # GPUs per pod
+  type: nvidia.com/gpu        # or nvidia.com/mig-3g.20gb for MIG
+
+resources:
+  requests: { cpu: "4",   memory: 16Gi }
+  limits:   { cpu: "8",   memory: 32Gi, nvidia.com/gpu: 1 }
+
+nodeSelector:
+  workload.next.io/class: ai
+tolerations:
+  - { key: nvidia.com/gpu, value: "true", operator: Equal, effect: NoSchedule }
+
+probes:
+  readiness:
+    httpGet: { path: /v2/health/ready, port: 8000 }
+    initialDelaySeconds: 30
+  liveness:
+    httpGet: { path: /v2/health/live, port: 8000 }
+    initialDelaySeconds: 60
+
+ports:
+  http: 8000
+  grpc: 8001
+  metrics: 8002
+
+autoscaling:
+  enabled: true
+  type: keda
+  minReplicas: 2
+  maxReplicas: 20
+  triggers:
+    - type: prometheus
+      metricName: nv_inference_queue_duration_us
+      threshold: "5000"
+    - type: prometheus
+      metricName: vllm:gpu_cache_usage_perc
+      threshold: "0.7"
+
+istio:
+  mtls: { mode: STRICT }

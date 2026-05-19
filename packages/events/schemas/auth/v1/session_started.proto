@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package next.events.auth.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/next/events/auth/v1;autheventsv1";
+
+// SessionStarted — emitted on successful login. PII-light by design.
+// Partition key: user_id.
+message SessionStarted {
+  string event_id   = 1 [(buf.validate.field).string.uuid = true];
+  google.protobuf.Timestamp emitted_at = 2;
+  string user_id    = 3 [(buf.validate.field).string.min_len = 26];
+  string session_id = 4 [(buf.validate.field).string.uuid = true];
+  string device_id  = 5;
+  Method method     = 6;
+  string ip_country = 7; // country code only; raw IP scrubbed by gateway
+  string user_agent_family = 8;
+
+  enum Method {
+    METHOD_UNSPECIFIED = 0;
+    METHOD_PASSWORD    = 1;
+    METHOD_PASSKEY     = 2;
+    METHOD_OAUTH       = 3;
+    METHOD_MAGIC_LINK  = 4;
+    METHOD_REFRESH     = 5;
+  }
+}

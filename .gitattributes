@@ -1,0 +1,62 @@
+* text=auto eol=lf
+
+# JS/TS
+*.{ts,tsx,js,jsx,mjs,cjs,json,jsonc} text eol=lf
+
+# Source
+*.go text eol=lf
+*.rs text eol=lf
+*.py text eol=lf
+*.proto text eol=lf
+
+# Config
+*.{yaml,yml,toml,xml,html,css,scss,md,mdx} text eol=lf
+*.{sh,bash,zsh,fish} text eol=lf
+Dockerfile text eol=lf
+Makefile text eol=lf
+
+# Lockfiles — large diffs, mark for collapsed display
+pnpm-lock.yaml linguist-generated=true -diff
+package-lock.json linguist-generated=true -diff
+yarn.lock linguist-generated=true -diff
+go.sum linguist-generated=true -diff
+Cargo.lock linguist-generated=true -diff
+uv.lock linguist-generated=true -diff
+
+# Generated
+**/__generated__/** linguist-generated=true
+**/generated/** linguist-generated=true
+*.pb.go linguist-generated=true
+*.pb.ts linguist-generated=true
+*_pb.ts linguist-generated=true
+*_pb2.py linguist-generated=true
+*_pb2_grpc.py linguist-generated=true
+
+# Binary
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.webp binary
+*.avif binary
+*.ico binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.eot binary
+*.mp4 binary
+*.webm binary
+*.mp3 binary
+*.wav binary
+*.pdf binary
+*.zip binary
+*.tar.gz binary
+*.tgz binary
+
+# ML
+*.safetensors binary
+*.onnx binary
+*.bin binary
+*.pt binary
+*.pth binary
+*.ckpt binary

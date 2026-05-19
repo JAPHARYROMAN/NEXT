@@ -1,0 +1,120 @@
+# NEXT — Python workspace root (uv).
+# AI / ML services live under /ai and declare their own pyproject.toml.
+
+[project]
+name = "next-python-workspace"
+version = "0.1.0"
+description = "NEXT Python workspace root (AI / ML systems)"
+requires-python = ">=3.12"
+license = { text = "Apache-2.0" }
+
+[tool.uv.workspace]
+members = [
+    "ai/recommendation-engine",
+    "ai/semantic-understanding",
+    "ai/video-intelligence",
+    "ai/multimodal-pipelines",
+    "ai/creator-copilot",
+    "ai/moderation-models",
+    "ai/search-ranking",
+    "ai/vector-pipelines",
+    "packages/python/*",
+]
+
+[tool.uv]
+dev-dependencies = [
+    "ruff>=0.7.0",
+    "mypy>=1.13.0",
+    "pytest>=8.3.0",
+    "pytest-asyncio>=0.24.0",
+    "pytest-cov>=5.0.0",
+    "ipython>=8.28.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = [
+    "**/generated/**",
+    "**/__generated__/**",
+    "**/*_pb2.py",
+    "**/*_pb2_grpc.py",
+]
+
+[tool.ruff.lint]
+select = [
+    "E", "W",  # pycodestyle
+    "F",       # pyflakes
+    "I",       # isort
+    "N",       # pep8-naming
+    "UP",      # pyupgrade
+    "B",       # bugbear
+    "A",       # builtins shadowing
+    "C4",      # comprehensions
+    "PIE",     # misc lints
+    "RET",     # returns
+    "SIM",     # simplifications
+    "ARG",     # unused args
+    "PTH",     # use pathlib
+    "ERA",     # eradicate commented code
+    "RUF",     # ruff-specific
+]
+ignore = [
+    "E501",   # line length (handled by formatter)
+    "B008",   # function call in default arg (FastAPI Depends)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"**/tests/**" = ["ARG", "RET504"]
+"**/__init__.py" = ["F401"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+exclude = [
+    ".*/generated/.*",
+    ".*/__generated__/.*",
+    ".*_pb2\\.py$",
+    ".*_pb2_grpc\\.py$",
+]
+
+[[tool.mypy.overrides]]
+module = [
+    "torch.*",
+    "transformers.*",
+    "ray.*",
+    "vllm.*",
+]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+testpaths = ["ai", "packages/python"]
+python_files = ["test_*.py", "*_test.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+asyncio_mode = "auto"
+addopts = [
+    "--strict-markers",
+    "--strict-config",
+    "-ra",
+    "--cov-report=term-missing",
+]
+filterwarnings = [
+    "error",
+    "ignore::DeprecationWarning:torch.*",
+]

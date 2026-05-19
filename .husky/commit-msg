@@ -1,0 +1,4 @@
+#!/usr/bin/env sh
+# NEXT — enforce Conventional Commits on every commit message.
+
+pnpm exec commitlint --edit "$1"

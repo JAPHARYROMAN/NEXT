@@ -1,0 +1,50 @@
+{
+  "name": "@next/web",
+  "version": "0.1.0",
+  "private": true,
+  "description": "NEXT primary web experience. Next.js 15 App Router + RSC + Edge.",
+  "license": "Apache-2.0",
+  "scripts": {
+    "dev": "next dev --turbo --port 3000",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint --dir src --dir app",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:e2e": "playwright test",
+    "analyze": "ANALYZE=true next build"
+  },
+  "dependencies": {
+    "@apollo/client": "catalog:",
+    "@next/api-client": "workspace:*",
+    "@next/auth-sdk": "workspace:*",
+    "@next/design-system": "workspace:*",
+    "@next/feature-flags": "workspace:*",
+    "@next/logger": "workspace:*",
+    "@next/telemetry": "workspace:*",
+    "@next/types": "workspace:*",
+    "@next/ui": "workspace:*",
+    "@tanstack/react-query": "catalog:",
+    "framer-motion": "catalog:",
+    "graphql": "catalog:",
+    "next": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "zod": "catalog:",
+    "zustand": "catalog:"
+  },
+  "devDependencies": {
+    "@next/config": "workspace:*",
+    "@next/eslint-plugin-next": "catalog:next",
+    "@playwright/test": "catalog:",
+    "@tailwindcss/typography": "catalog:",
+    "@types/node": "^22.7.5",
+    "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "autoprefixer": "catalog:",
+    "postcss": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

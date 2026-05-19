@@ -1,0 +1,165 @@
+name: CI
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+  id-token: write
+  pull-requests: write
+
+env:
+  TURBO_TOKEN: ${{ secrets.TURBO_TOKEN }}
+  TURBO_TEAM: ${{ vars.TURBO_TEAM }}
+  TURBO_REMOTE_CACHE_SIGNATURE_KEY: ${{ secrets.TURBO_REMOTE_CACHE_KEY }}
+
+jobs:
+  # ----- detect changes ---------------------------------------------------------
+  changes:
+    name: detect changes
+    runs-on: ubuntu-24.04
+    outputs:
+      ts: ${{ steps.f.outputs.ts }}
+      go: ${{ steps.f.outputs.go }}
+      rust: ${{ steps.f.outputs.rust }}
+      python: ${{ steps.f.outputs.python }}
+      proto: ${{ steps.f.outputs.proto }}
+      terraform: ${{ steps.f.outputs.terraform }}
+      kubernetes: ${{ steps.f.outputs.kubernetes }}
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 2 }
+      - id: f
+        uses: dorny/paths-filter@v3
+        with:
+          filters: |
+            ts: ['apps/**', 'packages/**/*.{ts,tsx,js,json}', 'tsconfig*.json', 'pnpm-workspace.yaml']
+            go: ['services/**/*.go', 'packages/go/**', 'go.work*']
+            rust: ['services/**/*.rs', 'ai/**/*.rs', 'packages/rust/**', '**/Cargo.{toml,lock}']
+            python: ['ai/**', 'packages/python/**', 'pyproject.toml']
+            proto: ['proto/**', '**/*.proto', 'buf.yaml', 'buf.gen.yaml']
+            terraform: ['infrastructure/terraform/**']
+            kubernetes: ['infrastructure/kubernetes/**']
+
+  # ----- TypeScript -------------------------------------------------------------
+  ts:
+    name: typescript
+    needs: changes
+    if: ${{ needs.changes.outputs.ts == 'true' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+      - uses: pnpm/action-setup@v4
+        with: { version: 9.12.0 }
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm turbo run lint typecheck test build
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: ts-coverage
+          path: '**/coverage/**'
+
+  # ----- Go ---------------------------------------------------------------------
+  go:
+    name: go
+    needs: changes
+    if: ${{ needs.changes.outputs.go == 'true' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+      - run: go work sync
+      - run: |
+          for dir in services/*; do
+            [ -f "$dir/go.mod" ] || continue
+            echo "==> $dir"
+            (cd "$dir" && go test -race -coverprofile=coverage.out ./...)
+          done
+      - name: lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: v1.61.0
+          working-directory: services
+          args: --timeout 5m
+
+  # ----- Rust -------------------------------------------------------------------
+  rust:
+    name: rust
+    needs: changes
+    if: ${{ needs.changes.outputs.rust == 'true' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+      - uses: Swatinem/rust-cache@v2
+      - run: cargo fmt --all -- --check
+      - run: cargo clippy --workspace --all-targets -- -D warnings
+      - run: cargo test --workspace --no-fail-fast
+
+  # ----- Python -----------------------------------------------------------------
+  python:
+    name: python
+    needs: changes
+    if: ${{ needs.changes.outputs.python == 'true' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+      - run: uv sync --all-packages
+      - run: uv run ruff check ai/ packages/python/
+      - run: uv run mypy ai/ packages/python/
+      - run: uv run pytest ai/ packages/python/ -q
+
+  # ----- Proto / buf ------------------------------------------------------------
+  proto:
+    name: proto
+    needs: changes
+    if: ${{ needs.changes.outputs.proto == 'true' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - uses: bufbuild/buf-setup-action@v1
+      - uses: bufbuild/buf-lint-action@v1
+      - uses: bufbuild/buf-breaking-action@v1
+        if: github.event_name == 'pull_request'
+        with: { against: 'https://github.com/${{ github.repository }}.git#branch=main' }
+
+  # ----- Terraform fmt/validate (plan handled in separate workflow) ------------
+  terraform:
+    name: terraform
+    needs: changes
+    if: ${{ needs.changes.outputs.terraform == 'true' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+      - run: terraform fmt -check -recursive infrastructure/terraform
+      - name: validate modules
+        run: |
+          for dir in infrastructure/terraform/modules/*; do
+            (cd "$dir" && terraform init -backend=false && terraform validate)
+          done
+
+  # ----- Kubernetes (helm lint, kustomize build) -------------------------------
+  kubernetes:
+    name: kubernetes
+    needs: changes
+    if: ${{ needs.changes.outputs.kubernetes == 'true' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: jdx/mise-action@v2
+      - run: |
+          for chart in infrastructure/kubernetes/charts/*/; do
+            helm lint "$chart"
+          done
+      - run: kubectl apply --dry-run=client -k infrastructure/kubernetes/base
