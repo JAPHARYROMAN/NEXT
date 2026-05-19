@@ -1,0 +1,108 @@
+syntax = "proto3";
+
+package next.profile.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/profile/v1;profilev1";
+
+// ProfileService is the internal contract for user identity + settings.
+service ProfileService {
+  // Create a profile for a newly registered user.
+  rpc Create(CreateRequest) returns (CreateResponse);
+
+  // Get a profile by user ID.
+  rpc Get(GetRequest) returns (GetResponse);
+
+  // Update mutable profile fields (handle, display_name, bio).
+  rpc Update(UpdateRequest) returns (UpdateResponse);
+}
+
+// SocialGraphService owns follows / mutes / blocks.
+service SocialGraphService {
+  rpc Follow(FollowRequest) returns (FollowResponse);
+  rpc Unfollow(UnfollowRequest) returns (UnfollowResponse);
+  rpc Followers(FollowersRequest) returns (FollowersResponse);
+  rpc Following(FollowingRequest) returns (FollowingResponse);
+}
+
+// ---- Profile messages ----
+
+message Profile {
+  string user_id      = 1;
+  string handle       = 2;
+  string display_name = 3;
+  string bio          = 4;
+  Tier   tier         = 5;
+  int64  followers    = 6;
+  int64  following    = 7;
+  google.protobuf.Timestamp created_at = 8;
+  google.protobuf.Timestamp updated_at = 9;
+}
+
+enum Tier {
+  TIER_UNSPECIFIED  = 0;
+  TIER_AUTHENTICATED = 1;
+  TIER_CREATOR     = 2;
+  TIER_PARTNER     = 3;
+  TIER_STAFF       = 4;
+}
+
+message CreateRequest {
+  string user_id      = 1 [(buf.validate.field).string.min_len = 1];
+  string handle       = 2 [(buf.validate.field).string.min_len = 3, (buf.validate.field).string.max_len = 30];
+  string display_name = 3 [(buf.validate.field).string.max_len = 80];
+}
+message CreateResponse { Profile profile = 1; }
+
+message GetRequest { string user_id = 1 [(buf.validate.field).string.min_len = 1]; }
+message GetResponse { Profile profile = 1; }
+
+message UpdateRequest {
+  string user_id      = 1 [(buf.validate.field).string.min_len = 1];
+  optional string handle       = 2;
+  optional string display_name = 3;
+  optional string bio          = 4;
+}
+message UpdateResponse { Profile profile = 1; }
+
+// ---- SocialGraph messages ----
+
+message FollowRequest {
+  string follower_id = 1 [(buf.validate.field).string.min_len = 1];
+  string followee_id = 2 [(buf.validate.field).string.min_len = 1];
+}
+message FollowResponse {}
+
+message UnfollowRequest {
+  string follower_id = 1 [(buf.validate.field).string.min_len = 1];
+  string followee_id = 2 [(buf.validate.field).string.min_len = 1];
+}
+message UnfollowResponse {}
+
+message FollowersRequest {
+  string user_id   = 1 [(buf.validate.field).string.min_len = 1];
+  int32  limit     = 2 [(buf.validate.field).int32.gte = 1, (buf.validate.field).int32.lte = 100];
+  string after     = 3;
+}
+message FollowersResponse {
+  repeated FollowEdge edges = 1;
+  string next_cursor = 2;
+}
+
+message FollowingRequest {
+  string user_id = 1 [(buf.validate.field).string.min_len = 1];
+  int32  limit   = 2 [(buf.validate.field).int32.gte = 1, (buf.validate.field).int32.lte = 100];
+  string after   = 3;
+}
+message FollowingResponse {
+  repeated FollowEdge edges = 1;
+  string next_cursor = 2;
+}
+
+message FollowEdge {
+  string user_id = 1;
+  string handle  = 2;
+  google.protobuf.Timestamp followed_at = 3;
+}

@@ -5,6 +5,8 @@ version: v2
 modules:
   - path: services/auth-service/proto
     name: buf.build/next-ecosystem/auth
+  - path: services/profile-service/proto
+    name: buf.build/next-ecosystem/profile
   - path: packages/events/schemas
     name: buf.build/next-ecosystem/events
 
