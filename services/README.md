@@ -36,20 +36,28 @@ Rust services follow the same shape with `Cargo.toml` + `src/` instead of `go.mo
 
 ## Catalog
 
-| Service | Lang | Database | Topics emitted |
-| --- | --- | --- | --- |
-| [api-gateway](api-gateway) | Go | — | — |
-| [event-gateway](event-gateway) | Go | Postgres (idempotency) | all (proxy) |
-| [auth-service](auth-service) | Go | Postgres + Redis | `auth.*` |
-| [profile-service](profile-service) | Go | Postgres | `profile.*` |
-| [media-service](media-service) | Go + Rust | Postgres + S3 | `media.*` |
-| [upload-service](upload-service) | Go | S3 (TUS) | `upload.*` |
-| [live-service](live-service) | Rust + Go | Redis + S3 | `live.*` |
-| [feed-service](feed-service) | Go | Redis | `feed.*` |
-| [recommendation-service](recommendation-service) | Go + Rust | Qdrant + Redis | `rec.*` |
-| [search-service](search-service) | Go | OpenSearch | `search.*` |
-| [community-service](community-service) | Go | Postgres + Redis | `community.*` |
-| [payment-service](payment-service) | Go | Postgres (ledger) | `payment.*` |
-| [notification-service](notification-service) | Go | Postgres + Redis | `notification.*` |
-| [moderation-service](moderation-service) | Go | Postgres + CH | `moderation.*` |
-| [analytics-service](analytics-service) | Go | ClickHouse | — (terminal sink) |
+| Service                                                | Lang      | Database               | Topics emitted        |
+| ------------------------------------------------------ | --------- | ---------------------- | --------------------- |
+| [api-gateway](api-gateway)                             | Go        | —                      | —                     |
+| [event-gateway](event-gateway)                         | Go        | Postgres (idempotency) | all (proxy)           |
+| [auth-service](auth-service)                           | Go        | Postgres + Redis       | `auth.*`              |
+| [profile-service](profile-service)                     | Go        | Postgres               | `profile.*`           |
+| [media-service](media-service)                         | Go + Rust | Postgres + S3          | `media.*`             |
+| [upload-service](upload-service)                       | Go        | S3 (TUS)               | `upload.*`            |
+| [live-service](live-service)                           | Rust + Go | Redis + S3             | `live.*`              |
+| [feed-service](feed-service)                           | Go        | Redis                  | `feed.*`              |
+| [recommendation-service](recommendation-service)       | Go + Rust | Qdrant + Redis         | `rec.*`               |
+| [search-service](search-service)                       | Go        | OpenSearch             | `search.*`            |
+| [community-service](community-service)                 | Go        | Postgres + Redis       | `community.*`         |
+| [payment-service](payment-service)                     | Go        | Postgres (ledger)      | `payment.*`           |
+| [notification-service](notification-service)           | Go        | Postgres + Redis       | `notification.*`      |
+| [moderation-service](moderation-service)               | Go        | Postgres + CH          | `moderation.*`        |
+| [analytics-service](analytics-service)                 | Go        | ClickHouse             | — (terminal sink)     |
+| [session-service](session-service)                     | Go        | Postgres + Redis       | `session.*`           |
+| [device-graph-service](device-graph-service)           | Go        | Postgres + ClickHouse  | `device.*`            |
+| [trust-service](trust-service)                         | Go        | Postgres + ClickHouse  | `trust.*`             |
+| [identity-graph-service](identity-graph-service)       | Go        | Neo4j                  | `identity_graph.*`    |
+| [creator-identity-service](creator-identity-service)   | Go        | Postgres               | `creator.*`           |
+| [access-control-service](access-control-service)       | Go        | Postgres + S3          | `access.*`            |
+| [account-recovery-service](account-recovery-service)   | Go        | Postgres               | `recovery.*`          |
+| [notification-auth-service](notification-auth-service) | Go        | Postgres               | `notification_auth.*` |
