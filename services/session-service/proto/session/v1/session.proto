@@ -1,0 +1,65 @@
+syntax = "proto3";
+
+package next.session.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/session/v1;sessionv1";
+
+service SessionService {
+  rpc Create(CreateRequest)     returns (CreateResponse);
+  rpc Validate(ValidateRequest) returns (ValidateResponse);
+  rpc Refresh(RefreshRequest)   returns (RefreshResponse);
+  rpc Revoke(RevokeRequest)     returns (RevokeResponse);
+  rpc List(ListRequest)         returns (ListResponse);
+}
+
+message Session {
+  string id            = 1;
+  string user_id       = 2;
+  string family_id     = 3;
+  string method        = 4;
+  string device_id     = 5;
+  string ip_country    = 6;
+  string user_agent    = 7;
+  google.protobuf.Timestamp started_at     = 8;
+  google.protobuf.Timestamp last_active_at = 9;
+  google.protobuf.Timestamp expires_at     = 10;
+  google.protobuf.Timestamp revoked_at     = 11;
+}
+
+message CreateRequest {
+  string user_id    = 1 [(buf.validate.field).string.min_len = 1];
+  string method     = 2 [(buf.validate.field).string.min_len = 1];
+  string device_id  = 3;
+  string ip_country = 4;
+  string user_agent = 5;
+  // Refresh-token lifetime in seconds. Defaults to 7 days when 0.
+  int64 ttl_seconds = 6;
+}
+
+message CreateResponse {
+  Session session       = 1;
+  string  refresh_token = 2; // raw; given to the client once
+}
+
+message ValidateRequest { string session_id = 1 [(buf.validate.field).string.uuid = true]; }
+message ValidateResponse {
+  Session session = 1;
+  bool    revoked = 2;
+  bool    expired = 3;
+}
+
+message RefreshRequest { string refresh_token = 1 [(buf.validate.field).string.min_len = 1]; }
+message RefreshResponse {
+  Session session       = 1;
+  string  refresh_token = 2;
+  bool    theft_detected = 3;
+}
+
+message RevokeRequest { string session_id = 1 [(buf.validate.field).string.uuid = true]; }
+message RevokeResponse {}
+
+message ListRequest { string user_id = 1 [(buf.validate.field).string.min_len = 1]; }
+message ListResponse { repeated Session sessions = 1; }
