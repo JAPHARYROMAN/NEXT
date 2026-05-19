@@ -5,6 +5,7 @@
 
 export const TOPICS = {
   // ---- Identity ----
+  AUTH_USER_REGISTERED: 'auth.user.registered.v1',
   AUTH_SESSION_STARTED: 'auth.session.started.v1',
   AUTH_SESSION_ENDED: 'auth.session.ended.v1',
   AUTH_CREDENTIAL_ROTATED: 'auth.credential.rotated.v1',
