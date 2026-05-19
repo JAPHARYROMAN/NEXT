@@ -30,8 +30,8 @@ catalog:
   # Motion + 3D
   framer-motion: ^11.11.0
   three: ^0.170.0
-  "@react-three/fiber": ^8.17.10
-  "@react-three/drei": ^9.117.0
+  "@react-three/fiber": ^9.5.0
+  "@react-three/drei": ^10.7.7
   "@types/three": ^0.170.0
 
   # GraphQL
@@ -76,14 +76,30 @@ catalog:
   "eslint-plugin-react": ^7.37.1
   "eslint-plugin-react-hooks": ^5.0.0
 
+# Scoped overrides: pin React 18 inside @next/mobile's dependency subgraph only.
+# RN 0.76 / Expo 52 peer-dep on react@18; the rest of the monorepo stays on the
+# catalog's react@19. pnpm honors `overrides` only at workspace root, so this
+# lives here (not in apps/mobile/package.json) despite being mobile-scoped.
+overrides:
+  "@next/mobile>react": "18.3.1"
+  "@next/mobile>react-dom": "18.3.1"
+  "@next/mobile>@types/react": "~18.3.12"
+
 # pnpm-specific config
 peerDependencyRules:
   ignoreMissing:
     - "@types/react"
     - "@types/react-dom"
   allowedVersions:
-    react: "19"
-    react-dom: "19"
+    # Mobile is on react 18 (RN 0.76 constraint); web/immersive are on react 19.
+    # Both must be accepted to silence peer warnings across the workspace.
+    react: "18 || 19"
+    react-dom: "18 || 19"
+    "@types/react": "18 || 19"
+    # fiber@9 peers on react-native>=0.78 (optional). Mobile is intentionally on
+    # 0.76 (latest stable Expo 52 target). Accept the older RN to silence the
+    # workspace-wide warning fiber emits when scanning mobile's RN install.
+    react-native: "0.76 || >=0.78"
 
 # Enable strict peer dep resolution
 strict-peer-dependencies: false
