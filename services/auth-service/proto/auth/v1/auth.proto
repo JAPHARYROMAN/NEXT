@@ -84,4 +84,16 @@ message RegisterUserRequest {
 
 message RegisterUserResponse {
   string user_id = 1;
+  TokenPair tokens = 2;
+}
+
+// TokenPair is the pair the client uses to authenticate subsequent requests.
+// access_token is a short-lived RS256 JWT verified by every service.
+// refresh_token is opaque + server-side (rotated on use). Phase 5 leaves
+// the refresh side empty; Phase 6 wires it through session-service.
+message TokenPair {
+  string access_token = 1;
+  string token_type   = 2;   // always "Bearer"
+  google.protobuf.Timestamp access_token_expires_at = 3;
+  string refresh_token = 4;
 }

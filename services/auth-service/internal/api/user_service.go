@@ -9,10 +9,12 @@ import (
 	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
+	"google.golang.org/protobuf/types/known/timestamppb"
 
 	authv1 "github.com/next-ecosystem/next/gen/go/auth/v1"
 	"github.com/next-ecosystem/next/services/auth-service/internal/eventbus"
 	"github.com/next-ecosystem/next/services/auth-service/internal/store"
+	"github.com/next-ecosystem/next/services/auth-service/internal/tokens"
 )
 
 // handleRegex enforces the same rules profile-service applies; we validate at the
@@ -25,11 +27,12 @@ type UserService struct {
 
 	pg     *store.Postgres
 	events *eventbus.Producer
+	issuer *tokens.Issuer
 }
 
 // NewUserService constructs the handler.
-func NewUserService(pg *store.Postgres, ev *eventbus.Producer) *UserService {
-	return &UserService{pg: pg, events: ev}
+func NewUserService(pg *store.Postgres, ev *eventbus.Producer, iss *tokens.Issuer) *UserService {
+	return &UserService{pg: pg, events: ev, issuer: iss}
 }
 
 // RegisterUser creates the user row and emits auth.user.registered.v1.
@@ -74,5 +77,22 @@ func (s *UserService) RegisterUser(ctx context.Context, req *authv1.RegisterUser
 		}
 	}
 
-	return &authv1.RegisterUserResponse{UserId: userID.String()}, nil
+	resp := &authv1.RegisterUserResponse{UserId: userID.String()}
+
+	// Mint an access token so the client is authenticated immediately after
+	// signup. The refresh side is left empty until session-service.Refresh lands.
+	if s.issuer != nil {
+		access, expiresAt, err := s.issuer.Mint(userID.String(), handle)
+		if err != nil {
+			slog.WarnContext(ctx, "mint access token failed", "err", err)
+		} else {
+			resp.Tokens = &authv1.TokenPair{
+				AccessToken:          access,
+				TokenType:            "Bearer",
+				AccessTokenExpiresAt: timestamppb.New(expiresAt),
+			}
+		}
+	}
+
+	return resp, nil
 }

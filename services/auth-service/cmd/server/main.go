@@ -37,6 +37,7 @@ import (
 	"github.com/next-ecosystem/next/services/auth-service/internal/api"
 	"github.com/next-ecosystem/next/services/auth-service/internal/eventbus"
 	"github.com/next-ecosystem/next/services/auth-service/internal/store"
+	"github.com/next-ecosystem/next/services/auth-service/internal/tokens"
 )
 
 const (
@@ -56,6 +57,8 @@ type config struct {
 	RedisURL     string `env:"REDIS_URL,required"`
 	KafkaBrokers string `env:"KAFKA_BROKERS" envDefault:""`
 	EmitStartup  bool   `env:"AUTH_EMIT_STARTUP_EVENT" envDefault:"true"`
+	JWTIssuer    string `env:"JWT_ISSUER" envDefault:"https://auth.next.local"`
+	JWTAudience  string `env:"JWT_AUDIENCE" envDefault:"next-api"`
 }
 
 func main() {
@@ -134,10 +137,18 @@ func run() error {
 		}
 	}
 
-	sessionSvc := api.NewSessionService(pg, rd)
-	userSvc := api.NewUserService(pg, producer)
+	tokenIssuer, err := tokens.NewIssuer(tokens.Config{
+		Issuer:   cfg.JWTIssuer,
+		Audience: cfg.JWTAudience,
+	})
+	if err != nil {
+		return err
+	}
 
-	httpSrv := newHTTPServer(cfg, pg, rd, &ready)
+	sessionSvc := api.NewSessionService(pg, rd)
+	userSvc := api.NewUserService(pg, producer, tokenIssuer)
+
+	httpSrv := newHTTPServer(cfg, pg, rd, tokenIssuer, &ready)
 	grpcSrv := newGRPCServer(sessionSvc, userSvc)
 
 	grpcLis, err := net.Listen("tcp", cfg.GRPCAddr)
@@ -188,7 +199,7 @@ func run() error {
 	return nil
 }
 
-func newHTTPServer(cfg config, pg *store.Postgres, rd *store.Redis, ready *atomic.Bool) *http.Server {
+func newHTTPServer(cfg config, pg *store.Postgres, rd *store.Redis, iss *tokens.Issuer, ready *atomic.Bool) *http.Server {
 	r := chi.NewRouter()
 	r.Use(middleware.RequestID, middleware.Recoverer, middleware.Compress(5))
 
@@ -196,6 +207,9 @@ func newHTTPServer(cfg config, pg *store.Postgres, rd *store.Redis, ready *atomi
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte("ok"))
 	})
+
+	// JWKS for every JWT verifier in the platform.
+	r.Method(http.MethodGet, tokens.JWKSPath, iss.JWKSHandler())
 
 	r.Get("/readyz", func(w http.ResponseWriter, req *http.Request) {
 		if !ready.Load() {
