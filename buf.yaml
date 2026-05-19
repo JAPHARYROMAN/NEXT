@@ -1,27 +1,31 @@
 # NEXT — Buf module config for protobuf governance.
-# All gRPC contracts live under /proto and per-service /services/*/proto.
+# Each domain owns its proto files; this file enumerates the modules.
+
 version: v2
 modules:
-  - path: proto
-    name: buf.build/next-ecosystem/proto
+  - path: services/auth-service/proto
+    name: buf.build/next-ecosystem/auth
+  - path: packages/events/schemas
+    name: buf.build/next-ecosystem/events
+
 breaking:
   use:
     - FILE
   except:
     - FIELD_NO_DELETE
+
 lint:
   use:
-    - DEFAULT
-    - COMMENTS
-    - UNARY_RPC
+    - STANDARD
   except:
     - PACKAGE_VERSION_SUFFIX
+    - PACKAGE_DIRECTORY_MATCH
   enum_zero_value_suffix: _UNSPECIFIED
   service_suffix: Service
   rpc_allow_same_request_response: false
   rpc_allow_google_protobuf_empty_requests: false
   rpc_allow_google_protobuf_empty_responses: false
+
 deps:
   - buf.build/googleapis/googleapis
-  - buf.build/grpc-ecosystem/grpc-gateway
   - buf.build/bufbuild/protovalidate

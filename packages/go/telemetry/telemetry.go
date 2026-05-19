@@ -58,10 +58,16 @@ func Init(ctx context.Context, cfg Config) (shutdown func(context.Context) error
 	if err != nil {
 		return nil, fmt.Errorf("trace exporter: %w", err)
 	}
+	// Sampling: 1% baseline in prod; everything outside prod so engineers see their
+	// own traces during dev + integration tests without juggling env vars.
+	sampler := sdktrace.ParentBased(sdktrace.TraceIDRatioBased(0.01))
+	if cfg.Environment != "prod" {
+		sampler = sdktrace.ParentBased(sdktrace.AlwaysSample())
+	}
 	tp := sdktrace.NewTracerProvider(
 		sdktrace.WithBatcher(traceExp, sdktrace.WithMaxQueueSize(2048)),
 		sdktrace.WithResource(res),
-		sdktrace.WithSampler(sdktrace.ParentBased(sdktrace.TraceIDRatioBased(0.01))),
+		sdktrace.WithSampler(sampler),
 	)
 	otel.SetTracerProvider(tp)
 

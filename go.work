@@ -1,23 +1,23 @@
-go 1.23.2
+go 1.25.0
 
 use (
-	./services/auth-service
-	./services/profile-service
-	./services/media-service
-	./services/upload-service
-	./services/live-service
-	./services/feed-service
-	./services/recommendation-service
-	./services/search-service
-	./services/community-service
-	./services/payment-service
-	./services/notification-service
-	./services/moderation-service
-	./services/analytics-service
-	./services/event-gateway
-	./services/api-gateway
-	./packages/go/eventbus
-	./packages/go/telemetry
+	./gen/go
 	./packages/go/auth
 	./packages/go/database
+	./packages/go/eventbus
+	./packages/go/telemetry
+	./services/analytics-service
+	./services/auth-service
+	./services/community-service
+	./services/event-gateway
+	./services/feed-service
+	./services/live-service
+	./services/media-service
+	./services/moderation-service
+	./services/notification-service
+	./services/payment-service
+	./services/profile-service
+	./services/recommendation-service
+	./services/search-service
+	./services/upload-service
 )
