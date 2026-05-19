@@ -54,6 +54,15 @@ func Init(ctx context.Context, cfg Config) (shutdown func(context.Context) error
 	traceExp, err := otlptracegrpc.New(ctx,
 		otlptracegrpc.WithEndpoint(endpoint),
 		otlptracegrpc.WithInsecure(),
+		// Per-request timeout — the first OTLP gRPC connect on Docker Desktop
+		// can take seconds while the proxy warms up, so leave plenty of room.
+		otlptracegrpc.WithTimeout(30*time.Second),
+		otlptracegrpc.WithRetry(otlptracegrpc.RetryConfig{
+			Enabled:         true,
+			InitialInterval: 500 * time.Millisecond,
+			MaxInterval:     5 * time.Second,
+			MaxElapsedTime:  60 * time.Second,
+		}),
 	)
 	if err != nil {
 		return nil, fmt.Errorf("trace exporter: %w", err)
