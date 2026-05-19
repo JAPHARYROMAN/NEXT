@@ -20,6 +20,8 @@ use (
 	./services/profile-service
 	./services/recommendation-service
 	./services/search-service
+	./services/session-service
 	./services/upload-service
 	./scripts/e2e-register
+	./scripts/e2e-jwt
 )

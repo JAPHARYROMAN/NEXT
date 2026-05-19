@@ -1,0 +1,32 @@
+{
+  "name": "@next/account-center",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Authenticated surface for managing your identity: profile, sessions, devices, personalization, audit.",
+  "license": "Apache-2.0",
+  "scripts": {
+    "dev": "next dev --turbo --port 3060",
+    "build": "next build",
+    "start": "next start --port 3060",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@next/api-client": "workspace:*",
+    "@next/auth-sdk": "workspace:*",
+    "@next/design-system": "workspace:*",
+    "@next/identity-types": "workspace:*",
+    "@next/session-utils": "workspace:*",
+    "@next/ui": "workspace:*",
+    "@tanstack/react-query": "catalog:",
+    "next": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:"
+  },
+  "devDependencies": {
+    "@next/config": "workspace:*",
+    "@types/react": "catalog:",
+    "tailwindcss": "catalog:",
+    "typescript": "catalog:"
+  }
+}

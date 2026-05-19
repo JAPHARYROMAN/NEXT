@@ -22,7 +22,7 @@ const config: NextConfig = {
     typedRoutes: true,
     serverActions: { bodySizeLimit: '4mb' },
     optimizePackageImports: ['@next/ui', '@next/design-system', 'framer-motion'],
-    ppr: 'incremental',
+    // ppr is canary-only — re-enable when we adopt next@canary or PPR ships stable.
   },
 
   images: {
