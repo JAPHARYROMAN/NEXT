@@ -1,6 +1,113 @@
 # Architecture Decision Records
 
-ADRs capture **load-bearing** architectural decisions: their context, the alternatives considered, the call we made, and the consequences we accepted.
+ADRs are the **institutional memory of NEXT**. They capture load-bearing
+architectural decisions — context, alternatives, the call we made, the
+consequences we accepted — so the system stays coherent as it grows and as four
+AI agents build it in parallel.
+
+This is governance infrastructure, not documentation decoration. **Accepted
+ADRs are binding** on every contributor, human or agent.
+
+## What an ADR is
+
+An ADR records one architectural decision. It is created when a decision is
+significant, hard to reverse, and affects more than one service or team. It is
+never deleted — a decision that no longer holds is _superseded_ by a new ADR, so
+the history of why the system is shaped the way it is stays intact.
+
+## When an ADR is required
+
+| Change                                          | ADR required?               |
+| ----------------------------------------------- | --------------------------- |
+| New runtime or language for a tier              | **Yes**                     |
+| New datastore, cache, or warehouse              | **Yes**                     |
+| New event-contract pattern or messaging system  | **Yes**                     |
+| New infrastructure component                    | **Yes**                     |
+| Changing or reversing a prior decision          | **Yes** — a superseding ADR |
+| A new service that follows existing patterns    | No                          |
+| Bug fix, refactor, test, or doc within a domain | No                          |
+
+If you are unsure, it needs an ADR. Cheap to write, expensive to omit.
+
+## How to create one
+
+1. Copy [`template.md`](template.md) to `NNNN-short-slug.md` using the next
+   unused number (see numbering rules below).
+2. Fill **every** section — including _Implementation rules_, _Agent
+   instructions_, and _Review triggers_. An ADR without enforceable rules and a
+   review trigger is not finished.
+3. Open a docs-only PR with `Status: Proposed`.
+4. Discuss in the PR. On consensus, set `Status: Accepted`, add a row to the
+   index below, and merge.
+5. An ADR that supersedes another sets the old one's status to
+   `Superseded by NNNN` and links it.
+
+## Numbering rules
+
+- ADRs are numbered sequentially from `0001`, four digits, **never reused**.
+- The next ADR takes the next unused number — currently **0036**.
+- A number, once assigned, is permanent even if the ADR is later superseded or
+  deprecated. Numbers are identity, not ordering of importance.
+
+## Status lifecycle
+
+```
+Proposed ──▶ Accepted ──▶ Superseded by NNNN
+                  │
+                  └─────▶ Deprecated
+```
+
+- **Proposed** — under discussion in a PR. Not yet binding.
+- **Accepted** — binding. All contributors must comply.
+- **Superseded by NNNN** — replaced by a newer decision; kept for history.
+- **Deprecated** — no longer relevant and not replaced (e.g. the component was
+  removed); kept for history.
+
+## Ownership
+
+The ADR system is owned by **Architecture (Claude)** per
+[ADR 0033](0033-multi-agent-governance.md). Each individual ADR also names the
+roles accountable for _its_ decision in the `Owners` field. Directory ownership
+across the monorepo is defined by [ADR 0034](0034-monorepo-boundary-ownership.md).
+
+## Agent rules
+
+Every AI agent must, per
+[adr-governance.instructions.md](../../.github/instructions/adr-governance.instructions.md):
+
+1. Check the relevant ADRs before changing architecture.
+2. Create a new ADR for any major runtime / datastore / event / infra decision.
+3. Never violate an Accepted ADR — propose a superseding ADR instead.
+4. Escalate conflicts instead of guessing.
+5. Preserve ownership boundaries.
+
+## Format
+
+ADRs from `0033` onward use the upgraded [`template.md`](template.md), which
+adds agent-readable sections — _Implementation rules_, _Agent instructions_,
+_Review triggers_ — to the classic
+[Michael Nygard structure](https://github.com/joelparkerhenderson/architecture-decision-record/blob/main/locales/en/templates/decision-record-template-by-michael-nygard/index.md):
+Context · Decision · Alternatives · Consequences. ADRs `0001`–`0032` use the
+original format and are upgraded lazily when next substantively edited.
+
+## Foundational decision map
+
+The runtime and platform decisions that everything else rests on. Use this to
+find the ADR that governs an area before you change it.
+
+| Decision                                            | ADR                                                                                                                                                   |
+| --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Backend runtime = **Go**                            | [0007](0007-backend-languages.md)                                                                                                                     |
+| Frontend runtime = **TypeScript + React / Next.js** | [0014](0014-frontend.md)                                                                                                                              |
+| AI runtime = **Python**                             | [0016](0016-ai-serving.md), [0007](0007-backend-languages.md)                                                                                         |
+| Event-driven architecture = **Kafka**               | [0008](0008-event-bus.md), [0019](0019-schema-first.md)                                                                                               |
+| Media storage = **object storage, tiered**          | [0026](0026-storage-tiering.md), [0027](0027-signed-playback-urls.md)                                                                                 |
+| Analytics warehouse = **ClickHouse**                | [0035](0035-clickhouse-analytics-warehouse.md)                                                                                                        |
+| Observability = **OpenTelemetry**                   | [0009](0009-observability.md)                                                                                                                         |
+| Recommendation = **Precision · Discovery · Chaos**  | [0029](0029-three-discovery-modes.md), [0030](0030-multi-stage-ranking.md), [0031](0031-anti-homogenization.md), [0032](0032-interest-graph-decay.md) |
+| Database isolation = **one per service**            | [0017](0017-database-per-service.md)                                                                                                                  |
+| Multi-agent governance                              | [0033](0033-multi-agent-governance.md)                                                                                                                |
+| Monorepo boundary ownership                         | [0034](0034-monorepo-boundary-ownership.md)                                                                                                           |
 
 ## Index
 
@@ -38,19 +145,6 @@ ADRs capture **load-bearing** architectural decisions: their context, the altern
 | 0030 | [Multi-stage ranking with diversity balancing](0030-multi-stage-ranking.md)       | Accepted |
 | 0031 | [Anti-homogenization & creator fairness](0031-anti-homogenization.md)             | Accepted |
 | 0032 | [Interest graph with affinity decay](0032-interest-graph-decay.md)                | Accepted |
-
-## Process
-
-1. Copy [template.md](template.md) to `NNNN-short-slug.md` using the next unused number.
-2. Open a docs-only PR with status `Proposed`.
-3. Discuss in PR. When consensus reached, update status to `Accepted` and merge.
-4. Future ADRs that supersede this one set its status to `Superseded by NNNN`.
-
-## Format
-
-Each ADR follows [Michael Nygard's template](https://github.com/joelparkerhenderson/architecture-decision-record/blob/main/locales/en/templates/decision-record-template-by-michael-nygard/index.md):
-
-- **Context** — what is going on; what constraints apply
-- **Decision** — what we chose
-- **Alternatives** — what we rejected and why
-- **Consequences** — what we accept (good and bad)
+| 0033 | [Multi-agent governance model](0033-multi-agent-governance.md)                    | Accepted |
+| 0034 | [Monorepo boundary ownership](0034-monorepo-boundary-ownership.md)                | Accepted |
+| 0035 | [ClickHouse as the analytics warehouse](0035-clickhouse-analytics-warehouse.md)   | Accepted |
