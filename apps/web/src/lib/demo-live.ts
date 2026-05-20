@@ -25,7 +25,7 @@ export interface LiveChatDemo {
   readonly highlight?: boolean;
 }
 
-export const demoLiveStreams: readonly LiveStream[] = [
+export const demoLiveStreams: readonly [LiveStream, ...LiveStream[]] = [
   {
     id: 'live-1',
     title: 'Underground stage — night set',
@@ -64,7 +64,7 @@ export const demoLiveStreams: readonly LiveStream[] = [
   },
 ];
 
-export const demoLiveEvents: readonly LiveEvent[] = [
+export const demoLiveEvents: readonly [LiveEvent, ...LiveEvent[]] = [
   {
     id: 'evt-premiere',
     title: 'Premiere — Field recordings vol. 2',

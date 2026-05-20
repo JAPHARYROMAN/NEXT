@@ -14,7 +14,7 @@ export interface LiveViewingProps {
 }
 
 export function LiveViewing({ streamId }: LiveViewingProps) {
-  const active = demoLiveStreams.find((s) => s.id === streamId) ?? demoLiveStreams[0]!;
+  const active = demoLiveStreams.find((s) => s.id === streamId) ?? demoLiveStreams[0];
 
   useEffect(() => {
     trackLiveViewingEngagement(active.id, 'view_mount');

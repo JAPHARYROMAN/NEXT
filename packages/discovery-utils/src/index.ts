@@ -124,8 +124,7 @@ export function mmrSelect<T>(
   while (picked.length < limit) {
     let bestIdx = 0;
     let bestScore = -Infinity;
-    for (let i = 0; i < remaining.length; i++) {
-      const candidate = remaining[i]!;
+    for (const [i, candidate] of remaining.entries()) {
       let maxSim = 0;
       for (const p of picked) {
         const sim = similarityOf(candidate, p);
@@ -137,7 +136,9 @@ export function mmrSelect<T>(
         bestIdx = i;
       }
     }
-    picked.push(remaining[bestIdx]!);
+    const best = remaining[bestIdx];
+    if (best === undefined) break;
+    picked.push(best);
     remaining.splice(bestIdx, 1);
   }
   return picked;

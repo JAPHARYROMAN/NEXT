@@ -10,7 +10,7 @@
     "start": "next start --port 3031",
     "lint": "eslint app",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
     "@next/api-client": "workspace:*",

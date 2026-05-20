@@ -16,7 +16,7 @@ export interface LiveEventsExperienceProps {
 }
 
 export function LiveEventsExperience({ eventId }: LiveEventsExperienceProps) {
-  const event = demoLiveEvents.find((e) => e.id === eventId) ?? demoLiveEvents[0]!;
+  const event = demoLiveEvents.find((e) => e.id === eventId) ?? demoLiveEvents[0];
   const startsInSec = useLiveCountdownStore((s) =>
     s.eventId === event.id ? s.startsInSec : event.startsInSec,
   );
