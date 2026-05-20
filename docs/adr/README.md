@@ -45,7 +45,7 @@ If you are unsure, it needs an ADR. Cheap to write, expensive to omit.
 ## Numbering rules
 
 - ADRs are numbered sequentially from `0001`, four digits, **never reused**.
-- The next ADR takes the next unused number — currently **0036**.
+- The next ADR takes the next unused number — currently **0040**.
 - A number, once assigned, is permanent even if the ADR is later superseded or
   deprecated. Numbers are identity, not ordering of importance.
 
@@ -100,12 +100,13 @@ find the ADR that governs an area before you change it.
 | Backend runtime = **Go**                            | [0007](0007-backend-languages.md)                                                                                                                     |
 | Frontend runtime = **TypeScript + React / Next.js** | [0014](0014-frontend.md)                                                                                                                              |
 | AI runtime = **Python**                             | [0016](0016-ai-serving.md), [0007](0007-backend-languages.md)                                                                                         |
-| Event-driven architecture = **Kafka**               | [0008](0008-event-bus.md), [0019](0019-schema-first.md)                                                                                               |
+| Event-driven architecture = **Kafka**               | [0008](0008-event-bus.md), [0019](0019-schema-first.md), [0036](0036-event-topology.md), [0039](0039-event-schema-source-of-truth.md)                 |
 | Media storage = **object storage, tiered**          | [0026](0026-storage-tiering.md), [0027](0027-signed-playback-urls.md)                                                                                 |
 | Analytics warehouse = **ClickHouse**                | [0035](0035-clickhouse-analytics-warehouse.md)                                                                                                        |
 | Observability = **OpenTelemetry**                   | [0009](0009-observability.md)                                                                                                                         |
 | Recommendation = **Precision · Discovery · Chaos**  | [0029](0029-three-discovery-modes.md), [0030](0030-multi-stage-ranking.md), [0031](0031-anti-homogenization.md), [0032](0032-interest-graph-decay.md) |
 | Database isolation = **one per service**            | [0017](0017-database-per-service.md)                                                                                                                  |
+| Go service layout = **coordinator + perf worker**   | [0037](0037-compute-coordinator-worker-split.md), [0038](0038-canonical-go-service-layout.md)                                                         |
 | Multi-agent governance                              | [0033](0033-multi-agent-governance.md)                                                                                                                |
 | Monorepo boundary ownership                         | [0034](0034-monorepo-boundary-ownership.md)                                                                                                           |
 
@@ -148,3 +149,7 @@ find the ADR that governs an area before you change it.
 | 0033 | [Multi-agent governance model](0033-multi-agent-governance.md)                    | Accepted |
 | 0034 | [Monorepo boundary ownership](0034-monorepo-boundary-ownership.md)                | Accepted |
 | 0035 | [ClickHouse as the analytics warehouse](0035-clickhouse-analytics-warehouse.md)   | Accepted |
+| 0036 | [Event topology: category streams](0036-event-topology.md)                        | Accepted |
+| 0037 | [Compute coordinator + worker split](0037-compute-coordinator-worker-split.md)    | Accepted |
+| 0038 | [Canonical Go service layout](0038-canonical-go-service-layout.md)                | Accepted |
+| 0039 | [Protobuf event-definition source of truth](0039-event-schema-source-of-truth.md) | Accepted |
