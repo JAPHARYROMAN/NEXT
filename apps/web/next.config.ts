@@ -10,6 +10,11 @@ const config: NextConfig = {
   transpilePackages: [
     '@next/ui',
     '@next/design-system',
+    '@next/animation-system',
+    '@next/theme-system',
+    '@next/layout-engine',
+    '@next/frontend-utils',
+    '@next/icons',
     '@next/api-client',
     '@next/auth-sdk',
     '@next/feature-flags',
@@ -21,7 +26,15 @@ const config: NextConfig = {
   experimental: {
     typedRoutes: true,
     serverActions: { bodySizeLimit: '4mb' },
-    optimizePackageImports: ['@next/ui', '@next/design-system', 'framer-motion'],
+    optimizePackageImports: [
+      '@next/ui',
+      '@next/design-system',
+      '@next/animation-system',
+      '@next/layout-engine',
+      '@next/icons',
+      '@next/frontend-utils',
+      'framer-motion',
+    ],
     // ppr is canary-only — re-enable when we adopt next@canary or PPR ships stable.
   },
 

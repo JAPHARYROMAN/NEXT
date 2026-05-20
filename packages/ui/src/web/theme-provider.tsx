@@ -1,30 +1,33 @@
 'use client';
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from 'react';
+import { createContext, useContext, type ReactNode } from 'react';
 import type { ThemeName } from '@next/design-system';
+import { useAdaptiveTheme, type ThemePreference } from '@next/theme-system';
 
 interface ThemeContextValue {
   theme: ThemeName;
+  preference: ThemePreference;
   setTheme: (next: ThemeName) => void;
+  setPreference: (next: ThemePreference) => void;
 }
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 export interface ThemeProviderProps {
-  readonly initial?: ThemeName;
+  readonly initial?: ThemePreference;
   readonly children: ReactNode;
 }
 
-export function ThemeProvider({ initial = 'dark', children }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<ThemeName>(initial);
+export function ThemeProvider({ initial = 'system', children }: ThemeProviderProps) {
+  const { theme, preference, setPreference } = useAdaptiveTheme(initial);
 
-  useEffect(() => {
-    document.documentElement.dataset['theme'] = theme;
-    document.documentElement.classList.toggle('dark', theme === 'dark');
-    document.documentElement.classList.toggle('light', theme === 'light');
-  }, [theme]);
+  const setTheme = (next: ThemeName) => setPreference(next);
 
-  return <ThemeContext.Provider value={{ theme, setTheme }}>{children}</ThemeContext.Provider>;
+  return (
+    <ThemeContext.Provider value={{ theme, preference, setTheme, setPreference }}>
+      {children}
+    </ThemeContext.Provider>
+  );
 }
 
 export function useTheme(): ThemeContextValue {

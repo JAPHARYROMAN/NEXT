@@ -1,8 +1,11 @@
 import type { Metadata, Viewport } from 'next';
 import type { ReactNode } from 'react';
-import { ThemeProvider } from '@next/ui';
 import '@next/design-system/tokens.css';
 import './globals.css';
+import '@/styles/cinematic.css';
+import { AppProviders } from '@/providers/app-providers';
+import { AuthHydrator } from '@/providers/auth-hydrator';
+import { TelemetryInit } from '@/providers/telemetry-init';
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env['NEXT_PUBLIC_SITE_URL'] ?? 'https://next.example'),
@@ -22,8 +25,11 @@ export const viewport: Viewport = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className="bg-bg text-fg font-sans antialiased">
-        <ThemeProvider initial="dark">{children}</ThemeProvider>
+      <body className="next-ambient bg-bg text-fg font-sans antialiased">
+        <AppProviders>
+          <TelemetryInit />
+          <AuthHydrator>{children}</AuthHydrator>
+        </AppProviders>
       </body>
     </html>
   );
