@@ -1,0 +1,18 @@
+@import '@next/design-system/tokens.css';
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body,
+#root {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--next-font-sans);
+  background: rgb(var(--next-color-bg));
+  color: rgb(var(--next-color-fg));
+}
