@@ -1,27 +1,33 @@
 # Shared packages
 
-| Package                                  | Purpose                                                     | Languages |
-| ---------------------------------------- | ----------------------------------------------------------- | --------- |
-| [`@next/config`](config)                 | Shared eslint, tsconfig, tailwind, vitest, prettier configs | TS        |
-| [`@next/types`](types)                   | Branded IDs, pagination, Result, media types                | TS        |
-| [`@next/design-system`](design-system)   | Tokens, themes, motion easings                              | TS, CSS   |
-| [`@next/ui`](ui)                         | Cross-surface UI primitives (web + native)                  | TS        |
-| [`@next/logger`](logger)                 | Structured logging (pino) with OTel correlation             | TS        |
-| [`@next/telemetry`](telemetry)           | OpenTelemetry SDK wrapper                                   | TS        |
-| [`@next/events`](events)                 | Kafka producer + consumer + topic catalog                   | TS        |
-| [`@next/auth-sdk`](auth-sdk)             | OAuth2/OIDC + JWT verification (JWKS-cached)                | TS        |
-| [`@next/database`](database)             | Postgres/Redis/ClickHouse client wrappers                   | TS        |
-| [`@next/api-client`](api-client)         | Generated GraphQL + gRPC clients                            | TS        |
-| [`@next/feature-flags`](feature-flags)   | OpenFeature + typed flag registry                           | TS        |
-| [`@next/identity-types`](identity-types) | Sessions, tiers, devices, trust types                       | TS        |
-| [`@next/session-utils`](session-utils)   | JWT verifier + bearer token helpers                         | TS        |
-| [`@next/security-utils`](security-utils) | Constant-time eq, random tokens, PKCE                       | TS        |
-| [`@next/permissions`](permissions)       | Canonical scope catalog + default tier scopes               | TS        |
-| [`@next/access-control`](access-control) | Local-first authorize + PDP client                          | TS        |
-| [`@next/trust-events`](trust-events)     | TS types mirroring `trust.*` Kafka events                   | TS        |
-| [`packages/go/*`](go)                    | Go shared modules: telemetry, eventbus, auth, database      | Go        |
-| [`packages/rust/*`](rust)                | Rust crates: telemetry, eventbus, proto                     | Rust      |
-| [`packages/python/*`](python)            | Python packages: telemetry, …                               | Python    |
+| Package                                    | Purpose                                                     | Languages |
+| ------------------------------------------ | ----------------------------------------------------------- | --------- |
+| [`@next/config`](config)                   | Shared eslint, tsconfig, tailwind, vitest, prettier configs | TS        |
+| [`@next/types`](types)                     | Branded IDs, pagination, Result, media types                | TS        |
+| [`@next/design-system`](design-system)     | Tokens, themes, motion easings                              | TS, CSS   |
+| [`@next/ui`](ui)                           | Cross-surface UI primitives (web + native)                  | TS        |
+| [`@next/logger`](logger)                   | Structured logging (pino) with OTel correlation             | TS        |
+| [`@next/telemetry`](telemetry)             | OpenTelemetry SDK wrapper                                   | TS        |
+| [`@next/events`](events)                   | Kafka producer + consumer + topic catalog                   | TS        |
+| [`@next/auth-sdk`](auth-sdk)               | OAuth2/OIDC + JWT verification (JWKS-cached)                | TS        |
+| [`@next/database`](database)               | Postgres/Redis/ClickHouse client wrappers                   | TS        |
+| [`@next/api-client`](api-client)           | Generated GraphQL + gRPC clients                            | TS        |
+| [`@next/feature-flags`](feature-flags)     | OpenFeature + typed flag registry                           | TS        |
+| [`@next/identity-types`](identity-types)   | Sessions, tiers, devices, trust types                       | TS        |
+| [`@next/session-utils`](session-utils)     | JWT verifier + bearer token helpers                         | TS        |
+| [`@next/security-utils`](security-utils)   | Constant-time eq, random tokens, PKCE                       | TS        |
+| [`@next/permissions`](permissions)         | Canonical scope catalog + default tier scopes               | TS        |
+| [`@next/access-control`](access-control)   | Local-first authorize + PDP client                          | TS        |
+| [`@next/trust-events`](trust-events)       | TS types mirroring `trust.*` Kafka events                   | TS        |
+| [`@next/media-events`](media-events)       | TS types mirroring `media.*` / `playback.*` events          | TS        |
+| [`@next/streaming-utils`](streaming-utils) | Bitrate ladder, ABR selection, QoE math                     | TS        |
+| [`@next/upload-sdk`](upload-sdk)           | Resumable upload client — chunking + uploader               | TS        |
+| [`@next/player-controls`](player-controls) | Headless player state machine + QoE                         | TS        |
+| [`@next/media-sdk`](media-sdk)             | Video types, manifest helpers, processing state             | TS        |
+| [`@next/video-player`](video-player)       | The NEXT player (React surface at `/react`)                 | TS        |
+| [`packages/go/*`](go)                      | Go shared modules: telemetry, eventbus, auth, database      | Go        |
+| [`packages/rust/*`](rust)                  | Rust crates: telemetry, eventbus, proto                     | Rust      |
+| [`packages/python/*`](python)              | Python packages: telemetry, …                               | Python    |
 
 ## Versioning
 

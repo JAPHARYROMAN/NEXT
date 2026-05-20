@@ -25,6 +25,22 @@ export const TOPICS = {
   MEDIA_VIDEO_DELETED: 'media.video.deleted.v1',
   MEDIA_VIDEO_VIEWED: 'media.video.viewed.v1',
 
+  // ---- Media processing pipeline ----
+  MEDIA_PROCESSING_STARTED: 'media.processing.started.v1',
+  MEDIA_PROCESSING_STAGE: 'media.processing.stage.v1',
+  MEDIA_PROCESSING_COMPLETED: 'media.processing.completed.v1',
+  MEDIA_PROCESSING_FAILED: 'media.processing.failed.v1',
+  MEDIA_THUMBNAIL_GENERATED: 'media.thumbnail.generated.v1',
+  MEDIA_SUBTITLE_GENERATED: 'media.subtitle.generated.v1',
+  MEDIA_CLIP_GENERATED: 'media.clip.generated.v1',
+  MEDIA_HIGHLIGHT_DETECTED: 'media.highlight.detected.v1',
+  MEDIA_SEMANTIC_INDEXED: 'media.semantic.indexed.v1',
+
+  // ---- Playback ----
+  PLAYBACK_STARTED: 'playback.started.v1',
+  PLAYBACK_BUFFERED: 'playback.buffered.v1',
+  PLAYBACK_COMPLETED: 'playback.completed.v1',
+
   // ---- Live ----
   LIVE_STREAM_STARTED: 'live.stream.started.v1',
   LIVE_STREAM_ENDED: 'live.stream.ended.v1',

@@ -18,6 +18,12 @@ members = [
     "ai/moderation-models",
     "ai/search-ranking",
     "ai/vector-pipelines",
+    "ai/scene-detection",
+    "ai/emotion-analysis",
+    "ai/speech-transcription",
+    "ai/highlight-detection",
+    "ai/semantic-indexing",
+    "ai/multimodal-tagging",
     "packages/python/*",
 ]
 

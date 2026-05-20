@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package next.videosegmentation.v1;
+
+import "buf/validate/validate.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/videosegmentation/v1;videosegmentationv1";
+
+// VideoSegmentationService slices renditions into CMAF segments and scene cuts.
+service VideoSegmentationService {
+  rpc Segment(SegmentRequest) returns (SegmentResponse);
+  rpc GetSegments(GetSegmentsRequest) returns (GetSegmentsResponse);
+}
+
+message Segment {
+  uint32 index     = 1;
+  uint64 start_ms  = 2;
+  uint64 duration_ms = 3;
+  string url       = 4;
+  bool   scene_boundary = 5;
+}
+
+message SegmentManifest {
+  string video_id      = 1;
+  string rendition     = 2;
+  string init_url      = 3;
+  repeated Segment segments = 4;
+}
+
+message SegmentRequest {
+  string video_id  = 1 [(buf.validate.field).string.uuid = true];
+  string rendition = 2 [(buf.validate.field).string.min_len = 1];
+  uint32 target_duration_ms = 3;
+}
+message SegmentResponse { SegmentManifest manifest = 1; }
+
+message GetSegmentsRequest {
+  string video_id  = 1 [(buf.validate.field).string.uuid = true];
+  string rendition = 2 [(buf.validate.field).string.min_len = 1];
+}
+message GetSegmentsResponse { SegmentManifest manifest = 1; }

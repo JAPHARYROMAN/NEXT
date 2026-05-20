@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package next.mediametadata.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/mediametadata/v1;mediametadatav1";
+
+// MediaMetadataService owns the descriptive + structural metadata catalog.
+service MediaMetadataService {
+  rpc Get(GetRequest) returns (GetResponse);
+  rpc Upsert(UpsertRequest) returns (UpsertResponse);
+  rpc ListChapters(ListChaptersRequest) returns (ListChaptersResponse);
+}
+
+message Chapter {
+  string title       = 1;
+  uint64 start_ms    = 2;
+  uint64 end_ms      = 3;
+}
+
+message CaptionTrack {
+  string language    = 1;
+  string kind        = 2;   // subtitles|captions|description
+  bool   auto        = 3;   // ASR-derived
+  string url         = 4;
+}
+
+message Metadata {
+  string video_id              = 1;
+  string title                 = 2;
+  string description           = 3;
+  string primary_language      = 4;
+  string content_rating        = 5;
+  repeated string tags         = 6;
+  repeated Chapter chapters    = 7;
+  repeated CaptionTrack captions = 8;
+  google.protobuf.Timestamp updated_at = 9;
+}
+
+message GetRequest { string video_id = 1 [(buf.validate.field).string.uuid = true]; }
+message GetResponse { Metadata metadata = 1; }
+
+message UpsertRequest {
+  string video_id   = 1 [(buf.validate.field).string.uuid = true];
+  Metadata metadata = 2;
+}
+message UpsertResponse { Metadata metadata = 1; }
+
+message ListChaptersRequest { string video_id = 1 [(buf.validate.field).string.uuid = true]; }
+message ListChaptersResponse { repeated Chapter chapters = 1; }

@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package next.cdnrouting.v1;
+
+import "buf/validate/validate.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/cdnrouting/v1;cdnroutingv1";
+
+// CdnRoutingService steers viewers to the optimal CDN edge POP.
+service CdnRoutingService {
+  rpc Resolve(ResolveRequest) returns (ResolveResponse);
+  rpc ReportEdgeHealth(ReportEdgeHealthRequest) returns (ReportEdgeHealthResponse);
+}
+
+message ViewerLocation {
+  string country  = 1;
+  string region   = 2;
+  uint32 asn      = 3;
+  string network_class = 4;  // wifi|cellular|wired
+}
+
+message EdgeTarget {
+  string pop_id     = 1;
+  string cdn        = 2;     // cloudfront|fastly|internal
+  string origin_url = 3;
+  double score      = 4;
+}
+
+message EdgeMetrics {
+  double throughput_mbps = 1;
+  double error_rate      = 2;
+  uint32 rtt_ms          = 3;
+}
+
+message ResolveRequest {
+  ViewerLocation viewer = 1;
+  string video_id       = 2 [(buf.validate.field).string.uuid = true];
+}
+message ResolveResponse { EdgeTarget target = 1; }
+
+message ReportEdgeHealthRequest {
+  string pop_id        = 1;
+  EdgeMetrics metrics  = 2;
+}
+message ReportEdgeHealthResponse {}

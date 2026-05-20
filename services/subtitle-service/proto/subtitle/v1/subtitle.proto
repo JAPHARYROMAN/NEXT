@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package next.subtitle.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/subtitle/v1;subtitlev1";
+
+// SubtitleService stores and serves subtitle + caption tracks.
+service SubtitleService {
+  rpc GetTrack(GetTrackRequest) returns (GetTrackResponse);
+  rpc ListTracks(ListTracksRequest) returns (ListTracksResponse);
+  rpc UpsertTrack(UpsertTrackRequest) returns (UpsertTrackResponse);
+}
+
+message Track {
+  string video_id   = 1;
+  string language   = 2;
+  string kind       = 3;   // subtitles|captions|description
+  bool   auto       = 4;   // ASR-derived
+  string format     = 5;   // vtt|srt
+  string url        = 6;
+  google.protobuf.Timestamp updated_at = 7;
+}
+
+message GetTrackRequest {
+  string video_id = 1 [(buf.validate.field).string.uuid = true];
+  string language = 2 [(buf.validate.field).string.min_len = 2];
+}
+message GetTrackResponse { Track track = 1; }
+
+message ListTracksRequest { string video_id = 1 [(buf.validate.field).string.uuid = true]; }
+message ListTracksResponse { repeated Track tracks = 1; }
+
+message UpsertTrackRequest {
+  string video_id = 1 [(buf.validate.field).string.uuid = true];
+  Track track     = 2;
+  bytes payload   = 3;
+}
+message UpsertTrackResponse { Track track = 1; }

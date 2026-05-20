@@ -1,6 +1,6 @@
 # AI systems
 
-Eight AI/ML subsystems. Python primary; serving via Triton + vLLM + Ray (per [ADR 0016](../docs/adr/0016-ai-serving.md)).
+Fourteen AI/ML subsystems. Python primary; serving via Triton + vLLM + Ray (per [ADR 0016](../docs/adr/0016-ai-serving.md)).
 
 ```
 ai/
@@ -11,7 +11,13 @@ ai/
 ├── creator-copilot/          # LLM creator assistant
 ├── moderation-models/        # Toxicity, CSAM, abuse classifiers
 ├── search-ranking/           # Learning-to-rank for search
-└── vector-pipelines/         # Embedding generation + index maintenance
+├── vector-pipelines/         # Embedding generation + index maintenance
+├── scene-detection/          # Shot + scene boundary detection
+├── emotion-analysis/         # Multimodal affective signal extraction
+├── speech-transcription/     # ASR, diarization, translation
+├── highlight-detection/      # Highlight + key-moment scoring
+├── semantic-indexing/        # Video embedding + vector index population
+└── multimodal-tagging/       # Content tagging + categorization
 ```
 
 ## Common layout per system
@@ -32,13 +38,13 @@ ai/<system>/
 
 ## Serving topology
 
-| Workload | Runtime | GPU pool |
-| --- | --- | --- |
-| Embedding (online) | Triton | `gpu-inference` (g5.xlarge) |
-| Ranker (online) | Triton + custom Rust client (recommendation-service/ranker) | `gpu-inference` (g5.2xlarge) |
-| LLM (online) | vLLM | `gpu-inference` (g5.12xlarge or A10) |
-| Batch embedding | Ray | `gpu-batch` (g5.12xlarge, spot) |
-| Training | Ray Train | `gpu-training` (p5.48xlarge, on-demand) |
+| Workload           | Runtime                                                     | GPU pool                                |
+| ------------------ | ----------------------------------------------------------- | --------------------------------------- |
+| Embedding (online) | Triton                                                      | `gpu-inference` (g5.xlarge)             |
+| Ranker (online)    | Triton + custom Rust client (recommendation-service/ranker) | `gpu-inference` (g5.2xlarge)            |
+| LLM (online)       | vLLM                                                        | `gpu-inference` (g5.12xlarge or A10)    |
+| Batch embedding    | Ray                                                         | `gpu-batch` (g5.12xlarge, spot)         |
+| Training           | Ray Train                                                   | `gpu-training` (p5.48xlarge, on-demand) |
 
 ## Model registry
 

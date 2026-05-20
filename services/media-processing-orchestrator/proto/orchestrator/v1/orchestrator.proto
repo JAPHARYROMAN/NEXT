@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+package next.orchestrator.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/orchestrator/v1;orchestratorv1";
+
+// OrchestratorService coordinates the media processing pipeline saga.
+service OrchestratorService {
+  rpc StartRun(StartRunRequest) returns (StartRunResponse);
+  rpc GetRun(GetRunRequest) returns (GetRunResponse);
+  rpc ReportStage(ReportStageRequest) returns (ReportStageResponse);
+}
+
+message PipelineRun {
+  string id        = 1;
+  string video_id  = 2;
+  string state     = 3;   // running|completed|failed
+  repeated StageStatus stages = 4;
+  google.protobuf.Timestamp started_at = 5;
+}
+
+message StageStatus {
+  string stage    = 1;   // transcode|thumbnail|subtitle|understand|index
+  string status   = 2;   // pending|running|succeeded|failed
+  int32  attempts = 3;
+  string detail   = 4;
+}
+
+message StartRunRequest {
+  string video_id   = 1 [(buf.validate.field).string.min_len = 1];
+  string source_key = 2 [(buf.validate.field).string.min_len = 1];
+}
+message StartRunResponse { PipelineRun run = 1; }
+
+message GetRunRequest { string video_id = 1 [(buf.validate.field).string.min_len = 1]; }
+message GetRunResponse { PipelineRun run = 1; }
+
+message ReportStageRequest {
+  string video_id = 1 [(buf.validate.field).string.min_len = 1];
+  string stage    = 2 [(buf.validate.field).string.min_len = 1];
+  string status   = 3 [(buf.validate.field).string.min_len = 1];   // succeeded|failed
+  string detail   = 4;
+}
+message ReportStageResponse {
+  PipelineRun run = 1;
+  bool run_complete = 2;
+  bool run_failed   = 3;
+}

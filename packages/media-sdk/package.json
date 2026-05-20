@@ -1,0 +1,25 @@
+{
+  "name": "@next/media-sdk",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Client SDK for the media domain: video types, manifest helpers, GraphQL operations.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@next/streaming-utils": "workspace:*",
+    "@next/types": "workspace:*"
+  },
+  "devDependencies": {
+    "@next/config": "workspace:*",
+    "typescript": "catalog:"
+  }
+}

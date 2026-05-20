@@ -1,0 +1,76 @@
+syntax = "proto3";
+
+package next.media.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/media/v1;mediav1";
+
+// MediaService owns the Video aggregate + its processing state machine.
+service MediaService {
+  rpc Ingest(IngestRequest) returns (IngestResponse);
+  rpc Get(GetRequest) returns (GetResponse);
+  rpc Publish(PublishRequest) returns (PublishResponse);
+  rpc AdvanceState(AdvanceStateRequest) returns (AdvanceStateResponse);
+  rpc AddRendition(AddRenditionRequest) returns (AddRenditionResponse);
+  rpc List(ListRequest) returns (ListResponse);
+}
+
+// State machine: UPLOADED -> INGESTED -> PROCESSING -> READY -> PUBLISHED, or FAILED.
+message Video {
+  string id           = 1;
+  string creator_id   = 2;
+  string title        = 3;
+  string visibility   = 4;   // public|unlisted|private|scheduled
+  string state        = 5;
+  string source_key   = 6;   // S3 master object
+  int64  duration_ms  = 7;
+  repeated Rendition renditions = 8;
+  google.protobuf.Timestamp published_at = 9;
+  google.protobuf.Timestamp created_at   = 10;
+}
+
+message Rendition {
+  string rung       = 1;     // "720p"
+  string codec      = 2;
+  string object_key = 3;
+  int64  bytes      = 4;
+  int32  width      = 5;
+  int32  height     = 6;
+  int32  bitrate_kbps = 7;
+}
+
+message IngestRequest {
+  string creator_id = 1 [(buf.validate.field).string.min_len = 1];
+  string title      = 2 [(buf.validate.field).string.min_len = 1, (buf.validate.field).string.max_len = 200];
+  string source_key = 3 [(buf.validate.field).string.min_len = 1];
+}
+message IngestResponse { Video video = 1; }
+
+message GetRequest { string video_id = 1 [(buf.validate.field).string.min_len = 1]; }
+message GetResponse { Video video = 1; }
+
+message PublishRequest {
+  string video_id   = 1 [(buf.validate.field).string.min_len = 1];
+  string visibility = 2 [(buf.validate.field).string.min_len = 1];
+}
+message PublishResponse { Video video = 1; }
+
+message AdvanceStateRequest {
+  string video_id = 1 [(buf.validate.field).string.min_len = 1];
+  string to_state = 2 [(buf.validate.field).string.min_len = 1];
+}
+message AdvanceStateResponse { Video video = 1; }
+
+message AddRenditionRequest {
+  string video_id = 1 [(buf.validate.field).string.min_len = 1];
+  Rendition rendition = 2;
+}
+message AddRenditionResponse { Video video = 1; }
+
+message ListRequest {
+  string creator_id = 1 [(buf.validate.field).string.min_len = 1];
+  int32  limit      = 2;
+}
+message ListResponse { repeated Video videos = 1; }

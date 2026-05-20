@@ -1,0 +1,52 @@
+syntax = "proto3";
+
+package next.thumbnail.v1;
+
+import "buf/validate/validate.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/thumbnail/v1;thumbnailv1";
+
+// ThumbnailService generates poster frames, sprite sheets, and animated previews.
+service ThumbnailService {
+  rpc Generate(GenerateRequest) returns (GenerateResponse);
+  rpc GetSprite(GetSpriteRequest) returns (GetSpriteResponse);
+  rpc GetPoster(GetPosterRequest) returns (GetPosterResponse);
+}
+
+message SpriteSheet {
+  string url       = 1;
+  uint32 columns   = 2;
+  uint32 rows      = 3;
+  uint32 interval_ms = 4;
+  uint32 tile_width  = 5;
+  uint32 tile_height = 6;
+}
+
+message PosterFrame {
+  string url       = 1;
+  uint64 time_ms   = 2;
+  uint32 width     = 3;
+  uint32 height    = 4;
+}
+
+message ThumbnailSet {
+  string video_id          = 1;
+  PosterFrame poster       = 2;
+  SpriteSheet sprite       = 3;
+  string animated_preview_url = 4;
+}
+
+message GenerateRequest {
+  string video_id   = 1 [(buf.validate.field).string.uuid = true];
+  string source_url = 2;
+}
+message GenerateResponse { ThumbnailSet set = 1; }
+
+message GetSpriteRequest { string video_id = 1 [(buf.validate.field).string.uuid = true]; }
+message GetSpriteResponse { SpriteSheet sprite = 1; }
+
+message GetPosterRequest {
+  string video_id = 1 [(buf.validate.field).string.uuid = true];
+  uint64 time_ms  = 2;
+}
+message GetPosterResponse { PosterFrame poster = 1; }

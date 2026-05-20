@@ -1,0 +1,24 @@
+[project]
+name = "next-emotion-analysis"
+version = "0.1.0"
+description = "Affective signal extraction from face, voice, and language."
+requires-python = ">=3.12"
+dependencies = [
+    "torch>=2.5.0",
+    "transformers>=4.46.0",
+    "ray[default,data]>=2.38.0",
+    "librosa>=0.10.2",
+    "ffmpeg-python>=0.2.0",
+    "mlflow>=2.17.0",
+    "next-telemetry",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/next_emotion_analysis"]
+
+[tool.uv.sources]
+next-telemetry = { workspace = true }

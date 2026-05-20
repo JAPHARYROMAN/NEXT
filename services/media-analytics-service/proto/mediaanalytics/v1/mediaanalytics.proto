@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package next.mediaanalytics.v1;
+
+import "buf/validate/validate.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/mediaanalytics/v1;mediaanalyticsv1";
+
+// MediaAnalyticsService aggregates playback + QoE telemetry.
+service MediaAnalyticsService {
+  rpc IngestPlaybackEvent(IngestPlaybackEventRequest) returns (IngestPlaybackEventResponse);
+  rpc GetVideoStats(GetVideoStatsRequest) returns (GetVideoStatsResponse);
+  rpc GetWatchTime(GetWatchTimeRequest) returns (GetWatchTimeResponse);
+}
+
+message PlaybackEvent {
+  string session_id  = 1;
+  string video_id    = 2;
+  string viewer_id   = 3;
+  string kind        = 4;   // start|progress|complete|abandon
+  uint64 position_ms = 5;
+  uint64 watched_ms  = 6;
+}
+
+message VideoStats {
+  string video_id        = 1;
+  uint64 views           = 2;
+  uint64 total_watch_ms  = 3;
+  double avg_completion  = 4;
+  repeated double retention_curve = 5;  // 10 deciles
+  double rebuffer_ratio  = 6;
+}
+
+message WatchTime {
+  string creator_id      = 1;
+  uint64 total_watch_ms  = 2;
+  uint64 unique_viewers  = 3;
+}
+
+message IngestPlaybackEventRequest { PlaybackEvent event = 1; }
+message IngestPlaybackEventResponse {}
+
+message GetVideoStatsRequest {
+  string video_id = 1 [(buf.validate.field).string.uuid = true];
+  string window   = 2;   // 24h|7d|28d|all
+}
+message GetVideoStatsResponse { VideoStats stats = 1; }
+
+message GetWatchTimeRequest {
+  string creator_id = 1 [(buf.validate.field).string.uuid = true];
+  string window     = 2;
+}
+message GetWatchTimeResponse { WatchTime watch_time = 1; }

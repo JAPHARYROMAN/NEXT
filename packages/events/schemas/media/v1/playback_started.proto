@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package next.events.media.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/next/events/media/v1;mediaeventsv1";
+
+// PlaybackStarted — emitted by the player (via the gateway) when a view begins.
+// Feeds QoE analytics + media.video.viewed counters.
+// Partition key: session_id.
+message PlaybackStarted {
+  string event_id   = 1 [(buf.validate.field).string.uuid = true];
+  google.protobuf.Timestamp emitted_at = 2;
+
+  string session_id = 3 [(buf.validate.field).string.uuid = true];
+  string video_id   = 4 [(buf.validate.field).string.min_len = 26];
+  string viewer_id  = 5;   // empty for anonymous
+  string device_platform = 6;
+  string ip_country = 7;
+  int64  start_time_ms = 8;  // time-to-first-frame measured client-side
+  string initial_rendition = 9;  // e.g. "720p"
+}

@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package next.playback.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/playback/v1;playbackv1";
+
+// PlaybackService authorizes viewers and issues signed, short-TTL manifest URLs.
+service PlaybackService {
+  rpc StartSession(StartSessionRequest) returns (StartSessionResponse);
+  rpc GetManifest(GetManifestRequest) returns (GetManifestResponse);
+  rpc ReportQoE(ReportQoERequest) returns (ReportQoEResponse);
+  rpc EndSession(EndSessionRequest) returns (EndSessionResponse);
+}
+
+message SignedManifest {
+  string session_id              = 1;
+  string manifest_url            = 2;
+  google.protobuf.Timestamp expires_at = 3;
+}
+
+// QoE counters mirror @next/player-controls Session.
+message QoE {
+  uint32 stall_count       = 1;
+  uint64 stall_ms          = 2;
+  uint64 startup_ms        = 3;
+  uint32 dropped_frames    = 4;
+  uint32 bitrate_switches  = 5;
+}
+
+message StartSessionRequest {
+  string video_id  = 1 [(buf.validate.field).string.uuid = true];
+  string viewer_id = 2 [(buf.validate.field).string.uuid = true];
+  string device_id = 3;
+}
+message StartSessionResponse { SignedManifest manifest = 1; }
+
+message GetManifestRequest { string session_id = 1 [(buf.validate.field).string.uuid = true]; }
+message GetManifestResponse { SignedManifest manifest = 1; }
+
+message ReportQoERequest {
+  string session_id = 1 [(buf.validate.field).string.uuid = true];
+  QoE qoe           = 2;
+}
+message ReportQoEResponse {}
+
+message EndSessionRequest { string session_id = 1 [(buf.validate.field).string.uuid = true]; }
+message EndSessionResponse {}

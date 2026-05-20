@@ -23,6 +23,32 @@ modules:
     name: buf.build/next-ecosystem/notificationauth
   - path: services/identity-graph-service/proto
     name: buf.build/next-ecosystem/identitygraph
+  - path: services/upload-service/proto
+    name: buf.build/next-ecosystem/upload
+  - path: services/media-service/proto
+    name: buf.build/next-ecosystem/media
+  - path: services/transcoding-service/proto
+    name: buf.build/next-ecosystem/transcoding
+  - path: services/media-processing-orchestrator/proto
+    name: buf.build/next-ecosystem/orchestrator
+  - path: services/playback-service/proto
+    name: buf.build/next-ecosystem/playback
+  - path: services/cdn-routing-service/proto
+    name: buf.build/next-ecosystem/cdnrouting
+  - path: services/media-metadata-service/proto
+    name: buf.build/next-ecosystem/mediametadata
+  - path: services/thumbnail-service/proto
+    name: buf.build/next-ecosystem/thumbnail
+  - path: services/subtitle-service/proto
+    name: buf.build/next-ecosystem/subtitle
+  - path: services/media-search-service/proto
+    name: buf.build/next-ecosystem/mediasearch
+  - path: services/video-segmentation-service/proto
+    name: buf.build/next-ecosystem/videosegmentation
+  - path: services/clip-generation-service/proto
+    name: buf.build/next-ecosystem/clipgeneration
+  - path: services/media-analytics-service/proto
+    name: buf.build/next-ecosystem/mediaanalytics
   - path: packages/events/schemas
     name: buf.build/next-ecosystem/events
 

@@ -30,6 +30,10 @@ ADRs capture **load-bearing** architectural decisions: their context, the altern
 | 0022 | [Access control via Rego policy bundles](0022-access-control-rego.md)             | Accepted |
 | 0023 | [Identity graph on Neo4j](0023-identity-graph-neo4j.md)                           | Accepted |
 | 0024 | [Trust score is event-driven](0024-trust-score-event-driven.md)                   | Accepted |
+| 0025 | [Content-adaptive transcoding ladder](0025-transcoding-ladder.md)                 | Accepted |
+| 0026 | [Media storage tiering; immutable masters](0026-storage-tiering.md)               | Accepted |
+| 0027 | [Signed short-TTL playback URLs](0027-signed-playback-urls.md)                    | Accepted |
+| 0028 | [Media pipeline orchestrator saga](0028-media-pipeline-orchestrator.md)           | Accepted |
 
 ## Process
 

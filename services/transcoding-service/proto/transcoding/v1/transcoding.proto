@@ -1,0 +1,62 @@
+syntax = "proto3";
+
+package next.transcoding.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/transcoding/v1;transcodingv1";
+
+// TranscodingService owns the transcode job queue + bitrate ladder.
+service TranscodingService {
+  rpc SubmitJob(SubmitJobRequest) returns (SubmitJobResponse);
+  rpc GetJob(GetJobRequest) returns (GetJobResponse);
+  rpc ClaimNext(ClaimNextRequest) returns (ClaimNextResponse);
+  rpc CompleteRung(CompleteRungRequest) returns (CompleteRungResponse);
+}
+
+message TranscodeJob {
+  string id          = 1;
+  string video_id    = 2;
+  string source_key  = 3;
+  int32  source_height = 4;
+  string state       = 5;   // queued|running|completed|failed
+  repeated RungSpec ladder = 6;
+  int32  completed_rungs = 7;
+  google.protobuf.Timestamp created_at = 8;
+}
+
+message RungSpec {
+  string name   = 1;   // "720p"
+  int32  width  = 2;
+  int32  height = 3;
+  string codec  = 4;
+  int32  bitrate_kbps = 5;
+}
+
+message SubmitJobRequest {
+  string video_id     = 1 [(buf.validate.field).string.min_len = 1];
+  string source_key   = 2 [(buf.validate.field).string.min_len = 1];
+  int32  source_height = 3 [(buf.validate.field).int32.gt = 0];
+}
+message SubmitJobResponse { TranscodeJob job = 1; }
+
+message GetJobRequest { string job_id = 1 [(buf.validate.field).string.uuid = true]; }
+message GetJobResponse { TranscodeJob job = 1; }
+
+// ClaimNext is called by GPU workers to pull the next queued job.
+message ClaimNextRequest { string worker_id = 1 [(buf.validate.field).string.min_len = 1]; }
+message ClaimNextResponse {
+  TranscodeJob job = 1;
+  bool found = 2;
+}
+
+message CompleteRungRequest {
+  string job_id     = 1 [(buf.validate.field).string.uuid = true];
+  string rung       = 2 [(buf.validate.field).string.min_len = 1];
+  string object_key = 3 [(buf.validate.field).string.min_len = 1];
+}
+message CompleteRungResponse {
+  TranscodeJob job = 1;
+  bool job_complete = 2;
+}

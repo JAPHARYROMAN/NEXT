@@ -13,6 +13,8 @@ use (
 	./services/analytics-service
 	./services/api-gateway
 	./services/auth-service
+	./services/cdn-routing-service
+	./services/clip-generation-service
 	./services/community-service
 	./services/creator-identity-service
 	./services/device-graph-service
@@ -20,15 +22,24 @@ use (
 	./services/feed-service
 	./services/identity-graph-service
 	./services/live-service
+	./services/media-analytics-service
+	./services/media-metadata-service
+	./services/media-processing-orchestrator
+	./services/media-search-service
 	./services/media-service
 	./services/moderation-service
 	./services/notification-auth-service
 	./services/notification-service
 	./services/payment-service
+	./services/playback-service
 	./services/profile-service
 	./services/recommendation-service
 	./services/search-service
 	./services/session-service
+	./services/subtitle-service
+	./services/thumbnail-service
+	./services/transcoding-service
 	./services/trust-service
 	./services/upload-service
+	./services/video-segmentation-service
 )

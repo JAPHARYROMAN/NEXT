@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package next.events.media.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/next/events/media/v1;mediaeventsv1";
+
+// ProcessingStage — emitted by a pipeline stage when it finishes (success or fail).
+// The orchestrator consumes these to advance the per-video saga.
+// Partition key: video_id.
+message ProcessingStage {
+  string event_id   = 1 [(buf.validate.field).string.uuid = true];
+  google.protobuf.Timestamp emitted_at = 2;
+
+  string video_id   = 3 [(buf.validate.field).string.min_len = 26, (buf.validate.field).string.max_len = 26];
+  string run_id     = 4 [(buf.validate.field).string.uuid = true];
+  Stage  stage      = 5 [(buf.validate.field).enum.defined_only = true];
+  Status status     = 6 [(buf.validate.field).enum.defined_only = true];
+  string detail     = 7;   // failure reason, or a result pointer on success
+  int32  attempt    = 8;
+
+  enum Stage {
+    STAGE_UNSPECIFIED = 0;
+    STAGE_TRANSCODE   = 1;
+    STAGE_THUMBNAIL   = 2;
+    STAGE_SUBTITLE    = 3;
+    STAGE_UNDERSTAND  = 4;
+    STAGE_INDEX       = 5;
+  }
+  enum Status {
+    STATUS_UNSPECIFIED = 0;
+    STATUS_SUCCEEDED   = 1;
+    STATUS_FAILED      = 2;
+  }
+}

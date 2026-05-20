@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package next.clipgeneration.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/clipgeneration/v1;clipgenerationv1";
+
+// ClipGenerationService cuts shareable clips and AI highlight reels.
+service ClipGenerationService {
+  rpc CreateClip(CreateClipRequest) returns (CreateClipResponse);
+  rpc GetClip(GetClipRequest) returns (GetClipResponse);
+  rpc ListClips(ListClipsRequest) returns (ListClipsResponse);
+}
+
+message Clip {
+  string id          = 1;
+  string parent_video_id = 2;
+  string clip_video_id   = 3;
+  uint64 start_ms    = 4;
+  uint64 end_ms      = 5;
+  string source      = 6;   // user|ai_highlight
+  string status      = 7;   // generating|ready|failed
+  google.protobuf.Timestamp created_at = 8;
+}
+
+message CreateClipRequest {
+  string video_id  = 1 [(buf.validate.field).string.uuid = true];
+  uint64 start_ms  = 2;
+  uint64 end_ms    = 3 [(buf.validate.field).uint64.gt = 0];
+  string source    = 4;
+  string requested_by = 5;
+}
+message CreateClipResponse { Clip clip = 1; }
+
+message GetClipRequest { string clip_id = 1 [(buf.validate.field).string.uuid = true]; }
+message GetClipResponse { Clip clip = 1; }
+
+message ListClipsRequest { string video_id = 1 [(buf.validate.field).string.uuid = true]; }
+message ListClipsResponse { repeated Clip clips = 1; }
