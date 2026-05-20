@@ -14,5 +14,5 @@ variable "num_replicas_per_shard" {
   default = 1
 }
 variable "domain" {
-  type    = string
+  type = string
 }

@@ -23,8 +23,8 @@ resource "aws_cloudfront_distribution" "this" {
   dynamic "origin" {
     for_each = var.origins
     content {
-      origin_id   = origin.key
-      domain_name = origin.value
+      origin_id                = origin.key
+      domain_name              = origin.value
       origin_access_control_id = origin.key == "media" ? aws_cloudfront_origin_access_control.this.id : null
       dynamic "custom_origin_config" {
         for_each = origin.key == "api" ? [1] : []
@@ -39,22 +39,22 @@ resource "aws_cloudfront_distribution" "this" {
   }
 
   default_cache_behavior {
-    target_origin_id       = "media"
-    viewer_protocol_policy = "redirect-to-https"
-    allowed_methods        = ["GET", "HEAD", "OPTIONS"]
-    cached_methods         = ["GET", "HEAD"]
-    compress               = true
-    cache_policy_id        = "658327ea-f89d-4fab-a63d-7e88639e58f6" # Managed-CachingOptimized
+    target_origin_id           = "media"
+    viewer_protocol_policy     = "redirect-to-https"
+    allowed_methods            = ["GET", "HEAD", "OPTIONS"]
+    cached_methods             = ["GET", "HEAD"]
+    compress                   = true
+    cache_policy_id            = "658327ea-f89d-4fab-a63d-7e88639e58f6" # Managed-CachingOptimized
     response_headers_policy_id = "67f7725c-6f97-4210-82d7-5512b31e9d03" # Managed-SecurityHeadersPolicy
   }
 
   ordered_cache_behavior {
-    path_pattern           = "/graphql*"
-    target_origin_id       = "api"
-    viewer_protocol_policy = "https-only"
-    allowed_methods        = ["GET", "HEAD", "OPTIONS", "POST", "PUT", "PATCH", "DELETE"]
-    cached_methods         = ["GET", "HEAD", "OPTIONS"]
-    cache_policy_id        = "4135ea2d-6df8-44a3-9df3-4b5a84be39ad" # Managed-CachingDisabled
+    path_pattern             = "/graphql*"
+    target_origin_id         = "api"
+    viewer_protocol_policy   = "https-only"
+    allowed_methods          = ["GET", "HEAD", "OPTIONS", "POST", "PUT", "PATCH", "DELETE"]
+    cached_methods           = ["GET", "HEAD", "OPTIONS"]
+    cache_policy_id          = "4135ea2d-6df8-44a3-9df3-4b5a84be39ad" # Managed-CachingDisabled
     origin_request_policy_id = "216adef6-5c7f-47e4-b989-5492eafa07d3" # Managed-AllViewer
   }
 

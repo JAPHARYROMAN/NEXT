@@ -65,7 +65,7 @@ jobs:
         if: always()
         with:
           name: ts-coverage
-          path: '**/coverage/**'
+          path: "**/coverage/**"
 
   # ----- Go ---------------------------------------------------------------------
   go:
@@ -76,19 +76,13 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: jdx/mise-action@v2
-      - run: go work sync
-      - run: |
-          for dir in services/*; do
-            [ -f "$dir/go.mod" ] || continue
-            echo "==> $dir"
-            (cd "$dir" && go test -race -coverprofile=coverage.out ./...)
-          done
+      - run: task codegen:proto
+      - run: task test:go
       - name: lint
         uses: golangci/golangci-lint-action@v6
         with:
           version: v1.61.0
-          working-directory: services
-          args: --timeout 5m
+          args: --timeout 5m ./packages/go/... ./services/...
 
   # ----- Rust -------------------------------------------------------------------
   rust:
@@ -129,9 +123,11 @@ jobs:
         with: { fetch-depth: 0 }
       - uses: bufbuild/buf-setup-action@v1
       - uses: bufbuild/buf-lint-action@v1
+      - run: buf generate
+      - run: git diff --exit-code -- gen/go
       - uses: bufbuild/buf-breaking-action@v1
         if: github.event_name == 'pull_request'
-        with: { against: 'https://github.com/${{ github.repository }}.git#branch=main' }
+        with: { against: "https://github.com/${{ github.repository }}.git#branch=main" }
 
   # ----- Terraform fmt/validate (plan handled in separate workflow) ------------
   terraform:

@@ -6,6 +6,7 @@ import (
 	"context"
 	"crypto/tls"
 	"fmt"
+	"net"
 	"time"
 
 	"github.com/segmentio/kafka-go"
@@ -91,12 +92,12 @@ func (p *Producer) Close() error { return p.w.Close() }
 
 type dialer struct{ d *kafka.Dialer }
 
-func (d *dialer) DialFunc(ctx context.Context, network, address string) (kafka.Conn, error) {
+func (d *dialer) DialFunc(ctx context.Context, network, address string) (net.Conn, error) {
 	c, err := d.d.DialContext(ctx, network, address)
 	if err != nil {
 		return nil, err
 	}
-	return *c, nil
+	return c, nil
 }
 
 func newDialer(cfg Config) *dialer {
