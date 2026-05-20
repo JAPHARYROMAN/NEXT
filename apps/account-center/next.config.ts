@@ -23,7 +23,7 @@ const config: NextConfig = {
       ],
     },
   ],
-  output: 'standalone',
+  ...(process.platform === 'win32' ? {} : { output: 'standalone' as const }),
 };
 
 export default config;

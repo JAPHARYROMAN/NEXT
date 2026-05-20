@@ -13,7 +13,7 @@ const BUFFER_LIMIT = 50;
 const FLUSH_INTERVAL_MS = 5_000;
 
 export function createBrowserLogger(config: LoggerConfig): BrowserLogger {
-  const buffer: Array<Record<string, unknown>> = [];
+  const buffer: Record<string, unknown>[] = [];
 
   const flush = (): void => {
     if (buffer.length === 0) return;

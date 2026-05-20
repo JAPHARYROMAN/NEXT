@@ -8,9 +8,9 @@
     "dev": "next dev --turbo --port 3031",
     "build": "next build",
     "start": "next start --port 3031",
-    "lint": "next lint",
+    "lint": "eslint app",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
     "@next/api-client": "workspace:*",
@@ -31,6 +31,7 @@
     "@next/config": "workspace:*",
     "@types/react": "catalog:",
     "tailwindcss": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

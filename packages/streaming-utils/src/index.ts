@@ -31,11 +31,13 @@ export function selectRung(
   safetyFactor = 0.8,
 ): Rung {
   const budget = throughputKbps * safetyFactor;
-  let chosen = ladder[0];
+  const first = ladder[0];
+  if (!first) throw new Error('empty ladder');
+  let chosen: Rung = first;
   for (const r of ladder) {
     if (r.bitrateKbps <= budget) chosen = r;
   }
-  return chosen as Rung;
+  return chosen;
 }
 
 /**

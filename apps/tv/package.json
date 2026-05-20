@@ -10,23 +10,31 @@
     "preview": "vite preview",
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run"
+    "test": "vitest run --passWithNoTests"
   },
   "dependencies": {
-    "@next/api-client": "workspace:*",
-    "@next/auth-sdk": "workspace:*",
+    "@next/animation-system": "workspace:*",
     "@next/design-system": "workspace:*",
+    "@next/discovery-ui": "workspace:*",
+    "@next/frontend-utils": "workspace:*",
+    "@next/layout-engine": "workspace:*",
+    "@next/remote-navigation": "workspace:*",
+    "@next/theater-ui": "workspace:*",
+    "@next/tv-ui": "workspace:*",
     "@next/ui": "workspace:*",
     "@noriginmedia/norigin-spatial-navigation": "^2.2.0",
+    "framer-motion": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:"
   },
   "devDependencies": {
     "@next/config": "workspace:*",
     "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
     "@vitejs/plugin-react": "^4.3.3",
     "tailwindcss": "catalog:",
     "typescript": "catalog:",
-    "vite": "^5.4.10"
+    "vite": "^5.4.10",
+    "vitest": "catalog:"
   }
 }

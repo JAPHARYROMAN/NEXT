@@ -1,7 +1,7 @@
-import { FeedGrid } from '@/features/feed/feed-grid';
+import { CinematicFeedPage } from '@/features/feed/cinematic-feed-page';
 
 export const metadata = { title: 'Home' };
 
 export default function HomePage() {
-  return <FeedGrid title="Your feed" />;
+  return <CinematicFeedPage />;
 }

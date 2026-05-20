@@ -6,7 +6,7 @@ export type Vector = readonly number[];
 
 function assertSameDim(a: Vector, b: Vector): void {
   if (a.length !== b.length) {
-    throw new Error(`vector dimension mismatch: ${a.length} vs ${b.length}`);
+    throw new Error(`vector dimension mismatch: ${String(a.length)} vs ${String(b.length)}`);
   }
 }
 
@@ -14,7 +14,11 @@ function assertSameDim(a: Vector, b: Vector): void {
 export function dot(a: Vector, b: Vector): number {
   assertSameDim(a, b);
   let sum = 0;
-  for (let i = 0; i < a.length; i++) sum += a[i] * b[i];
+  for (let i = 0; i < a.length; i++) {
+    const av = a[i] ?? 0;
+    const bv = b[i] ?? 0;
+    sum += av * bv;
+  }
   return sum;
 }
 
@@ -42,7 +46,7 @@ export function euclideanDistance(a: Vector, b: Vector): number {
   assertSameDim(a, b);
   let sum = 0;
   for (let i = 0; i < a.length; i++) {
-    const d = a[i] - b[i];
+    const d = (a[i] ?? 0) - (b[i] ?? 0);
     sum += d * d;
   }
   return Math.sqrt(sum);
@@ -57,17 +61,19 @@ export function normalize(v: Vector): Vector {
 /** Element-wise weighted sum: a*wa + b*wb. */
 export function blend(a: Vector, wa: number, b: Vector, wb: number): Vector {
   assertSameDim(a, b);
-  return a.map((x, i) => x * wa + b[i] * wb);
+  return a.map((x, i) => x * wa + (b[i] ?? 0) * wb);
 }
 
 /** The centroid (mean) of a set of vectors. Throws on an empty set. */
 export function centroid(vectors: readonly Vector[]): Vector {
   if (vectors.length === 0) throw new Error('centroid of empty set');
-  const dim = vectors[0].length;
+  const first = vectors[0];
+  if (!first) throw new Error('centroid of empty set');
+  const dim = first.length;
   const acc = new Array<number>(dim).fill(0);
   for (const v of vectors) {
     assertSameDim(v, acc);
-    for (let i = 0; i < dim; i++) acc[i] += v[i];
+    for (let i = 0; i < dim; i++) acc[i] = (acc[i] ?? 0) + (v[i] ?? 0);
   }
   return acc.map((x) => x / vectors.length);
 }

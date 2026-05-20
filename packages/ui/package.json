@@ -22,7 +22,9 @@
     "@next/animation-system": "workspace:*",
     "@next/design-system": "workspace:*",
     "@next/icons": "workspace:*",
+    "@next/frontend-utils": "workspace:*",
     "@next/layout-engine": "workspace:*",
+    "@next/navigation-ui": "workspace:*",
     "@next/theme-system": "workspace:*",
     "framer-motion": "catalog:",
     "clsx": "^2.1.1"

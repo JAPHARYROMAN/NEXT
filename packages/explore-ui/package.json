@@ -1,0 +1,43 @@
+{
+  "name": "@next/explore-ui",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Explore home — cultural waves, live shelves, topic portals, chaos entry.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@next/animation-system": "workspace:*",
+    "@next/design-system": "workspace:*",
+    "@next/discovery-ui": "workspace:*",
+    "@next/feed-ui": "workspace:*",
+    "@next/frontend-utils": "workspace:*",
+    "@next/layout-engine": "workspace:*",
+    "@next/ui": "workspace:*",
+    "clsx": "^2.1.1",
+    "framer-motion": "catalog:"
+  },
+  "peerDependencies": {
+    "next": "catalog:",
+    "react": "catalog:"
+  },
+  "devDependencies": {
+    "@next/config": "workspace:*",
+    "@testing-library/react": "catalog:",
+    "@types/react": "catalog:",
+    "next": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

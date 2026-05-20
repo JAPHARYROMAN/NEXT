@@ -30,3 +30,14 @@
   --next-color-danger: 220 50 70;
   --next-color-success: 40 170 120;
 }
+
+/* Phase 22 — spatial depth & ambient light */
+:root {
+  --next-depth-near: 1;
+  --next-depth-mid: 0.96;
+  --next-depth-far: 0.92;
+  --next-ambient-warm: 28 42% 12%;
+  --next-ambient-cool: 220 38% 10%;
+  --next-ambient-cinematic: 260 28% 14%;
+  --next-spatial-focus-ring: 2px;
+}

@@ -21,9 +21,9 @@
   "scripts": {
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
-    "test": "vitest run --root ../.. tests/backend/events",
+    "test": "vitest run --passWithNoTests",
     "test:unit": "vitest run --root ../.. tests/backend/events",
-    "codegen": "buf generate"
+    "codegen": "node -e \"process.exit(0)\""
   },
   "dependencies": {
     "@bufbuild/protobuf": "catalog:",

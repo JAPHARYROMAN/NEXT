@@ -9,7 +9,7 @@ const demoCommunities = [
     name: 'Quiet Signals',
     description: 'Slow cinema, ambient scores, and late-night edits.',
     memberCount: '12.4k',
-    href: '/explore',
+    href: '/community/quiet-signals',
     mood: 'calm' as const,
   },
   {
@@ -17,7 +17,7 @@ const demoCommunities = [
     name: 'Chaos Hour',
     description: 'Unlisted experiments and underground culture.',
     memberCount: '3.1k',
-    href: '/explore',
+    href: '/community/chaos-hour',
     mood: 'chaos' as const,
   },
   {
@@ -25,7 +25,7 @@ const demoCommunities = [
     name: 'Learn Forward',
     description: 'Craft, technique, and generous teaching.',
     memberCount: '8.7k',
-    href: '/explore',
+    href: '/community/learn-forward',
     mood: 'learn' as const,
   },
 ];

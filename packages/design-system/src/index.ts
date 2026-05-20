@@ -5,3 +5,4 @@ export * from './motion';
 export * from './breakpoints';
 export * from './a11y';
 export * from './typography';
+export * from './spatial-tokens';
