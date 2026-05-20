@@ -119,6 +119,11 @@ export default tseslint.config(
       'no-constant-binary-expression': 'off',
       '@typescript-eslint/no-deprecated': 'off',
       '@typescript-eslint/no-misused-promises': 'off',
+      // Empty no-op callbacks and mock methods are an intentional UI pattern.
+      '@typescript-eslint/no-empty-function': ['error', { allow: ['arrowFunctions', 'methods'] }],
+      // `arr[i]!` is common under noUncheckedIndexedAccess; keep visible, non-blocking.
+      '@typescript-eslint/no-non-null-assertion': 'warn',
     },
-  },  prettierConfig,
+  },
+  prettierConfig,
 );
