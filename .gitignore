@@ -43,6 +43,11 @@ junit.xml
 !gen/go/go.sum
 !**/src/**/generated/.gitkeep
 
+# ----- Buf v3 module cache (created by `buf` CLI on Windows/WSL) -----
+# Contents: commitlocks/, commits/, modulelocks/, modules/, plugins/,
+# policies/, wellknowntypes/. Local cache only — never commit.
+v3/
+
 # ----- Claude Code session state -----
 .claude/
 
