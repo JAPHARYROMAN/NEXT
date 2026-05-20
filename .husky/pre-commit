@@ -1,4 +1,8 @@
 #!/usr/bin/env sh
 # NEXT — pre-commit guardrails. Fast checks only; full validation runs in CI.
 
+# Block binaries, archives, and other forbidden artifacts from entering the index.
+# Script lives at scripts/hygiene/check-no-binaries.sh and is shellcheck-clean.
+sh scripts/hygiene/check-no-binaries.sh || exit 1
+
 pnpm exec lint-staged
