@@ -15,6 +15,7 @@
     "./breakpoints": "./src/breakpoints.ts",
     "./a11y": "./src/a11y.ts",
     "./typography": "./src/typography.ts",
+    "./spatial-tokens": "./src/spatial-tokens.ts",
     "./tokens.css": "./src/tokens.css"
   },
   "scripts": {

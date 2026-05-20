@@ -1,8 +1,8 @@
 {
-  "name": "@next/layout-engine",
+  "name": "@next/adaptive-layouts",
   "version": "0.1.0",
   "private": true,
-  "description": "Adaptive layout primitives for mobile through ultrawide surfaces.",
+  "description": "Mobile-first adaptive layouts — portrait, landscape, foldable, split-screen.",
   "license": "Apache-2.0",
   "type": "module",
   "main": "./src/index.ts",
@@ -17,7 +17,8 @@
   },
   "dependencies": {
     "@next/design-system": "workspace:*",
-    "@next/frontend-utils": "workspace:*",
+    "@next/layout-engine": "workspace:*",
+    "@next/responsive-engine": "workspace:*",
     "clsx": "^2.1.1"
   },
   "peerDependencies": {

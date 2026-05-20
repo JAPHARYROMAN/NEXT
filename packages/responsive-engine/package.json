@@ -1,8 +1,8 @@
 {
-  "name": "@next/layout-engine",
+  "name": "@next/responsive-engine",
   "version": "0.1.0",
   "private": true,
-  "description": "Adaptive layout primitives for mobile through ultrawide surfaces.",
+  "description": "Device-class detection, orientation, and viewport signals for adaptive UX.",
   "license": "Apache-2.0",
   "type": "module",
   "main": "./src/index.ts",
@@ -16,9 +16,7 @@
     "test": "vitest run"
   },
   "dependencies": {
-    "@next/design-system": "workspace:*",
-    "@next/frontend-utils": "workspace:*",
-    "clsx": "^2.1.1"
+    "@next/design-system": "workspace:*"
   },
   "peerDependencies": {
     "react": "catalog:"

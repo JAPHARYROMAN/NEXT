@@ -11,7 +11,9 @@ export type ThemeColor =
   | 'brand'
   | 'accent'
   | 'danger'
-  | 'success';
+  | 'success'
+  | 'ambient'
+  | 'glow';
 
 export type Theme = Record<ThemeColor, string>;
 
@@ -26,6 +28,8 @@ export const darkTheme: Theme = {
   accent: '120 100 255',
   danger: '255 90 100',
   success: '60 200 140',
+  ambient: '40 38 52',
+  glow: '90 70 180',
 };
 
 export const lightTheme: Theme = {
@@ -39,6 +43,8 @@ export const lightTheme: Theme = {
   accent: '90 70 230',
   danger: '220 50 70',
   success: '40 170 120',
+  ambient: '235 235 245',
+  glow: '120 100 220',
 };
 
 export const themes = { dark: darkTheme, light: lightTheme } as const;
