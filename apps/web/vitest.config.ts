@@ -1,3 +1,9 @@
-import reactCfg from '@next/config/vitest/react';
+import { defineConfig } from 'vitest/config';
 
-export default reactCfg;
+export default defineConfig({
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    passWithNoTests: true,
+  },
+});

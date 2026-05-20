@@ -13,7 +13,7 @@ export default function LandingPage() {
         intentional chaos without engagement manipulation.
       </p>
       <div className="mt-10 flex flex-wrap gap-4">
-        <Link href="/onboarding">
+        <Link href="/welcome">
           <Button size="lg">Begin</Button>
         </Link>
         <Link href="/discovery">

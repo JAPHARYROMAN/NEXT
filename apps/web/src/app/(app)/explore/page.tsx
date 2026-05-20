@@ -1,13 +1,7 @@
-import { FeedGrid } from '@/features/feed/feed-grid';
-import { CommunityRail } from '@/features/explore/community-rail';
+import { ExploreHome } from '@/features/explore/explore-home';
 
-export const metadata = { title: 'Explore' };
+export const metadata = { title: 'Explore — NEXT' };
 
 export default function ExplorePage() {
-  return (
-    <div className="space-y-12">
-      <CommunityRail />
-      <FeedGrid title="Explore worlds" />
-    </div>
-  );
+  return <ExploreHome />;
 }

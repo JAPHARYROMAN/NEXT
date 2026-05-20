@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@next/design-system": "workspace:*",
+    "@next/frontend-utils": "workspace:*",
     "clsx": "^2.1.1"
   },
   "peerDependencies": {

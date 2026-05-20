@@ -16,7 +16,7 @@ describe('Modal', () => {
 
   it('exposes dialog with title', () => {
     render(
-      <Modal open title="Settings" onClose={() => {}}>
+      <Modal open title="Settings" onClose={() => undefined}>
         Body
       </Modal>,
     );

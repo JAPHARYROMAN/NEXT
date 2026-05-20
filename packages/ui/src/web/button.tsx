@@ -30,7 +30,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button
   return (
     <button
       ref={ref}
-      disabled={disabled || loading}
+      disabled={(disabled ?? false) || loading}
       className={clsx(
         'inline-flex items-center justify-center font-medium select-none transition duration-quick ease-cinematic',
         'disabled:opacity-50 disabled:cursor-not-allowed',
