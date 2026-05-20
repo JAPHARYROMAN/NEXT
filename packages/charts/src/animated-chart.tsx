@@ -55,7 +55,7 @@ export function AnimatedChart({
               className="w-full rounded-t-md"
               style={{ background: accent }}
               initial={{ height: 0 }}
-              animate={{ height: `${heights[i]! * 100}%` }}
+              animate={{ height: `${(heights[i] ?? 0) * 100}%` }}
               transition={{ duration: reduced ? 0 : 0.6, delay: reduced ? 0 : i * 0.04 }}
               aria-hidden
             />
