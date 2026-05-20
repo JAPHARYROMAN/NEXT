@@ -16,7 +16,7 @@
   "scripts": {
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
-    "codegen": "graphql-codegen --config codegen.ts && buf generate"
+    "codegen": "graphql-codegen --config codegen.ts && cd ../.. && buf generate"
   },
   "dependencies": {
     "@apollo/client": "catalog:",

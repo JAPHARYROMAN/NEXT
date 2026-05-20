@@ -23,7 +23,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run --root ../.. tests/backend/events",
     "test:unit": "vitest run --root ../.. tests/backend/events",
-    "codegen": "buf generate"
+    "codegen": "cd ../.. && buf generate"
   },
   "dependencies": {
     "@bufbuild/protobuf": "catalog:",
