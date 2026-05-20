@@ -1,0 +1,8 @@
+blank_issues_enabled: false
+contact_links:
+  - name: NEXT Engineering Operating System
+    url: https://github.com/JAPHARYROMAN/NEXT/blob/main/docs/governance/README.md
+    about: How NEXT is built — read the governance docs before filing.
+  - name: ADR system
+    url: https://github.com/JAPHARYROMAN/NEXT/blob/main/docs/adr/README.md
+    about: Architecture Decision Records — the binding decision log.
