@@ -1,0 +1,6 @@
+# NEXT — approved /services/* layout exceptions.
+# One service directory name per line. Lines starting with `#` are comments.
+# Entries here are skipped by scripts/hygiene/validate-service-layout.sh.
+#
+# Adding an entry requires an architecture review note (Claude).
+# Prefer fixing the service layout over adding an exception.
