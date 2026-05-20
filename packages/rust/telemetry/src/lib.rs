@@ -3,7 +3,7 @@
 //! Initialises a global tracer that exports to the in-cluster OTel Collector
 //! and a `tracing` subscriber that emits JSON logs correlated with the active span.
 
-use opentelemetry::{global, KeyValue};
+use opentelemetry::{global, trace::TracerProvider as _, KeyValue};
 use opentelemetry_otlp::WithExportConfig;
 use opentelemetry_sdk::{
     propagation::TraceContextPropagator,
@@ -40,7 +40,7 @@ pub fn init(cfg: Config) -> Result<(), InitError> {
         KeyValue::new("deployment.environment.name", cfg.environment.clone()),
     ]);
 
-    let tracer = opentelemetry_otlp::new_pipeline()
+    let tracer_provider = opentelemetry_otlp::new_pipeline()
         .tracing()
         .with_exporter(
             opentelemetry_otlp::new_exporter()
@@ -54,6 +54,7 @@ pub fn init(cfg: Config) -> Result<(), InitError> {
         )
         .install_batch(runtime::Tokio)?;
 
+    let tracer = tracer_provider.tracer(cfg.service.clone());
     let telemetry = tracing_opentelemetry::layer().with_tracer(tracer);
     let fmt = tracing_subscriber::fmt::layer().json();
 

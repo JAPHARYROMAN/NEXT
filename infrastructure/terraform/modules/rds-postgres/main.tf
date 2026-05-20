@@ -29,34 +29,34 @@ resource "aws_security_group" "this" {
 }
 
 resource "aws_db_instance" "this" {
-  identifier             = var.name
-  engine                 = "postgres"
-  engine_version         = var.engine_version
-  instance_class         = var.instance_class
-  allocated_storage      = var.allocated_storage
-  max_allocated_storage  = var.allocated_storage * 4
-  storage_type           = "gp3"
-  storage_encrypted      = true
-  kms_key_id             = aws_kms_key.this.arn
-  db_name                = replace(var.name, "-", "_")
-  username               = "next_admin"
-  password               = random_password.master.result
-  multi_az               = var.multi_az
-  vpc_security_group_ids = [aws_security_group.this.id]
-  db_subnet_group_name   = aws_db_subnet_group.this.name
-  publicly_accessible    = false
-  backup_retention_period = 35
-  backup_window          = "03:00-04:00"
-  maintenance_window     = "sun:04:00-sun:05:00"
-  copy_tags_to_snapshot  = true
-  deletion_protection    = true
-  skip_final_snapshot    = false
-  final_snapshot_identifier = "${var.name}-final"
-  performance_insights_enabled = true
+  identifier                            = var.name
+  engine                                = "postgres"
+  engine_version                        = var.engine_version
+  instance_class                        = var.instance_class
+  allocated_storage                     = var.allocated_storage
+  max_allocated_storage                 = var.allocated_storage * 4
+  storage_type                          = "gp3"
+  storage_encrypted                     = true
+  kms_key_id                            = aws_kms_key.this.arn
+  db_name                               = replace(var.name, "-", "_")
+  username                              = "next_admin"
+  password                              = random_password.master.result
+  multi_az                              = var.multi_az
+  vpc_security_group_ids                = [aws_security_group.this.id]
+  db_subnet_group_name                  = aws_db_subnet_group.this.name
+  publicly_accessible                   = false
+  backup_retention_period               = 35
+  backup_window                         = "03:00-04:00"
+  maintenance_window                    = "sun:04:00-sun:05:00"
+  copy_tags_to_snapshot                 = true
+  deletion_protection                   = true
+  skip_final_snapshot                   = false
+  final_snapshot_identifier             = "${var.name}-final"
+  performance_insights_enabled          = true
   performance_insights_retention_period = 7
-  monitoring_interval    = 30
-  enabled_cloudwatch_logs_exports = ["postgresql"]
-  auto_minor_version_upgrade = true
+  monitoring_interval                   = 30
+  enabled_cloudwatch_logs_exports       = ["postgresql"]
+  auto_minor_version_upgrade            = true
 
   apply_immediately = false
 

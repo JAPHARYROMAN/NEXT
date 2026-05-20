@@ -53,11 +53,11 @@ module "vpc" {
 module "eks" {
   source = "../../modules/eks"
 
-  name                = local.name
-  vpc_id              = module.vpc.vpc_id
-  private_subnet_ids  = module.vpc.private_subnet_ids
-  kubernetes_version  = "1.31"
-  enable_karpenter    = true
+  name                 = local.name
+  vpc_id               = module.vpc.vpc_id
+  private_subnet_ids   = module.vpc.private_subnet_ids
+  kubernetes_version   = "1.31"
+  enable_karpenter     = true
   enable_gpu_node_pool = true
 }
 
@@ -89,13 +89,13 @@ module "rds_profile" {
 module "redis_auth" {
   source = "../../modules/elasticache-redis"
 
-  name       = "${local.name}-auth"
-  vpc_id     = module.vpc.vpc_id
-  subnet_ids = module.vpc.private_subnet_ids
-  node_type  = "cache.r7g.large"
-  num_shards = 3
+  name                   = "${local.name}-auth"
+  vpc_id                 = module.vpc.vpc_id
+  subnet_ids             = module.vpc.private_subnet_ids
+  node_type              = "cache.r7g.large"
+  num_shards             = 3
   num_replicas_per_shard = 1
-  domain     = "identity"
+  domain                 = "identity"
 }
 
 module "msk" {
@@ -112,43 +112,43 @@ module "msk" {
 }
 
 module "s3_media" {
-  source = "../../modules/s3-bucket"
-  name   = "next-media-prod"
-  domain = "media"
-  lifecycle_to_ia_days = 30
+  source                    = "../../modules/s3-bucket"
+  name                      = "next-media-prod"
+  domain                    = "media"
+  lifecycle_to_ia_days      = 30
   lifecycle_to_glacier_days = 365
 }
 
 module "s3_uploads" {
-  source = "../../modules/s3-bucket"
-  name   = "next-uploads-prod"
-  domain = "media"
+  source                          = "../../modules/s3-bucket"
+  name                            = "next-uploads-prod"
+  domain                          = "media"
   abort_incomplete_multipart_days = 7
 }
 
 module "opensearch" {
   source = "../../modules/opensearch"
 
-  name           = local.name
-  vpc_id         = module.vpc.vpc_id
-  subnet_ids     = module.vpc.private_subnet_ids
-  engine_version = "OpenSearch_2.17"
-  master_instances = 3
-  data_instances = 6
+  name               = local.name
+  vpc_id             = module.vpc.vpc_id
+  subnet_ids         = module.vpc.private_subnet_ids
+  engine_version     = "OpenSearch_2.17"
+  master_instances   = 3
+  data_instances     = 6
   data_instance_type = "or1.large.search"
-  warm_enabled   = true
-  domain         = "search"
+  warm_enabled       = true
+  domain             = "search"
 }
 
 module "cdn" {
   source = "../../modules/cloudfront"
   name   = local.name
   origins = {
-    media       = module.s3_media.regional_domain_name
-    api         = "api.next.io"
+    media = module.s3_media.regional_domain_name
+    api   = "api.next.io"
   }
 }
 
-output "eks_cluster_name"   { value = module.eks.cluster_name }
-output "vpc_id"             { value = module.vpc.vpc_id }
+output "eks_cluster_name" { value = module.eks.cluster_name }
+output "vpc_id" { value = module.vpc.vpc_id }
 output "msk_bootstrap_brokers" { value = module.msk.bootstrap_brokers }

@@ -17,7 +17,7 @@ members = [
 [workspace.package]
 version = "0.1.0"
 edition = "2021"
-rust-version = "1.82"
+rust-version = "1.91.1"
 authors = ["NEXT Ecosystem <eng@next.example>"]
 license = "Apache-2.0"
 repository = "https://github.com/next-ecosystem/next"
@@ -61,7 +61,7 @@ config = "0.14"
 dotenvy = "0.15"
 
 # Kafka
-rdkafka = { version = "0.36", features = ["tokio", "ssl"] }
+rdkafka = { version = "0.36", features = ["tokio", "ssl-vendored", "cmake-build"] }
 
 # Postgres
 sqlx = { version = "0.8", features = ["postgres", "runtime-tokio", "tls-rustls", "uuid", "chrono"] }
