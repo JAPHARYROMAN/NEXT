@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package next.ranking.v1;
+
+import "buf/validate/validate.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/ranking/v1;rankingv1";
+
+// RankingService runs ranking stages 1-2: the lightweight scorer and the
+// semantic cross-encoder.
+service RankingService {
+  rpc Rank(RankRequest) returns (RankResponse);
+  rpc ScoreBatch(ScoreBatchRequest) returns (ScoreBatchResponse);
+}
+
+message RankCandidate {
+  string content_id = 1 [(buf.validate.field).string.min_len = 1];
+  string creator_id = 2;
+  repeated float embedding = 3;
+}
+
+message ScoredCandidate {
+  string content_id = 1;
+  string creator_id = 2;
+  double relevance  = 3;   // resonance
+  double novelty    = 4;   // distance from established taste
+}
+
+message RankRequest {
+  string user_id    = 1 [(buf.validate.field).string.uuid = true];
+  string session_id = 2 [(buf.validate.field).string.uuid = true];
+  repeated RankCandidate candidates = 3;
+}
+message RankResponse { repeated ScoredCandidate scored = 1; }
+
+message ScorePair {
+  repeated float context_embedding   = 1;
+  repeated float candidate_embedding = 2;
+}
+message ScoreBatchRequest { repeated ScorePair pairs = 1; }
+message ScoreBatchResponse { repeated double scores = 1; }

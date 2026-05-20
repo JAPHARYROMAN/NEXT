@@ -1,0 +1,24 @@
+[project]
+name = "next-semantic-clustering"
+version = "0.1.0"
+description = "Aesthetic + topic clustering and trend detection over content embeddings."
+requires-python = ">=3.12"
+dependencies = [
+    "ray[default,data]>=2.38.0",
+    "scikit-learn>=1.5.0",
+    "hdbscan>=0.8.40",
+    "numpy>=2.1.0",
+    "qdrant-client>=1.12.0",
+    "mlflow>=2.17.0",
+    "next-telemetry",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/next_semantic_clustering"]
+
+[tool.uv.sources]
+next-telemetry = { workspace = true }

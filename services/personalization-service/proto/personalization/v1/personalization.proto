@@ -1,0 +1,47 @@
+syntax = "proto3";
+
+package next.personalization.v1;
+
+import "buf/validate/validate.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/personalization/v1;personalizationv1";
+
+// PersonalizationService owns the interest graph and the user/session models.
+service PersonalizationService {
+  rpc GetProfile(GetProfileRequest) returns (GetProfileResponse);
+  rpc UpdateSession(UpdateSessionRequest) returns (UpdateSessionResponse);
+  rpc GetExplorationVector(GetExplorationVectorRequest) returns (GetExplorationVectorResponse);
+  rpc InferMode(InferModeRequest) returns (InferModeResponse);
+}
+
+message InterestEdge {
+  string node    = 1;   // interest / creator / community / aesthetic-cluster id
+  string kind    = 2;
+  double weight  = 3;   // decays on a 21-day half-life
+}
+
+message InterestProfile {
+  string user_id              = 1;
+  repeated float taste_vector = 2;   // the slow centroid
+  repeated InterestEdge edges = 3;
+}
+
+message GetProfileRequest { string user_id = 1 [(buf.validate.field).string.uuid = true]; }
+message GetProfileResponse { InterestProfile profile = 1; }
+
+message UpdateSessionRequest {
+  string session_id = 1 [(buf.validate.field).string.uuid = true];
+  string event_kind = 2;   // play|skip|complete|search|follow
+  string content_id = 3;
+  string topic      = 4;
+}
+message UpdateSessionResponse {}
+
+message GetExplorationVectorRequest { string user_id = 1 [(buf.validate.field).string.uuid = true]; }
+message GetExplorationVectorResponse { repeated float vector = 1; }
+
+message InferModeRequest { string session_id = 1 [(buf.validate.field).string.uuid = true]; }
+message InferModeResponse {
+  string mode     = 1;   // precision|discovery|chaos
+  double appetite = 2;
+}

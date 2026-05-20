@@ -1,0 +1,69 @@
+syntax = "proto3";
+
+package next.feed.v1;
+
+import "buf/validate/validate.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/feed/v1;feedv1";
+
+// FeedService orchestrates feed pages: it takes a ranked slate (from
+// recommendation-service), deduplicates against the session, paginates,
+// tracks cross-page emotional pacing, and assigns experiment arms.
+service FeedService {
+  rpc GetFeed(GetFeedRequest) returns (GetFeedResponse);
+  rpc RecordImpression(RecordImpressionRequest) returns (RecordImpressionResponse);
+  rpc AssignExperiment(AssignExperimentRequest) returns (AssignExperimentResponse);
+}
+
+// RankedItem — an upstream-ranked candidate handed to feed orchestration.
+message RankedItem {
+  string content_id  = 1 [(buf.validate.field).string.min_len = 1];
+  string creator_id  = 2 [(buf.validate.field).string.uuid = true];
+  double score       = 3;
+  bool   exploration = 4;
+  double intensity   = 5;   // [0,1] emotional energy, for pacing
+}
+
+// FeedItem — one rendered feed entry.
+message FeedItem {
+  string content_id  = 1;
+  string creator_id  = 2;
+  uint32 position    = 3;
+  double score       = 4;
+  bool   exploration = 5;
+}
+
+message GetFeedRequest {
+  string user_id    = 1 [(buf.validate.field).string.uuid = true];
+  string session_id = 2 [(buf.validate.field).string.uuid = true];
+  string surface    = 3 [(buf.validate.field).string.min_len = 1];
+  string cursor     = 4;   // opaque; empty = first page
+  uint32 limit      = 5 [(buf.validate.field).uint32.lte = 100];
+  repeated RankedItem ranked = 6;
+}
+message GetFeedResponse {
+  repeated FeedItem items = 1;
+  string next_cursor      = 2;
+  bool   has_more         = 3;
+  double fatigue          = 4;   // session fatigue after this page, [0,1]
+  bool   breathe          = 5;   // pacing recommends a calmer next page
+}
+
+message RecordImpressionRequest {
+  string user_id    = 1 [(buf.validate.field).string.uuid = true];
+  string session_id = 2 [(buf.validate.field).string.uuid = true];
+  string content_id = 3 [(buf.validate.field).string.min_len = 1];
+  string kind       = 4 [(buf.validate.field).string.min_len = 1];  // view|click|skip|complete
+  int64  dwell_ms   = 5;
+}
+message RecordImpressionResponse {}
+
+message AssignExperimentRequest {
+  string user_id        = 1 [(buf.validate.field).string.uuid = true];
+  string experiment_key = 2 [(buf.validate.field).string.min_len = 1];
+  repeated string arms  = 3;
+}
+message AssignExperimentResponse {
+  string arm       = 1;
+  bool   newly_assigned = 2;
+}

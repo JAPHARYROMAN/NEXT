@@ -34,6 +34,10 @@ ADRs capture **load-bearing** architectural decisions: their context, the altern
 | 0026 | [Media storage tiering; immutable masters](0026-storage-tiering.md)               | Accepted |
 | 0027 | [Signed short-TTL playback URLs](0027-signed-playback-urls.md)                    | Accepted |
 | 0028 | [Media pipeline orchestrator saga](0028-media-pipeline-orchestrator.md)           | Accepted |
+| 0029 | [Three continuous discovery modes](0029-three-discovery-modes.md)                 | Accepted |
+| 0030 | [Multi-stage ranking with diversity balancing](0030-multi-stage-ranking.md)       | Accepted |
+| 0031 | [Anti-homogenization & creator fairness](0031-anti-homogenization.md)             | Accepted |
+| 0032 | [Interest graph with affinity decay](0032-interest-graph-decay.md)                | Accepted |
 
 ## Process
 

@@ -49,6 +49,20 @@ modules:
     name: buf.build/next-ecosystem/clipgeneration
   - path: services/media-analytics-service/proto
     name: buf.build/next-ecosystem/mediaanalytics
+  - path: services/recommendation-service/proto
+    name: buf.build/next-ecosystem/recommendation
+  - path: services/feed-service/proto
+    name: buf.build/next-ecosystem/feed
+  - path: services/discovery-service/proto
+    name: buf.build/next-ecosystem/discovery
+  - path: services/personalization-service/proto
+    name: buf.build/next-ecosystem/personalization
+  - path: services/ranking-service/proto
+    name: buf.build/next-ecosystem/ranking
+  - path: services/candidate-generation-service/proto
+    name: buf.build/next-ecosystem/candidategen
+  - path: services/semantic-retrieval-service/proto
+    name: buf.build/next-ecosystem/semanticretrieval
   - path: packages/events/schemas
     name: buf.build/next-ecosystem/events
 

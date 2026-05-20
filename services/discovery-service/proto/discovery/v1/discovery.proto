@@ -1,0 +1,42 @@
+syntax = "proto3";
+
+package next.discovery.v1;
+
+import "buf/validate/validate.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/discovery/v1;discoveryv1";
+
+// DiscoveryService owns explore + chaos surfaces: trending, niche emergence,
+// and controlled serendipity.
+service DiscoveryService {
+  rpc Explore(ExploreRequest) returns (ExploreResponse);
+  rpc Trending(TrendingRequest) returns (TrendingResponse);
+  rpc NicheEmergence(NicheEmergenceRequest) returns (NicheEmergenceResponse);
+}
+
+message DiscoveryItem {
+  string content_id = 1;
+  string creator_id = 2;
+  double score      = 3;
+  string reason     = 4;   // trending|emerging|serendipity
+}
+
+message ExploreRequest {
+  string user_id = 1 [(buf.validate.field).string.uuid = true];
+  string scope   = 2;   // region / locale
+  uint32 limit   = 3 [(buf.validate.field).uint32.lte = 100];
+}
+message ExploreResponse { repeated DiscoveryItem items = 1; }
+
+message TrendingRequest {
+  string scope  = 1;
+  string window = 2;   // 1h|6h|24h
+  uint32 limit  = 3 [(buf.validate.field).uint32.lte = 100];
+}
+message TrendingResponse { repeated DiscoveryItem items = 1; }
+
+message NicheEmergenceRequest {
+  string scope = 1;
+  uint32 limit = 2 [(buf.validate.field).uint32.lte = 100];
+}
+message NicheEmergenceResponse { repeated DiscoveryItem items = 1; }
