@@ -11,6 +11,10 @@ const config: NextConfig = {
     '@next/frontend-utils',
     '@next/icons',
     '@next/auth-sdk',
+    '@next/charts',
+    '@next/creator-ui',
+    '@next/studio-components',
+    '@next/media-ui',
   ],
 };
 

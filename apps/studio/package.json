@@ -13,13 +13,30 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@next/animation-system": "workspace:*",
     "@next/api-client": "workspace:*",
     "@next/auth-sdk": "workspace:*",
+    "@next/charts": "workspace:*",
+    "@next/creator-ui": "workspace:*",
     "@next/design-system": "workspace:*",
     "@next/feature-flags": "workspace:*",
     "@next/frontend-utils": "workspace:*",
     "@next/icons": "workspace:*",
+    "@next/identity-ui": "workspace:*",
+    "@next/onboarding-ui": "workspace:*",
+    "@next/profile-ui": "workspace:*",
     "@next/layout-engine": "workspace:*",
+    "@next/media-ui": "workspace:*",
+    "@next/studio-components": "workspace:*",
+    "@next/broadcast-ui": "workspace:*",
+    "@next/live-ui": "workspace:*",
+    "@next/chat-ui": "workspace:*",
+    "@next/moderation-ui": "workspace:*",
+    "@next/monetization-ui": "workspace:*",
+    "@next/subscription-ui": "workspace:*",
+    "@next/revenue-ui": "workspace:*",
+    "@next/sponsorship-ui": "workspace:*",
+    "@next/theme-system": "workspace:*",
     "@next/ui": "workspace:*",
     "@tanstack/react-query": "catalog:",
     "clsx": "^2.1.1",
@@ -39,6 +56,7 @@
     "postcss": "catalog:",
     "tailwindcss": "catalog:",
     "typescript": "catalog:",
+    "@testing-library/react": "catalog:",
     "vitest": "catalog:"
   }
 }
