@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package next.notificationauth.v1;
+
+import "buf/validate/validate.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/notificationauth/v1;notificationauthv1";
+
+service NotificationAuthService {
+  rpc PushChallenge(PushChallengeRequest) returns (PushChallengeResponse);
+  rpc VerifyChallenge(VerifyChallengeRequest) returns (VerifyChallengeResponse);
+  rpc CancelChallenge(CancelChallengeRequest) returns (CancelChallengeResponse);
+}
+
+message PushChallengeRequest {
+  string user_id     = 1 [(buf.validate.field).string.min_len = 1];
+  string action      = 2 [(buf.validate.field).string.min_len = 1];
+  int64  ttl_seconds = 3;
+}
+message PushChallengeResponse {
+  string challenge_id = 1;
+  // The approval token a trusted device presents back. In production it is
+  // delivered out-of-band via push; returned here for local dev + tests.
+  string approval_token = 2;
+}
+
+message VerifyChallengeRequest {
+  string challenge_id   = 1 [(buf.validate.field).string.min_len = 1];
+  string approval_token = 2 [(buf.validate.field).string.min_len = 1];
+}
+message VerifyChallengeResponse {
+  string state = 1;   // approved|denied|expired|unknown
+}
+
+message CancelChallengeRequest { string challenge_id = 1 [(buf.validate.field).string.min_len = 1]; }
+message CancelChallengeResponse {}

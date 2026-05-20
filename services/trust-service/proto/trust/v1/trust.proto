@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package next.trust.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/trust/v1;trustv1";
+
+service TrustService {
+  rpc Get(GetRequest) returns (GetResponse);
+  rpc GrantVerification(GrantVerificationRequest) returns (GrantVerificationResponse);
+  rpc RevokeVerification(RevokeVerificationRequest) returns (RevokeVerificationResponse);
+}
+
+message TrustState {
+  string user_id = 1;
+  double score   = 2;            // 0..1
+  repeated string verifications = 3;
+  google.protobuf.Timestamp updated_at = 4;
+}
+
+message GetRequest { string user_id = 1 [(buf.validate.field).string.min_len = 1]; }
+message GetResponse { TrustState state = 1; }
+
+message GrantVerificationRequest {
+  string user_id    = 1 [(buf.validate.field).string.min_len = 1];
+  string kind       = 2 [(buf.validate.field).string.min_len = 1];
+  string granted_by = 3 [(buf.validate.field).string.min_len = 1];
+  string evidence   = 4;
+}
+message GrantVerificationResponse { TrustState state = 1; }
+
+message RevokeVerificationRequest {
+  string user_id    = 1 [(buf.validate.field).string.min_len = 1];
+  string kind       = 2 [(buf.validate.field).string.min_len = 1];
+  string revoked_by = 3 [(buf.validate.field).string.min_len = 1];
+  string reason     = 4 [(buf.validate.field).string.min_len = 1];
+}
+message RevokeVerificationResponse { TrustState state = 1; }

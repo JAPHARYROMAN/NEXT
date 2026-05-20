@@ -1,0 +1,2 @@
+DROP TABLE IF EXISTS kyc_workflows;
+DROP TABLE IF EXISTS creators;

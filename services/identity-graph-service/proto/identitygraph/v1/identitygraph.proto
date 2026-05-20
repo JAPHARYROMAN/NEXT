@@ -1,0 +1,45 @@
+syntax = "proto3";
+
+package next.identitygraph.v1;
+
+import "buf/validate/validate.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/identitygraph/v1;identitygraphv1";
+
+service GraphService {
+  rpc Neighbors(NeighborsRequest) returns (NeighborsResponse);
+  rpc Path(PathRequest) returns (PathResponse);
+  rpc UpsertEdge(UpsertEdgeRequest) returns (UpsertEdgeResponse);
+}
+
+// EdgeKind: FOLLOWS | INTERACTED_WITH | AFFINITY | TRUSTS.
+message NeighborsRequest {
+  string user_id   = 1 [(buf.validate.field).string.min_len = 1];
+  string edge_kind = 2 [(buf.validate.field).string.min_len = 1];
+  int32  limit     = 3;
+}
+message NeighborsResponse {
+  repeated Neighbor neighbors = 1;
+}
+message Neighbor {
+  string user_id = 1;
+  double weight  = 2;
+}
+
+message PathRequest {
+  string from     = 1 [(buf.validate.field).string.min_len = 1];
+  string to       = 2 [(buf.validate.field).string.min_len = 1];
+  int32  max_hops = 3;
+}
+message PathResponse {
+  repeated string hops = 1;   // empty when no path within max_hops
+  bool   found = 2;
+}
+
+message UpsertEdgeRequest {
+  string from      = 1 [(buf.validate.field).string.min_len = 1];
+  string to        = 2 [(buf.validate.field).string.min_len = 1];
+  string edge_kind = 3 [(buf.validate.field).string.min_len = 1];
+  double weight    = 4;
+}
+message UpsertEdgeResponse {}

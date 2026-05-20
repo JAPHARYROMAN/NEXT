@@ -1,0 +1,44 @@
+syntax = "proto3";
+
+package next.accesscontrol.v1;
+
+import "buf/validate/validate.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/accesscontrol/v1;accesscontrolv1";
+
+// AuthzService is the policy decision point (PDP).
+service AuthzService {
+  rpc Authorize(AuthorizeRequest) returns (AuthorizeResponse);
+  rpc Roles(RolesRequest) returns (RolesResponse);
+  rpc GrantRole(GrantRoleRequest) returns (GrantRoleResponse);
+  rpc RevokeRole(RevokeRoleRequest) returns (RevokeRoleResponse);
+}
+
+message AuthorizeRequest {
+  string subject_id   = 1 [(buf.validate.field).string.min_len = 1];
+  string subject_tier = 2 [(buf.validate.field).string.min_len = 1];
+  string scope        = 3 [(buf.validate.field).string.min_len = 1];
+  string resource     = 4;
+}
+
+message AuthorizeResponse {
+  bool   allow  = 1;
+  string reason = 2;
+}
+
+message RolesRequest { string user_id = 1 [(buf.validate.field).string.min_len = 1]; }
+message RolesResponse { repeated string roles = 1; }
+
+message GrantRoleRequest {
+  string user_id    = 1 [(buf.validate.field).string.min_len = 1];
+  string role       = 2 [(buf.validate.field).string.min_len = 1];
+  string granted_by = 3 [(buf.validate.field).string.min_len = 1];
+}
+message GrantRoleResponse {}
+
+message RevokeRoleRequest {
+  string user_id    = 1 [(buf.validate.field).string.min_len = 1];
+  string role       = 2 [(buf.validate.field).string.min_len = 1];
+  string revoked_by = 3 [(buf.validate.field).string.min_len = 1];
+}
+message RevokeRoleResponse {}

@@ -1,0 +1,41 @@
+syntax = "proto3";
+
+package next.creatoridentity.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/creatoridentity/v1;creatoridentityv1";
+
+service CreatorService {
+  rpc Upgrade(UpgradeRequest) returns (UpgradeResponse);
+  rpc GetCreator(GetCreatorRequest) returns (GetCreatorResponse);
+  rpc StartVerification(StartVerificationRequest) returns (StartVerificationResponse);
+  rpc GetVerificationStatus(GetVerificationStatusRequest) returns (GetVerificationStatusResponse);
+}
+
+message Creator {
+  string user_id        = 1;
+  string display_name   = 2;
+  string kyc_state      = 3;   // none|pending|verified|rejected
+  bool   payout_ready   = 4;
+  google.protobuf.Timestamp upgraded_at = 5;
+}
+
+message UpgradeRequest {
+  string user_id      = 1 [(buf.validate.field).string.min_len = 1];
+  string display_name = 2;
+}
+message UpgradeResponse { Creator creator = 1; }
+
+message GetCreatorRequest { string user_id = 1 [(buf.validate.field).string.min_len = 1]; }
+message GetCreatorResponse { Creator creator = 1; }
+
+message StartVerificationRequest {
+  string user_id = 1 [(buf.validate.field).string.min_len = 1];
+  string kind    = 2 [(buf.validate.field).string.min_len = 1];
+}
+message StartVerificationResponse { string workflow_id = 1; }
+
+message GetVerificationStatusRequest { string user_id = 1 [(buf.validate.field).string.min_len = 1]; }
+message GetVerificationStatusResponse { string kyc_state = 1; }

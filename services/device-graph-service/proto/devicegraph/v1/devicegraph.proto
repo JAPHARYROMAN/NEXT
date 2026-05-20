@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package next.devicegraph.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/devicegraph/v1;devicegraphv1";
+
+service DeviceService {
+  rpc Register(RegisterRequest) returns (RegisterResponse);
+  rpc Score(ScoreRequest) returns (ScoreResponse);
+  rpc List(ListRequest) returns (ListResponse);
+  rpc Revoke(RevokeRequest) returns (RevokeResponse);
+}
+
+message Device {
+  string id           = 1;
+  string user_id      = 2;
+  string platform     = 3;
+  string fingerprint  = 4;
+  string user_agent   = 5;
+  string state        = 6;     // unverified|trusted|flagged|revoked
+  string last_ip_country = 7;
+  int32  risk_score   = 8;     // 0..100
+  google.protobuf.Timestamp first_seen_at = 9;
+  google.protobuf.Timestamp last_seen_at  = 10;
+}
+
+message RegisterRequest {
+  string user_id     = 1 [(buf.validate.field).string.min_len = 1];
+  string fingerprint = 2 [(buf.validate.field).string.min_len = 1];
+  string platform    = 3;
+  string user_agent  = 4;
+  string ip_country  = 5;
+}
+message RegisterResponse { Device device = 1; }
+
+message ScoreRequest {
+  string user_id    = 1 [(buf.validate.field).string.min_len = 1];
+  string device_id  = 2 [(buf.validate.field).string.min_len = 1];
+  string ip_country = 3;
+}
+message ScoreResponse {
+  int32  risk_score = 1;       // 0..100
+  string band       = 2;      // low|medium|high
+}
+
+message ListRequest { string user_id = 1 [(buf.validate.field).string.min_len = 1]; }
+message ListResponse { repeated Device devices = 1; }
+
+message RevokeRequest { string device_id = 1 [(buf.validate.field).string.min_len = 1]; }
+message RevokeResponse {}

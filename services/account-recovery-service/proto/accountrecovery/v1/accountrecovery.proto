@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package next.accountrecovery.v1;
+
+import "buf/validate/validate.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/accountrecovery/v1;accountrecoveryv1";
+
+service RecoveryService {
+  rpc IssueCodes(IssueCodesRequest) returns (IssueCodesResponse);
+  rpc StartFlow(StartFlowRequest) returns (StartFlowResponse);
+  rpc VerifyChallenge(VerifyChallengeRequest) returns (VerifyChallengeResponse);
+}
+
+message IssueCodesRequest { string user_id = 1 [(buf.validate.field).string.min_len = 1]; }
+message IssueCodesResponse {
+  // Plaintext codes — returned exactly once, never stored unhashed.
+  repeated string codes = 1;
+}
+
+message StartFlowRequest {
+  string user_id = 1 [(buf.validate.field).string.min_len = 1];
+  string kind    = 2 [(buf.validate.field).string.min_len = 1];   // recovery_code|email|trusted_contact
+}
+message StartFlowResponse {
+  string flow_id = 1;
+  string channel = 2;
+}
+
+message VerifyChallengeRequest {
+  string flow_id   = 1 [(buf.validate.field).string.min_len = 1];
+  string challenge = 2 [(buf.validate.field).string.min_len = 1];
+}
+message VerifyChallengeResponse {
+  bool   completed = 1;
+  string state     = 2;
+}
