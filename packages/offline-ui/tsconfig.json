@@ -1,0 +1,5 @@
+{
+  "extends": "@next/config/tsconfig/library",
+  "compilerOptions": { "jsx": "react-jsx" },
+  "include": ["src/**/*"]
+}

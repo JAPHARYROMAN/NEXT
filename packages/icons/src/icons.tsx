@@ -44,6 +44,15 @@ export function IconLibrary(props: NamedIconProps) {
   );
 }
 
+export function IconSearch(props: NamedIconProps) {
+  return (
+    <Icon {...props}>
+      <circle cx="11" cy="11" r="6" />
+      <path d="M16 16l4 4" />
+    </Icon>
+  );
+}
+
 export function IconStudio(props: NamedIconProps) {
   return (
     <Icon {...props}>
