@@ -5,7 +5,7 @@ package next.events.auth.v1;
 import "buf/validate/validate.proto";
 import "google/protobuf/timestamp.proto";
 
-option go_package = "github.com/next-ecosystem/next/gen/go/auth/v1;authv1";
+option go_package = "github.com/next-ecosystem/next/gen/go/next/events/auth/v1;autheventsv1";
 
 // UserRegistered fires when auth-service finalises a new user.
 // Consumers (profile-service first) use this to materialise downstream state.
