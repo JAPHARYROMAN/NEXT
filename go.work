@@ -6,22 +6,29 @@ use (
 	./packages/go/database
 	./packages/go/eventbus
 	./packages/go/telemetry
+	./scripts/e2e-jwt
+	./scripts/e2e-register
+	./services/access-control-service
+	./services/account-recovery-service
 	./services/analytics-service
 	./services/api-gateway
 	./services/auth-service
 	./services/community-service
+	./services/creator-identity-service
+	./services/device-graph-service
 	./services/event-gateway
 	./services/feed-service
+	./services/identity-graph-service
 	./services/live-service
 	./services/media-service
 	./services/moderation-service
+	./services/notification-auth-service
 	./services/notification-service
 	./services/payment-service
 	./services/profile-service
 	./services/recommendation-service
 	./services/search-service
 	./services/session-service
+	./services/trust-service
 	./services/upload-service
-	./scripts/e2e-register
-	./scripts/e2e-jwt
 )

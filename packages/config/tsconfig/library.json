@@ -2,15 +2,10 @@
   "$schema": "https://json.schemastore.org/tsconfig",
   "display": "NEXT library configuration",
   "extends": "./base.json",
+  "_comment": "rootDir/outDir/include are intentionally NOT set here — in an extended tsconfig those paths resolve relative to THIS file, not the consumer. Each package sets its own include; tsc infers rootDir.",
   "compilerOptions": {
     "declaration": true,
     "declarationMap": true,
-    "composite": true,
-    "incremental": true,
-    "tsBuildInfoFile": "dist/.tsbuildinfo",
-    "rootDir": "src",
-    "outDir": "dist"
-  },
-  "include": ["src/**/*"],
-  "exclude": ["**/*.test.ts", "**/*.test.tsx", "**/*.spec.ts", "**/*.spec.tsx"]
+    "incremental": true
+  }
 }

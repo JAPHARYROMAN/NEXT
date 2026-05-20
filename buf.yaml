@@ -9,6 +9,20 @@ modules:
     name: buf.build/next-ecosystem/profile
   - path: services/session-service/proto
     name: buf.build/next-ecosystem/session
+  - path: services/access-control-service/proto
+    name: buf.build/next-ecosystem/accesscontrol
+  - path: services/trust-service/proto
+    name: buf.build/next-ecosystem/trust
+  - path: services/device-graph-service/proto
+    name: buf.build/next-ecosystem/devicegraph
+  - path: services/creator-identity-service/proto
+    name: buf.build/next-ecosystem/creatoridentity
+  - path: services/account-recovery-service/proto
+    name: buf.build/next-ecosystem/accountrecovery
+  - path: services/notification-auth-service/proto
+    name: buf.build/next-ecosystem/notificationauth
+  - path: services/identity-graph-service/proto
+    name: buf.build/next-ecosystem/identitygraph
   - path: packages/events/schemas
     name: buf.build/next-ecosystem/events
 
