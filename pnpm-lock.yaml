@@ -727,6 +727,9 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
+      vitest:
+        specifier: 'catalog:'
+        version: 2.1.9(@types/node@22.19.18)(jsdom@20.0.3)(lightningcss@1.27.0)(terser@5.47.1)
 
   packages/feature-flags:
     dependencies:

@@ -1,9 +1,60 @@
+import type { EventCategory } from './contracts/envelope';
+
 // Topic catalog. The single source of truth for Kafka topics across NEXT.
-// Naming convention: <domain>.<entity>.<event>.v<n>
-//
-// Partition key conventions follow [docs/event-architecture.md].
+// Phase 5 canonical topics use <category>.events.v<n>; legacy domain topics
+// remain for services created in earlier phases until they migrate.
+
+export const CATEGORY_TOPICS = {
+  identity: 'identity.events.v1',
+  session: 'session.events.v1',
+  media: 'media.events.v1',
+  playback: 'playback.events.v1',
+  creator: 'creator.events.v1',
+  community: 'community.events.v1',
+  recommendation: 'recommendation.events.v1',
+  search: 'search.events.v1',
+  moderation: 'moderation.events.v1',
+  commerce: 'commerce.events.v1',
+  system: 'system.events.v1',
+} as const satisfies Record<EventCategory, string>;
+
+export const DEAD_LETTER_TOPICS = {
+  identity: 'identity.events.dlq.v1',
+  media: 'media.events.dlq.v1',
+  playback: 'playback.events.dlq.v1',
+  analytics: 'analytics.events.dlq.v1',
+} as const;
+
+export const REPLAY_TOPIC_PREFIX = 'replay';
+
+export type CategoryTopicName = (typeof CATEGORY_TOPICS)[EventCategory];
+export type DeadLetterTopicName = (typeof DEAD_LETTER_TOPICS)[keyof typeof DEAD_LETTER_TOPICS];
+
+export function topicForCategory(category: EventCategory): CategoryTopicName {
+  return CATEGORY_TOPICS[category];
+}
+
+export function deadLetterTopicForCategory(category: EventCategory): DeadLetterTopicName {
+  if (category === 'identity' || category === 'media' || category === 'playback') {
+    return DEAD_LETTER_TOPICS[category];
+  }
+  return DEAD_LETTER_TOPICS.analytics;
+}
 
 export const TOPICS = {
+  // ---- Phase 5 canonical category streams ----
+  IDENTITY_EVENTS_V1: CATEGORY_TOPICS.identity,
+  SESSION_EVENTS_V1: CATEGORY_TOPICS.session,
+  MEDIA_EVENTS_V1: CATEGORY_TOPICS.media,
+  PLAYBACK_EVENTS_V1: CATEGORY_TOPICS.playback,
+  CREATOR_EVENTS_V1: CATEGORY_TOPICS.creator,
+  COMMUNITY_EVENTS_V1: CATEGORY_TOPICS.community,
+  RECOMMENDATION_EVENTS_V1: CATEGORY_TOPICS.recommendation,
+  SEARCH_EVENTS_V1: CATEGORY_TOPICS.search,
+  MODERATION_EVENTS_V1: CATEGORY_TOPICS.moderation,
+  COMMERCE_EVENTS_V1: CATEGORY_TOPICS.commerce,
+  SYSTEM_EVENTS_V1: CATEGORY_TOPICS.system,
+
   // ---- Identity ----
   AUTH_USER_REGISTERED: 'auth.user.registered.v1',
   AUTH_SESSION_STARTED: 'auth.session.started.v1',
@@ -51,6 +102,12 @@ export const TOPICS = {
   FEED_INTERACTION: 'feed.interaction.v1',
   REC_CANDIDATE_REQUESTED: 'rec.candidate.requested.v1',
   REC_RANKING_COMPLETED: 'rec.ranking.completed.v1',
+  REC_RECOMMENDATION_SERVED: 'rec.recommendation.served.v1',
+  REC_RECOMMENDATION_CLICKED: 'rec.recommendation.clicked.v1',
+  REC_RECOMMENDATION_SKIPPED: 'rec.recommendation.skipped.v1',
+  REC_FEED_GENERATED: 'rec.feed.generated.v1',
+  REC_DISCOVERY_MODE_CHANGED: 'rec.discovery.mode.changed.v1',
+  REC_EXPLORATION_INJECTED: 'rec.exploration.injected.v1',
 
   // ---- Social ----
   COMMUNITY_CREATED: 'community.community.created.v1',
@@ -79,6 +136,9 @@ export const TOPICS = {
   ANALYTICS_RAW: 'analytics.raw.v1',
 } as const;
 
-export type TopicName = (typeof TOPICS)[keyof typeof TOPICS];
+export type TopicName =
+  | (typeof TOPICS)[keyof typeof TOPICS]
+  | CategoryTopicName
+  | DeadLetterTopicName;
 
 export const DLQ = (topic: TopicName): string => `${topic}.dlq`;
