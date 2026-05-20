@@ -113,9 +113,21 @@ importers:
       '@commitlint/config-conventional':
         specifier: ^19.5.0
         version: 19.8.1
+      '@eslint/js':
+        specifier: ^9.12.0
+        version: 9.39.4
       '@types/node':
         specifier: ^22.7.5
         version: 22.19.18
+      eslint:
+        specifier: 'catalog:'
+        version: 9.39.4(jiti@2.7.0)
+      eslint-config-prettier:
+        specifier: 'catalog:'
+        version: 9.1.2(eslint@9.39.4(jiti@2.7.0))
+      globals:
+        specifier: ^15.0.0
+        version: 15.15.0
       husky:
         specifier: ^9.1.6
         version: 9.1.7
@@ -134,6 +146,9 @@ importers:
       typescript:
         specifier: ^5.6.3
         version: 5.9.3
+      typescript-eslint:
+        specifier: ^8.8.1
+        version: 8.59.0(eslint@9.39.4(jiti@2.7.0))(typescript@5.9.3)
 
   apps/account-center:
     dependencies:
@@ -403,6 +418,9 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
+      vitest:
+        specifier: 'catalog:'
+        version: 2.1.9(@types/node@22.19.18)(jsdom@20.0.3)(lightningcss@1.27.0)(terser@5.47.1)
 
   apps/mobile:
     dependencies:
@@ -436,6 +454,9 @@ importers:
       expo-secure-store:
         specifier: ~14.0.0
         version: 14.0.1(expo@52.0.49(@babel/core@7.29.0)(@babel/preset-env@7.29.5(@babel/core@7.29.0))(@expo/metro-runtime@4.0.1(react-native@0.76.0(@babel/core@7.29.0)(@babel/preset-env@7.29.5(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.6)))(graphql@16.13.1)(react-native@0.76.0(@babel/core@7.29.0)(@babel/preset-env@7.29.5(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.6))(react@19.2.6))
+      expo-status-bar:
+        specifier: ~2.0.0
+        version: 2.0.1(react-native@0.76.0(@babel/core@7.29.0)(@babel/preset-env@7.29.5(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.6))(react@19.2.6)
       expo-updates:
         specifier: ~0.26.0
         version: 0.26.19(expo@52.0.49(@babel/core@7.29.0)(@babel/preset-env@7.29.5(@babel/core@7.29.0))(@expo/metro-runtime@4.0.1(react-native@0.76.0(@babel/core@7.29.0)(@babel/preset-env@7.29.5(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.6)))(graphql@16.13.1)(react-native@0.76.0(@babel/core@7.29.0)(@babel/preset-env@7.29.5(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.6))(react@19.2.6))(react@19.2.6)
@@ -670,6 +691,9 @@ importers:
       typescript:
         specifier: 'catalog:'
         version: 5.9.3
+      vitest:
+        specifier: 'catalog:'
+        version: 2.1.9(@types/node@22.19.18)(jsdom@20.0.3)(lightningcss@1.27.0)(terser@5.47.1)
 
   apps/tv:
     dependencies:
@@ -734,6 +758,9 @@ importers:
       vite:
         specifier: ^5.4.10
         version: 5.4.21(@types/node@22.19.18)(lightningcss@1.27.0)(terser@5.47.1)
+      vitest:
+        specifier: 'catalog:'
+        version: 2.1.9(@types/node@22.19.18)(jsdom@20.0.3)(lightningcss@1.27.0)(terser@5.47.1)
 
   apps/web:
     dependencies:
@@ -1090,6 +1117,9 @@ importers:
       '@bufbuild/protobuf':
         specifier: 'catalog:'
         version: 2.12.0
+      '@graphql-typed-document-node/core':
+        specifier: 3.2.0
+        version: 3.2.0(graphql@16.13.1)
       graphql:
         specifier: 'catalog:'
         version: 16.13.1
@@ -3199,6 +3229,9 @@ importers:
       '@opentelemetry/resources':
         specifier: ^1.27.0
         version: 1.30.1(@opentelemetry/api@1.9.1)
+      '@opentelemetry/sdk-metrics':
+        specifier: ^1.27.0
+        version: 1.27.0(@opentelemetry/api@1.9.1)
       '@opentelemetry/sdk-node':
         specifier: 'catalog:'
         version: 0.54.2(@opentelemetry/api@1.9.1)
@@ -7914,6 +7947,12 @@ packages:
     peerDependencies:
       expo: '*'
 
+  expo-status-bar@2.0.1:
+    resolution: {integrity: sha512-AkIPX7jWHRPp83UBZ1iXtVvyr0g+DgBVvIXTtlmPtmUsm8Vq9Bb5IGj86PW8osuFlgoTVAg7HI/+Ok7yEYwiRg==}
+    peerDependencies:
+      react: '*'
+      react-native: '*'
+
   expo-structured-headers@4.0.0:
     resolution: {integrity: sha512-uPiwZjWq3AdFGgY52+I2nGPrNa6izxAglymPXHUZLekZW290GqIUOk7MBNDD4sg4JwUbSi3gdxEurpEvuq+FSg==}
 
@@ -8256,6 +8295,10 @@ packages:
 
   globals@14.0.0:
     resolution: {integrity: sha512-oahGvuMGQlPw/ivIYBjVSrWAfWLBeku5tpPE2fOPLi+WHffIWbuh2tCjhyQhTBPMf5E9jDEH4FOmTYgYwbKwtQ==}
+    engines: {node: '>=18'}
+
+  globals@15.15.0:
+    resolution: {integrity: sha512-7ACyT3wmyp3I61S4fG682L0VA2RGD9otkqGJIwNUMF1SWUombIIk+af1unuDYgMm082aHYwD+mzJvv9Iu8dsgg==}
     engines: {node: '>=18'}
 
   globalthis@1.0.4:
@@ -15682,8 +15725,8 @@ snapshots:
 
   '@typescript-eslint/project-service@8.59.0(typescript@5.9.3)':
     dependencies:
-      '@typescript-eslint/tsconfig-utils': 8.59.0(typescript@5.9.3)
-      '@typescript-eslint/types': 8.59.0
+      '@typescript-eslint/tsconfig-utils': 8.59.2(typescript@5.9.3)
+      '@typescript-eslint/types': 8.59.2
       debug: 4.4.3
       typescript: 5.9.3
     transitivePeerDependencies:
@@ -17501,6 +17544,11 @@ snapshots:
     dependencies:
       expo: 52.0.49(@babel/core@7.29.0)(@babel/preset-env@7.29.5(@babel/core@7.29.0))(@expo/metro-runtime@4.0.1(react-native@0.76.0(@babel/core@7.29.0)(@babel/preset-env@7.29.5(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.6)))(graphql@16.13.1)(react-native@0.76.0(@babel/core@7.29.0)(@babel/preset-env@7.29.5(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.6))(react@19.2.6)
 
+  expo-status-bar@2.0.1(react-native@0.76.0(@babel/core@7.29.0)(@babel/preset-env@7.29.5(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.6))(react@19.2.6):
+    dependencies:
+      react: 19.2.6
+      react-native: 0.76.0(@babel/core@7.29.0)(@babel/preset-env@7.29.5(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.6)
+
   expo-structured-headers@4.0.0: {}
 
   expo-updates-interface@1.0.0(expo@52.0.49(@babel/core@7.29.0)(@babel/preset-env@7.29.5(@babel/core@7.29.0))(@expo/metro-runtime@4.0.1(react-native@0.76.0(@babel/core@7.29.0)(@babel/preset-env@7.29.5(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.6)))(graphql@16.13.1)(react-native@0.76.0(@babel/core@7.29.0)(@babel/preset-env@7.29.5(@babel/core@7.29.0))(@types/react@19.2.14)(react@19.2.6))(react@19.2.6)):
@@ -17910,6 +17958,8 @@ snapshots:
       ini: 4.1.1
 
   globals@14.0.0: {}
+
+  globals@15.15.0: {}
 
   globalthis@1.0.4:
     dependencies:

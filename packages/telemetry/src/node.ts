@@ -3,14 +3,14 @@
 
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-grpc';
 import { OTLPTraceExporter } from '@opentelemetry/exporter-trace-otlp-grpc';
-import { resourceFromAttributes } from '@opentelemetry/resources';
+import { Resource } from '@opentelemetry/resources';
 import { getNodeAutoInstrumentations } from '@opentelemetry/auto-instrumentations-node';
 import { NodeSDK } from '@opentelemetry/sdk-node';
 import {
-  ATTR_SERVICE_NAME,
-  ATTR_SERVICE_VERSION,
-  ATTR_SERVICE_NAMESPACE,
-  ATTR_DEPLOYMENT_ENVIRONMENT_NAME,
+  SEMRESATTRS_SERVICE_NAME,
+  SEMRESATTRS_SERVICE_VERSION,
+  SEMRESATTRS_SERVICE_NAMESPACE,
+  SEMRESATTRS_DEPLOYMENT_ENVIRONMENT,
 } from '@opentelemetry/semantic-conventions';
 import { PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics';
 
@@ -27,13 +27,16 @@ let sdk: NodeSDK | undefined;
 export function initTelemetry(config: TelemetryConfig): NodeSDK {
   if (sdk) return sdk;
 
-  const endpoint = config.otlpEndpoint ?? process.env['OTEL_EXPORTER_OTLP_ENDPOINT'] ?? 'http://otel-collector.next-observability:4317';
+  const endpoint =
+    config.otlpEndpoint ??
+    process.env.OTEL_EXPORTER_OTLP_ENDPOINT ??
+    'http://otel-collector.next-observability:4317';
 
-  const resource = resourceFromAttributes({
-    [ATTR_SERVICE_NAME]: config.service,
-    [ATTR_SERVICE_NAMESPACE]: config.namespace,
-    [ATTR_SERVICE_VERSION]: config.version ?? '0.0.0',
-    [ATTR_DEPLOYMENT_ENVIRONMENT_NAME]: config.env,
+  const resource = new Resource({
+    [SEMRESATTRS_SERVICE_NAME]: config.service,
+    [SEMRESATTRS_SERVICE_NAMESPACE]: config.namespace,
+    [SEMRESATTRS_SERVICE_VERSION]: config.version ?? '0.0.0',
+    [SEMRESATTRS_DEPLOYMENT_ENVIRONMENT]: config.env,
   });
 
   sdk = new NodeSDK({

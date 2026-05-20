@@ -93,7 +93,7 @@ const config: NextConfig = {
   },
 
   // Outputs a self-contained build for the container image (reduces layer size).
-  output: 'standalone',
+  ...(process.platform === 'win32' ? {} : { output: 'standalone' as const }),
 };
 
 export default config;

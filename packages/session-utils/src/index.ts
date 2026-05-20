@@ -40,7 +40,7 @@ export class JwtVerifier {
   async verify(token: string): Promise<NextClaims> {
     const { payload } = await jwtVerify(token, this.jwks, {
       issuer: this.config.issuer,
-      audience: [...this.config.audience],
+      audience: Array.isArray(this.config.audience) ? this.config.audience : [this.config.audience],
       algorithms: ['RS256'],
       clockTolerance: 30,
     });
