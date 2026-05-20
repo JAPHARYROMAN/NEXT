@@ -1,1 +1,5 @@
-{ "extends": "@next/config/tsconfig/library", "include": ["src/**/*"] }
+{
+  "extends": "@next/config/tsconfig/library",
+  "include": ["src/**/*"],
+  "exclude": ["src/__generated__/**/*"]
+}
