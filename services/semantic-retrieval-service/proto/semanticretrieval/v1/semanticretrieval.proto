@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package next.semanticretrieval.v1;
+
+import "buf/validate/validate.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/semanticretrieval/v1;semanticretrievalv1";
+
+// SemanticRetrievalService serves vector recall over the embedding collections.
+service SemanticRetrievalService {
+  rpc Query(QueryRequest) returns (QueryResponse);
+  rpc Similar(SimilarRequest) returns (SimilarResponse);
+}
+
+message RetrievalFilters {
+  string region          = 1;
+  string language        = 2;
+  uint32 freshness_hours = 3;   // 0 = no freshness bound
+  bool   exclude_held    = 4;   // drop safety-held content
+}
+
+message Match {
+  string content_id = 1;
+  string creator_id = 2;
+  double distance   = 3;   // cosine distance
+}
+
+message QueryRequest {
+  string collection        = 1 [(buf.validate.field).string.min_len = 1];  // content|creator|community
+  repeated float embedding = 2;
+  RetrievalFilters filters = 3;
+  uint32 k                 = 4 [(buf.validate.field).uint32.lte = 500];
+}
+message QueryResponse { repeated Match matches = 1; }
+
+message SimilarRequest {
+  string content_id = 1 [(buf.validate.field).string.min_len = 1];
+  uint32 k          = 2 [(buf.validate.field).uint32.lte = 500];
+}
+message SimilarResponse { repeated Match matches = 1; }

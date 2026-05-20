@@ -1,0 +1,36 @@
+syntax = "proto3";
+
+package next.events.recommendation.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/next/events/recommendation/v1;recommendationeventsv1";
+
+// RecommendationServed — emitted once per served slate. The arm vector + per-item
+// score breakdown make the slate replayable and attributable in ClickHouse.
+// Partition key: user_id.
+message RecommendationServed {
+  string event_id  = 1 [(buf.validate.field).string.uuid = true];
+  google.protobuf.Timestamp emitted_at = 2;
+
+  string user_id    = 3 [(buf.validate.field).string.uuid = true];
+  string session_id = 4 [(buf.validate.field).string.uuid = true];
+  string surface    = 5 [(buf.validate.field).string.min_len = 1];  // home|watch_next|explore|chaos
+  string mode       = 6;   // precision|discovery|chaos
+  double exploration_appetite = 7;
+
+  repeated ServedItem items = 8;
+  repeated string experiment_arms = 9;
+}
+
+message ServedItem {
+  string content_id  = 1 [(buf.validate.field).string.min_len = 1];
+  string creator_id  = 2 [(buf.validate.field).string.uuid = true];
+  uint32 position    = 3;
+  double relevance   = 4;
+  double novelty     = 5;
+  double final_score = 6;
+  bool   exploration = 7;   // injected to satisfy the exploration floor
+  repeated string sources = 8;
+}

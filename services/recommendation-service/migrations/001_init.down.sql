@@ -1,0 +1,3 @@
+DROP TABLE IF EXISTS feedback;
+DROP TABLE IF EXISTS slate_items;
+DROP TABLE IF EXISTS served_slates;

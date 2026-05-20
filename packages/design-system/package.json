@@ -11,8 +11,20 @@
     ".": "./src/index.ts",
     "./tokens": "./src/tokens.ts",
     "./themes": "./src/themes.ts",
+    "./motion": "./src/motion.ts",
+    "./breakpoints": "./src/breakpoints.ts",
+    "./a11y": "./src/a11y.ts",
+    "./typography": "./src/typography.ts",
     "./tokens.css": "./src/tokens.css"
   },
-  "scripts": { "lint": "eslint src", "typecheck": "tsc --noEmit" },
-  "devDependencies": { "@next/config": "workspace:*", "typescript": "catalog:" }
+  "scripts": {
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "devDependencies": {
+    "@next/config": "workspace:*",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
 }

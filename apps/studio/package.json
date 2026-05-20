@@ -17,8 +17,12 @@
     "@next/auth-sdk": "workspace:*",
     "@next/design-system": "workspace:*",
     "@next/feature-flags": "workspace:*",
+    "@next/frontend-utils": "workspace:*",
+    "@next/icons": "workspace:*",
+    "@next/layout-engine": "workspace:*",
     "@next/ui": "workspace:*",
     "@tanstack/react-query": "catalog:",
+    "clsx": "^2.1.1",
     "framer-motion": "catalog:",
     "idb-keyval": "^6.2.1",
     "next": "catalog:",
@@ -30,7 +34,11 @@
   "devDependencies": {
     "@next/config": "workspace:*",
     "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "autoprefixer": "catalog:",
+    "postcss": "catalog:",
     "tailwindcss": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

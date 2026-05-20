@@ -24,6 +24,13 @@ members = [
     "ai/highlight-detection",
     "ai/semantic-indexing",
     "ai/multimodal-tagging",
+    "ai/embedding-pipelines",
+    "ai/ranking-models",
+    "ai/discovery-models",
+    "ai/feed-intelligence",
+    "ai/interest-graph",
+    "ai/creator-affinity",
+    "ai/semantic-clustering",
     "packages/python/*",
 ]
 

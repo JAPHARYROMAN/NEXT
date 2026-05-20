@@ -13,11 +13,13 @@ use (
 	./services/analytics-service
 	./services/api-gateway
 	./services/auth-service
+	./services/candidate-generation-service
 	./services/cdn-routing-service
 	./services/clip-generation-service
 	./services/community-service
 	./services/creator-identity-service
 	./services/device-graph-service
+	./services/discovery-service
 	./services/event-gateway
 	./services/feed-service
 	./services/identity-graph-service
@@ -31,10 +33,13 @@ use (
 	./services/notification-auth-service
 	./services/notification-service
 	./services/payment-service
+	./services/personalization-service
 	./services/playback-service
 	./services/profile-service
+	./services/ranking-service
 	./services/recommendation-service
 	./services/search-service
+	./services/semantic-retrieval-service
 	./services/session-service
 	./services/subtitle-service
 	./services/thumbnail-service
