@@ -34,12 +34,16 @@ func main() {
 	if err != nil {
 		log.Fatalf("dial auth: %v", err)
 	}
-	defer authConn.Close()
+	defer func() {
+		_ = authConn.Close()
+	}()
 	profileConn, err := grpc.NewClient("passthrough:///"+*profileAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatalf("dial profile: %v", err)
 	}
-	defer profileConn.Close()
+	defer func() {
+		_ = profileConn.Close()
+	}()
 
 	authClient := authv1.NewUserServiceClient(authConn)
 	profileClient := profilev1.NewProfileServiceClient(profileConn)

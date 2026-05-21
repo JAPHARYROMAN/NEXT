@@ -3,6 +3,7 @@ import { existsSync } from 'node:fs';
 import path from 'node:path';
 
 const command = process.argv[2] ?? 'test';
+const golangciLint = process.env.GOLANGCI_LINT ?? 'golangci-lint';
 
 const work = JSON.parse(execFileSync('go', ['work', 'edit', '-json'], { encoding: 'utf8' }));
 
@@ -38,6 +39,15 @@ for (const entry of work.Use ?? []) {
   if (command === 'test') {
     console.log(`==> ${rel}: go test -coverprofile=coverage.out ./...`);
     execFileSync('go', ['test', '-coverprofile=coverage.out', './...'], {
+      cwd: dir,
+      stdio: 'inherit',
+    });
+    continue;
+  }
+
+  if (command === 'lint') {
+    console.log(`==> ${rel}: ${golangciLint} run --timeout 5m ./...`);
+    execFileSync(golangciLint, ['run', '--timeout', '5m', './...'], {
       cwd: dir,
       stdio: 'inherit',
     });

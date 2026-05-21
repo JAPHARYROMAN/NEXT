@@ -97,7 +97,6 @@ func (p *Postgres) UpdateProfile(ctx context.Context, userID uuid.UUID, handle, 
 	if bio != nil {
 		sets = append(sets, fmt.Sprintf("bio = $%d", idx))
 		args = append(args, *bio)
-		idx++
 	}
 	if len(sets) == 0 {
 		return p.GetProfile(ctx, userID)

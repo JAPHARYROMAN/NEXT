@@ -130,7 +130,7 @@ func stageRerank(in []Scored, appetite float64, limit int) ([]Scored, int) {
 	nw := NoveltyWeight(appetite)
 	for i := range in {
 		in[i].FinalScore = (1-nw)*in[i].Relevance + nw*in[i].Novelty
-		in[i].Exploration = in[i].Candidate.isExplorationSourced() || in[i].Novelty >= 0.6
+		in[i].Exploration = in[i].isExplorationSourced() || in[i].Novelty >= 0.6
 	}
 	sort.SliceStable(in, func(i, j int) bool { return in[i].FinalScore > in[j].FinalScore })
 

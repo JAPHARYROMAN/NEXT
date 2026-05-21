@@ -235,3 +235,48 @@ the CI script.
 The only accepted breaking output while comparing Phase 13 `develop` to the older `main` baseline is
 the ADR 0042 `go_package` correction for
 `packages/events/schemas/auth/v1/user_registered.proto`. Any other `buf breaking` output fails CI.
+
+---
+
+## Phase 13 CI Toolchain Alignment — 2026-05-21
+
+PR #3 validation reached repository checks after the proto and Terraform unblock, then failed on
+toolchain mismatches rather than product behavior:
+
+- TypeScript CI used Node `22.10.0`, while the locked dependency graph contains
+  `eslint-visitor-keys@5.0.1`, which requires `^20.19.0 || ^22.13.0 || >=24`. Runtime pins now use
+  Node `22.13.0` in `.mise.toml` and `.nvmrc`, and the root package engine is aligned to
+  `>=22.13.0`.
+- Go CI used `golangci-lint` `v1.61.0`, whose binary was built with Go 1.23 and cannot lint a repo
+  targeting Go 1.25. CI now installs `golangci-lint` `v2.12.2` with the repo Go toolchain and runs
+  it through the module-aware `scripts/go-work-run.mjs lint` path, matching the Go workspace shape
+  instead of using invalid root-level `./services/...` patterns.
+- Rust CI relies on `rustfmt` and `clippy`; the Rust job now installs those components explicitly
+  before running `cargo fmt`, `cargo clippy`, and `cargo test`. `rust-toolchain.toml` already
+  declares the same required components. Once `rustfmt` was available locally, `cargo fmt --check`
+  exposed one existing formatting diff in `packages/rust/telemetry/src/lib.rs`; that file was
+  reformatted with `cargo fmt` only.
+- Python CI used `uv sync --all-packages`, but the pinned uv `0.4.27` does not support that flag.
+  The uv pin is now `0.11.15`, preserving the existing all-workspace Python verification command
+  instead of weakening Python checks.
+
+No verification job was disabled or skipped.
+
+Local Windows Rust verification caveat:
+
+- `cargo fmt --all -- --check` passes.
+- `cargo clippy --workspace --all-targets -- -D warnings` and
+  `cargo test --workspace --no-fail-fast` both stop before checking project code because vendored
+  OpenSSL cannot find `perl` on this Windows host. CMake is available locally, but Strawberry Perl
+  installation through `winget` did not complete within the local timeout. The CI Rust job runs on
+  Ubuntu, keeps `cargo fmt`, `cargo clippy`, and `cargo test` enabled, and now explicitly installs
+  the required Rust components.
+
+Local Windows Python verification caveat:
+
+- `uv --version` reports `0.11.15`, confirming the pinned version supports
+  `uv sync --all-packages`.
+- `uv sync --all-packages --dry-run` resolves the workspace but cannot install
+  `tokenspeed-mla==0.1.2` on Windows because that package publishes Linux wheels only. The CI Python
+  job runs on Ubuntu, so this local platform limitation does not require weakening Python
+  verification.

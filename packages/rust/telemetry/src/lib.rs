@@ -49,7 +49,9 @@ pub fn init(cfg: Config) -> Result<(), InitError> {
         )
         .with_trace_config(
             trace::Config::default()
-                .with_sampler(Sampler::ParentBased(Box::new(Sampler::TraceIdRatioBased(0.01))))
+                .with_sampler(Sampler::ParentBased(Box::new(Sampler::TraceIdRatioBased(
+                    0.01,
+                ))))
                 .with_resource(resource),
         )
         .install_batch(runtime::Tokio)?;

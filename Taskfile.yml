@@ -122,7 +122,8 @@ tasks:
     cmds: ["pnpm turbo run lint"]
 
   lint:go:
-    cmds: ["golangci-lint run ./..."]
+    deps: [codegen:proto, codegen:gqlgen]
+    cmds: ["node scripts/go-work-run.mjs lint"]
 
   lint:rust:
     cmds: ["cargo clippy --workspace --all-targets -- -D warnings"]
