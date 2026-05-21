@@ -235,3 +235,44 @@ the CI script.
 The only accepted breaking output while comparing Phase 13 `develop` to the older `main` baseline is
 the ADR 0042 `go_package` correction for
 `packages/events/schemas/auth/v1/user_registered.proto`. Any other `buf breaking` output fails CI.
+
+### Follow-up CI toolchain fixes
+
+The PR validation run after the initial unblock confirmed `proto` and `terraform` green, then
+exposed additional CI setup mismatches:
+
+- Node was pinned to `22.10.0`, but the locked TypeScript dependency graph includes packages that
+  require `^20.19.0 || ^22.13.0 || >=24`. `.mise.toml` now pins Node `22.13.0`.
+- `uv sync --all-packages` is valid for the current uv CLI but not for the old pinned `0.4.27`
+  binary. `.mise.toml` now pins uv `0.11.15`, matching the workspace command policy already used in
+  `Taskfile.yml`, `scripts/bootstrap.sh`, and CI.
+- The Rust toolchain file declares `rustfmt` and `clippy`, but CI's mise-installed Rust did not have
+  those components available at runtime. The Rust job now installs `rustfmt` and `clippy` explicitly
+  before running `cargo fmt`, `cargo clippy`, and `cargo test`.
+- `golangci-lint` `v1.61.0` was built with Go 1.23 and cannot lint a repository targeting Go 1.25.
+  The Go job now uses `golangci/golangci-lint-action@v9.2.0` with `golangci-lint` `v2.12.2`.
+
+Local verification after these CI-only changes:
+
+| Command                                                            | Result         |
+| ------------------------------------------------------------------ | -------------- |
+| `buf lint`                                                         | PASS           |
+| `node scripts/proto/buf-breaking-common-modules.mjs --against ...` | PASS           |
+| `terraform fmt -check -recursive infrastructure/terraform`         | PASS           |
+| `task --version`                                                   | PASS           |
+| `pnpm install --frozen-lockfile`                                   | PASS           |
+| `pnpm turbo run lint typecheck test build`                         | PASS           |
+| `node scripts/go-work-run.mjs test ./...`                          | PASS           |
+| `rustup component add rustfmt clippy`                              | PASS           |
+| `cargo fmt --all -- --check`                                       | FAIL           |
+| `uv sync --all-packages --dry-run`                                 | FAIL           |
+| `mise install`                                                     | LOCAL ENV FAIL |
+
+`cargo fmt --all -- --check` now runs locally and reports a formatting diff in
+`packages/rust/telemetry/src/lib.rs`. That is a Rust product-code formatting issue, not a CI
+configuration issue, and remains unresolved under the "CI/tooling/docs only" constraint.
+
+`uv sync --all-packages --dry-run` now reaches dependency resolution locally, proving the CLI flag is
+valid with the updated uv pin. It fails on Windows because `tokenspeed-mla==0.1.2` publishes Linux
+wheels but no Windows wheel; the PR CI runner is Linux. `mise install` remains unverified locally
+because `mise` is not installed in this Windows shell; PR CI already verifies `jdx/mise-action`.
