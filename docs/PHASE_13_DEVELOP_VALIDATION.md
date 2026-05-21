@@ -279,7 +279,8 @@ PR #3 follow-up from CI run `26245088514`:
 - The TypeScript job passed `pnpm install --frozen-lockfile` and
   `pnpm turbo run lint typecheck test build`, then hung while uploading `**/coverage/**`. The
   coverage artifact path is now scoped to `apps/**/coverage/**` and `packages/**/coverage/**`, with
-  generated and dependency folders excluded and no-coverage runs ignored.
+  generated and dependency folders excluded. The upload step now runs only when matching coverage
+  files exist, so missing coverage artifacts cannot hang or fail a successful verification run.
 
 Local Windows Rust verification caveat:
 

@@ -62,7 +62,7 @@ jobs:
       - run: pnpm install --frozen-lockfile
       - run: pnpm turbo run lint typecheck test build
       - uses: actions/upload-artifact@v4
-        if: always()
+        if: ${{ always() && hashFiles('apps/**/coverage/**', 'packages/**/coverage/**') != '' }}
         with:
           name: ts-coverage
           path: |
