@@ -27,10 +27,6 @@ for (const entry of work.Use ?? []) {
       console.log(`==> ${rel} (skipped: no Go packages)`);
       continue;
     }
-    if (stderr.includes('no required module provides package')) {
-      console.log(`==> ${rel} (skipped: unresolved generated package)`);
-      continue;
-    }
     throw error;
   }
 

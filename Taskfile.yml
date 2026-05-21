@@ -82,7 +82,7 @@ tasks:
     cmds: ["pnpm turbo run test"]
 
   test:go:
-    deps: [codegen:proto]
+    deps: [codegen:proto, codegen:gqlgen]
     cmds: ["node scripts/go-work-run.mjs test"]
 
   test:rust:
@@ -96,6 +96,7 @@ tasks:
     desc: "Regenerate proto / GraphQL / OpenAPI clients"
     cmds:
       - task: codegen:proto
+      - task: codegen:gqlgen
       - task: codegen:graphql
 
   codegen:proto:
@@ -107,6 +108,10 @@ tasks:
   codegen:graphql:
     cmds:
       - pnpm --dir packages/api-client exec graphql-codegen --config codegen.ts
+
+  codegen:gqlgen:
+    cmds:
+      - go -C services/api-gateway run github.com/99designs/gqlgen generate
 
   # ---- Lint ----
   lint:
