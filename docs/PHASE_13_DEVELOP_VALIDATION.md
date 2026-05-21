@@ -204,3 +204,28 @@ CI-hardening follow-up (non-blocking): add a `develop` trigger and/or `workflow_
 `ci.yml` so future `develop` commits are validated without needing a PR.
 
 _Final check: no code modified; no merge to `main`; `develop` not updated; no force-push._
+
+---
+
+## Phase 13 CI Unblock Policy — 2026-05-21
+
+### Tool setup
+
+`.mise.toml` now installs Task through the Aqua registry key `aqua:go-task/task`. The previous
+`go-task` key is not present in the mise registry and caused CI setup to fail before repository
+verification could run.
+
+### Buf breaking policy
+
+CI still runs `buf lint`, `buf generate`, and generated Go drift checks. For pull requests into
+`main`, breaking checks now run module-by-module for proto modules that exist in both the PR and
+the `main` baseline. This preserves breaking checks for existing contracts while avoiding the Buf
+workspace image-count failure when `develop` adds new proto modules before `main` has those modules.
+
+New proto modules are not exempt from governance: they are linted and generated in the PR, and their
+breaking-change baseline starts after the module lands on `main`. Removing a baseline module fails
+the CI script.
+
+The only accepted breaking output while comparing Phase 13 `develop` to the older `main` baseline is
+the ADR 0042 `go_package` correction for
+`packages/events/schemas/auth/v1/user_registered.proto`. Any other `buf breaking` output fails CI.

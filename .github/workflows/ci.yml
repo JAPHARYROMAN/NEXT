@@ -125,9 +125,12 @@ jobs:
       - uses: bufbuild/buf-lint-action@v1
       - run: buf generate
       - run: git diff --exit-code -- gen/go
-      - uses: bufbuild/buf-breaking-action@v1
+      - name: fetch main proto baseline
         if: github.event_name == 'pull_request'
-        with: { against: "https://github.com/${{ github.repository }}.git#branch=main" }
+        run: git fetch origin main:refs/remotes/origin/main --depth=1
+      - name: buf breaking common modules
+        if: github.event_name == 'pull_request'
+        run: node scripts/proto/buf-breaking-common-modules.mjs --against "https://github.com/${{ github.repository }}.git#branch=main" --against-ref origin/main
 
   # ----- Terraform fmt/validate (plan handled in separate workflow) ------------
   terraform:
