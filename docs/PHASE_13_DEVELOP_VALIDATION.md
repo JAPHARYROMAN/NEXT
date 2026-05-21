@@ -59,3 +59,148 @@ Generated GraphQL server code is not committed:
 ## Main Eligibility
 
 This blocker no longer prevents main promotion. Main eligibility still depends on the remaining Phase 13 gates, especially independent Rust CI confirmation on Ubuntu.
+
+---
+
+## Independent Review (Claude) — 2026-05-20
+
+Codex's fix `8b7648e fix(api-gateway): restore go verification` (on `agent/codex-stabilization`,
+= `develop`@`b70f50a` + 1 commit) was independently re-verified in a clean worktree at `8b7648e`.
+
+### Review checklist
+
+| #   | Check                                                               | Result  | Evidence                                                                                                                                                                                                                                                                                  |
+| --- | ------------------------------------------------------------------- | ------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1   | api-gateway no longer silently skipped                              | ✅ PASS | With `internal/gql/generated/` removed, `node scripts/go-work-run.mjs test ./...` **exits 1** (throws on the unresolved package) instead of skipping. After codegen, the run prints `==> ./services/api-gateway: go test …` — it is in the tested set.                                    |
+| 2   | gqlgen / codegen policy respected                                   | ✅ PASS | `git ls-files …/internal/gql/generated` → 0 tracked files; `go -C services/api-gateway run github.com/99designs/gqlgen generate` (= `codegen:gqlgen`) regenerates `generated.go`, exit 0. Generated output stays git-ignored via `**/generated/`.                                         |
+| 3   | `go-work-run.mjs` returns nonzero on real runnable-service failures | ✅ PASS | Codex removed the `no required module provides package → skip` branch; the runner now falls through to `throw error` → process exits 1. Verified: pre-codegen run exited 1. `go test` failures also propagate (`execFileSync` throws).                                                    |
+| 4   | `services/api-gateway` passes `go test ./...`                       | ✅ PASS | `cd services/api-gateway && go test ./...` → exit 0; all 5 packages compile. The mangled `Me` doc comment is fixed and the previously-undefined helpers (`derefString`, `translateGRPCError`, `tryFetchProfile`, `toFollowersConnection`) now live in `internal/gql/resolver/helpers.go`. |
+| 5   | This report updated                                                 | ✅ PASS | This section.                                                                                                                                                                                                                                                                             |
+
+### Post-codegen workspace run
+
+`node scripts/go-work-run.mjs test ./...` after `codegen:gqlgen` → **exit 0**; api-gateway tested
+(5 packages), genuine scaffolds explicitly reported as `skipped: no Go packages`.
+
+### Residual note on the runner
+
+Codex's minimal change (delete the bad skip branch) satisfies criterion 3. One edge remains: a
+real service whose `go list` returns _"matched no packages"_ would still be skipped silently — not
+the observed bug, but worth a follow-up (a `hasGoSource` guard would close it). Non-blocking.
+
+### Phase 13 status after this review
+
+- **Blocker B-3 (api-gateway does not compile)** — ✅ **RESOLVED & VERIFIED** on
+  `agent/codex-stabilization` @ `8b7648e`.
+- **Important:** `8b7648e` is **not yet on `develop`**. `develop` (`b70f50a`) still contains the
+  broken api-gateway — the verified fix must be integrated into `develop` (Phase-12-style merge)
+  before `develop` itself is sound.
+- **Blocker B-1 (Rust job on Ubuntu)** — ❌ still **UNCONFIRMED**. `ci.yml` is `main`-only and has
+  never run for `develop`; the latest run skipped the `rust` job.
+
+**Overall verdict: NOT MAIN READY.** B-3's fix is verified but not integrated into `develop`;
+B-1 is unconfirmed. Next: integrate `8b7648e` into `develop`, then confirm the Rust job green on
+Ubuntu via the `develop → main` PR's `ci.yml` run.
+
+_Independent review: no product code modified; nothing merged; `develop`/`main` not updated._
+
+---
+
+## Phase 13 Final Main-Readiness Check (Claude) — 2026-05-20
+
+### develop final SHA
+
+`origin/develop` = **`8b7648e8ad5044318a9a1b37db80feea1b52c976`**. The api-gateway fix is now **on
+`develop`** — `develop` and `agent/codex-stabilization` point to the same commit `8b7648e`.
+
+### Can GitHub Actions validate `develop` before `main`?
+
+**Not directly.** `.github/workflows/ci.yml` triggers only on:
+
+```yaml
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+```
+
+It has **no `workflow_dispatch`** and **no `develop` trigger**. A push to `develop` runs **no
+`ci.yml` validation**. `gh run list --workflow=ci.yml` confirms `ci.yml` has **never run for
+`8b7648e` or any `develop` commit**. There is currently **no `develop → main` PR** open.
+
+### Safest validation path — recommended
+
+| Option                           | Assessment                                                                                                                                                                                                                                                                                                                 |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Open PR `develop → main`**     | ✅ **RECOMMENDED.** Triggers `ci.yml` via `pull_request: [main]`; runs every job (ts/go/rust/python/proto/terraform/k8s) on `ubuntu-24.04` against the develop code. Opening a PR is **not** a merge — it is a pure validation gate; `main` is untouched until someone explicitly merges. Requires **no workflow change**. |
+| Temporary `workflow_dispatch`    | Requires editing+committing `ci.yml` to add the trigger; manual run. Workable but a config change.                                                                                                                                                                                                                         |
+| Temporary `develop` push trigger | Requires editing+committing `ci.yml`; "temporary" triggers tend to persist. Reasonable as a _permanent_ CI-hardening improvement, but heavier than the PR for this one validation.                                                                                                                                         |
+
+→ **Open a `develop → main` pull request.** It is the safest, change-free way to get a full
+Ubuntu CI run for `develop`'s code before any merge to `main`.
+
+### Rust job
+
+- **Runner:** `ci.yml` `rust` job has `runs-on: ubuntu-24.04` — ✅ confirmed.
+- **Steps:** `cargo fmt --all -- --check`, `cargo clippy --workspace --all-targets -- -D warnings`,
+  `cargo test --workspace --no-fail-fast`.
+- **Gating:** `if: needs.changes.outputs.rust == 'true'`. A `develop → main` PR diff includes Rust
+  changes (`Cargo.toml`, `rust-toolchain.toml`, `packages/rust/**`), so the `changes` filter will
+  yield `rust: true` and the job **will run** on that PR.
+- **`cargo test --workspace` in CI:** ❌ **UNCONFIRMED** — no CI run has executed the `rust` job
+  for `develop`'s code. Local `cargo test` fails only on a Windows host limitation (vendored
+  `openssl-sys` needs Perl `Locale::Maketext::Simple`) — not a code defect, not representative of
+  Ubuntu. Confirmable **only** by the `develop → main` PR's `ci.yml` run.
+
+### Local verification results — `develop` @ `8b7648e`
+
+`8b7648e` = `b70f50a` (Phase 12 integration HEAD) **+ 1 commit** (`fix(api-gateway): restore go
+verification`). Provenance of the green results:
+
+| Gate                                          | Result                                                     | Source                                           |
+| --------------------------------------------- | ---------------------------------------------------------- | ------------------------------------------------ |
+| `pnpm install --frozen-lockfile`              | ✅ pass                                                    | Phase 12 §1 (`b70f50a`) — unchanged by `8b7648e` |
+| `pnpm turbo run lint`                         | ✅ pass (85/85)                                            | Phase 12 §1 — unchanged                          |
+| `pnpm turbo run typecheck`                    | ✅ pass (86/86)                                            | Phase 12 §1 — unchanged                          |
+| `pnpm turbo run test`                         | ✅ pass (62/62)                                            | Phase 12 §1 — unchanged                          |
+| `pnpm turbo run build`                        | ✅ pass (11/11)                                            | Phase 12 §1 — unchanged                          |
+| `buf lint`                                    | ✅ pass                                                    | Phase 12 §1 — unchanged                          |
+| `task codegen` (proto + graphql + **gqlgen**) | ✅ pass                                                    | re-verified on `8b7648e`                         |
+| `node scripts/go-work-run.mjs test ./...`     | ✅ pass (exit 0) — **api-gateway now tested**, not skipped | re-verified on `8b7648e`                         |
+| `go test ./...` in `services/api-gateway`     | ✅ pass (exit 0)                                           | re-verified on `8b7648e`                         |
+| `buf breaking --against origin/main`          | ⚠️ accepted — one detection, ADR 0042                      | Phase 12 §5                                      |
+| `cargo test --workspace`                      | ⚠️ Windows host limitation; **Ubuntu CI unconfirmed**      | NB-2 / B-1                                       |
+
+### api-gateway blocker (B-3) resolution
+
+✅ **RESOLVED & on `develop`.** Codex `8b7648e` added `internal/gql/resolver/helpers.go`, repaired
+the mangled `Me` doc comment in `schema.resolvers.go`, wired `codegen:gqlgen` into `Taskfile.yml`
+(`codegen` + `test:go` deps), and removed the silent-skip branch from `go-work-run.mjs`.
+Independently re-verified (all 4 review criteria PASS — see the previous section). `develop` no
+longer contains a broken api-gateway.
+
+### Rust CI status
+
+❌ **UNCONFIRMED.** No `ci.yml` run has exercised the `rust` job for `develop`. It must be
+confirmed on Ubuntu via the `develop → main` PR.
+
+### FINAL VERDICT: 🟡 MAIN READY AFTER CI PR
+
+`develop` @ `8b7648e` is **locally green** and **carries no known code blockers** — the api-gateway
+build failure is fixed and verified; all local + integrated gates pass. The **only** remaining
+gate is **CI confirmation on Ubuntu**, which the current `main`-only `ci.yml` cannot provide for a
+`develop` push.
+
+**`develop` is ready to promote to `main` contingent on:**
+
+1. Open a `develop → main` pull request (no code change; not a merge).
+2. `ci.yml` runs all jobs on `ubuntu-24.04`; the **`rust` job** (`cargo fmt`/`clippy`/`test`) and
+   all other jobs must be **green**.
+3. If green → **MAIN READY**, merge the PR. If the `rust` job (or any job) fails → **NOT MAIN
+   READY**, fix and re-run.
+
+CI-hardening follow-up (non-blocking): add a `develop` trigger and/or `workflow_dispatch` to
+`ci.yml` so future `develop` commits are validated without needing a PR.
+
+_Final check: no code modified; no merge to `main`; `develop` not updated; no force-push._
