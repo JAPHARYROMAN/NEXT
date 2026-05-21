@@ -276,6 +276,10 @@ PR #3 follow-up from CI run `26245088514`:
   because no Python tests were collected under `ai/` or `packages/python/`. CI still runs pytest, but
   treats exit 5 as the documented empty-test status until Python tests exist; all real pytest
   failures still fail the job.
+- The TypeScript job passed `pnpm install --frozen-lockfile` and
+  `pnpm turbo run lint typecheck test build`, then hung while uploading `**/coverage/**`. The
+  coverage artifact path is now scoped to `apps/**/coverage/**` and `packages/**/coverage/**`, with
+  generated and dependency folders excluded and no-coverage runs ignored.
 
 Local Windows Rust verification caveat:
 

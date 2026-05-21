@@ -65,7 +65,13 @@ jobs:
         if: always()
         with:
           name: ts-coverage
-          path: "**/coverage/**"
+          path: |
+            apps/**/coverage/**
+            packages/**/coverage/**
+            !**/node_modules/**
+            !**/.next/**
+            !**/dist/**
+          if-no-files-found: ignore
 
   # ----- Go ---------------------------------------------------------------------
   go:
