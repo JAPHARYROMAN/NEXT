@@ -262,6 +262,21 @@ toolchain mismatches rather than product behavior:
 
 No verification job was disabled or skipped.
 
+PR #3 follow-up from CI run `26245088514`:
+
+- Go lint installed `golangci-lint` successfully, but the next Actions step looked for the binary
+  at `$(go env GOPATH)/bin/golangci-lint`, which was not stable under `mise`. CI now installs the
+  binary into `$RUNNER_TEMP/go-bin` and exports the exact path through `$GITHUB_ENV` before invoking
+  the module-aware runner.
+- Rust reached `cargo clippy`, confirming the component install fixed the previous rustfmt issue.
+  The next native build failure was `rdkafka-sys` missing `curl/curl.h`; the Rust job now installs
+  Linux native build prerequisites (`libcurl4-openssl-dev`, `libsasl2-dev`, `pkg-config`, `cmake`,
+  and `perl`) before running fmt, clippy, and test.
+- Python `uv sync`, `ruff`, and `mypy` passed on Ubuntu with `uv 0.11.15`. `pytest` then exited 5
+  because no Python tests were collected under `ai/` or `packages/python/`. CI still runs pytest, but
+  treats exit 5 as the documented empty-test status until Python tests exist; all real pytest
+  failures still fail the job.
+
 Local Windows Rust verification caveat:
 
 - `cargo fmt --all -- --check` passes.
