@@ -13,8 +13,8 @@ kubectl = "1.31.1"
 helm = "3.16.2"
 argocd = "2.13.0"
 "aqua:go-task/task" = "3.39.2"
-"aqua:buf-build/buf" = "1.45.0"
-"aqua:protocolbuffers/protobuf" = "28.3"
+"aqua:bufbuild/buf" = "1.45.0"
+"aqua:protocolbuffers/protobuf/protoc" = "28.3"
 
 [env]
 GOPRIVATE = "github.com/next-ecosystem/*"
@@ -23,3 +23,4 @@ RUST_BACKTRACE = "1"
 [settings]
 experimental = true
 legacy_version_file = true
+python.github_attestations = false

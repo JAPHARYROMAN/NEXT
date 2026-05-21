@@ -215,6 +215,12 @@ _Final check: no code modified; no merge to `main`; `develop` not updated; no fo
 `go-task` key is not present in the mise registry and caused CI setup to fail before repository
 verification could run.
 
+The same CI run also proved the existing Aqua package IDs for Buf and protoc were invalid in mise's
+Aqua registry. `.mise.toml` now uses `aqua:bufbuild/buf` and
+`aqua:protocolbuffers/protobuf/protoc`. Python GitHub artifact attestation is disabled through
+`python.github_attestations = false`, matching mise's documented remediation for the pinned
+Python 3.12.7 build that currently has no GitHub artifact attestation.
+
 ### Buf breaking policy
 
 CI still runs `buf lint`, `buf generate`, and generated Go drift checks. For pull requests into
