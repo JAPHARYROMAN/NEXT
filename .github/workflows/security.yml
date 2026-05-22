@@ -22,15 +22,24 @@ jobs:
         language: [javascript-typescript, go, python]
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        if: matrix.language == 'go'
+        with:
+          go-version-file: go.work
+          cache: false
       - uses: github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
+          build-mode: none
       - uses: github/codeql-action/analyze@v3
 
   dependency-review:
     name: Dependency review
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-24.04
+    # Requires Dependency Graph enabled: Settings → Security → Dependency graph
+    # Until enabled this job is informational only and must not block merges.
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/dependency-review-action@v4
@@ -50,7 +59,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - uses: aquasecurity/trivy-action@0.28.0
+      - uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: fs
           ignore-unfixed: true
@@ -68,4 +77,5 @@ jobs:
         with: { fetch-depth: 0 }
       - uses: gitleaks/gitleaks-action@v2
         env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
