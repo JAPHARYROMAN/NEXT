@@ -52,10 +52,23 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      # OCI image references must be lowercase. ${{ github.repository_owner }}
+      # preserves the GitHub login casing (e.g. JAPHARYROMAN), which is a
+      # valid GitHub login but an invalid OCI reference and causes
+      # `cosign sign` and trivy image scans to fail with malformed digest
+      # errors. Lowercase once here and reuse for metadata, signing, and
+      # scanning so every step targets the same digest.
+      - name: Resolve lowercase image reference
+        id: refs
+        shell: bash
+        run: |
+          owner_lc=$(echo "${{ github.repository_owner }}" | tr '[:upper:]' '[:lower:]')
+          echo "image=ghcr.io/${owner_lc}/next/${{ matrix.service }}" >> "$GITHUB_OUTPUT"
+
       - uses: docker/metadata-action@v5
         id: meta
         with:
-          images: ghcr.io/${{ github.repository_owner }}/next/${{ matrix.service }}
+          images: ${{ steps.refs.outputs.image }}
           tags: |
             type=sha,prefix=sha-
             type=ref,event=branch
@@ -85,11 +98,11 @@ jobs:
 
       # ----- Sign + scan -----
       - uses: sigstore/cosign-installer@v3
-      - run: cosign sign --yes ghcr.io/${{ github.repository_owner }}/next/${{ matrix.service }}@${{ steps.build.outputs.digest }}
+      - run: cosign sign --yes ${{ steps.refs.outputs.image }}@${{ steps.build.outputs.digest }}
 
       - uses: aquasecurity/trivy-action@v0.36.0
         with:
-          image-ref: ghcr.io/${{ github.repository_owner }}/next/${{ matrix.service }}@${{ steps.build.outputs.digest }}
+          image-ref: ${{ steps.refs.outputs.image }}@${{ steps.build.outputs.digest }}
           severity: HIGH,CRITICAL
           ignore-unfixed: true
           exit-code: 1
