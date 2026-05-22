@@ -68,6 +68,11 @@ jobs:
           file: services/_template/Dockerfile
           build-args: |
             SERVICE=${{ matrix.service }}
+            GO_VERSION=1.25.0
+            ALPINE_VERSION=3.22
+            BUF_VERSION=1.45.0
+            PROTOC_GEN_GO_VERSION=v1.34.2
+            PROTOC_GEN_GO_GRPC_VERSION=v1.5.1
             VERSION=${{ github.sha }}
             COMMIT=${{ github.sha }}
           tags: ${{ steps.meta.outputs.tags }}
