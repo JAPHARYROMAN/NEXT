@@ -35,8 +35,17 @@ jobs:
           build-mode: ${{ matrix.language == 'go' && 'manual' || 'none' }}
       # Manual Go build sequence so CodeQL can trace compilation.
       # go-work-run.mjs iterates every workspace module, skipping stub services
-      # that contain no Go source ("matched no packages"). gen/go is committed,
-      # so no extra codegen is required at this stage.
+      # that contain no Go source ("matched no packages"). Generated protobuf
+      # Go code is not committed (gen/go/**/*.go is .gitignored) so it must be
+      # produced via `buf generate` before the build can succeed.
+      - name: Setup buf
+        if: matrix.language == 'go'
+        uses: bufbuild/buf-setup-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Generate Go proto/gRPC stubs
+        if: matrix.language == 'go'
+        run: buf generate
       - name: Build Go workspace for CodeQL tracing
         if: matrix.language == 'go'
         run: node scripts/go-work-run.mjs test
