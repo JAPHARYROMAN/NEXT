@@ -2,12 +2,18 @@
 
 ## Scope
 
-Phase 15E starts the scaffold-service image readiness work without turning
-service shells into fake implementations. The foundation PR adds runtime
-entrypoints for:
+Phase 15E makes the image-build scaffold services runtime-ready without turning
+service shells into fake implementations. PR #14 added runtime entrypoints for:
 
 - `notification-service`
 - `search-service`
+
+This follow-up PR adds runtime entrypoints for:
+
+- `live-service`
+- `community-service`
+- `payment-service`
+- `moderation-service`
 
 No frontend, product workflow, or image workflow behavior is changed.
 
@@ -32,13 +38,35 @@ real domain behavior.
 
 | Service | Phase 15E status | Runtime behavior |
 | --- | --- | --- |
-| `notification-service` | Runtime entrypoint added | Health-only HTTP + gRPC server |
-| `search-service` | Runtime entrypoint added | Health-only HTTP + gRPC server |
+| `notification-service` | Completed in PR #14 | Health-only HTTP + gRPC server |
+| `search-service` | Completed in PR #14 | Health-only HTTP + gRPC server |
+| `live-service` | Completed in this PR | Health-only HTTP + gRPC server |
+| `community-service` | Completed in this PR | Health-only HTTP + gRPC server |
+| `payment-service` | Completed in this PR | Health-only HTTP + gRPC server |
+| `moderation-service` | Completed in this PR | Health-only HTTP + gRPC server |
 
-## Remaining scaffold image blockers
+## Expected image-build outcome
 
-The following image-build matrix services still lack `cmd/server` and remain in
-the service-maturity backlog:
+After this PR merges, every service in the image-build matrix has `cmd/server`.
+The expected matrix result is **15/15 buildable services**:
+
+- `auth-service`
+- `profile-service`
+- `media-service`
+- `upload-service`
+- `live-service`
+- `feed-service`
+- `recommendation-service`
+- `search-service`
+- `community-service`
+- `payment-service`
+- `notification-service`
+- `moderation-service`
+- `analytics-service`
+- `event-gateway`
+- `api-gateway`
+
+The services that remain scaffold-level at the product/domain layer are:
 
 - `live-service`
 - `community-service`
