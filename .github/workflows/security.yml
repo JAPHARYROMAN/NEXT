@@ -43,6 +43,19 @@ jobs:
         uses: bufbuild/buf-setup-action@v1
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
+      # CodeQL ships a wrapped `go` binary at $CODEQL_ACTION_GO_BINARY that
+      # records compilation events for the extractor. Prepend its directory
+      # to PATH so every subsequent `go` invocation (buf, gqlgen, go-work-run)
+      # is traced; otherwise CodeQL reports "no source code seen during build".
+      - name: Enable CodeQL Go tracing wrapper
+        if: matrix.language == 'go'
+        shell: bash
+        run: |
+          if [ -z "${CODEQL_ACTION_GO_BINARY:-}" ]; then
+            echo "CODEQL_ACTION_GO_BINARY is unset; CodeQL Go tracing was not initialised." >&2
+            exit 1
+          fi
+          echo "$(dirname "$CODEQL_ACTION_GO_BINARY")" >> "$GITHUB_PATH"
       - name: Generate Go proto/gRPC stubs
         if: matrix.language == 'go'
         run: buf generate
