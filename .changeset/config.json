@@ -13,6 +13,6 @@
     "@next/admin",
     "@next/studio",
     "@next/tv",
-    "@next/immersive"
+    "@next/immersive-app"
   ]
 }
