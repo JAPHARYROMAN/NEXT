@@ -91,9 +91,9 @@ No Trivy rule was disabled. No vulnerability was suppressed or ignored.
   buildable service images and build failures on 6 scaffold services.
 - Exact run image digests were scanned locally with `aquasec/trivy:0.70.0`.
 - A representative patched image build passed:
-  `docker build -f services/_template/Dockerfile --build-arg SERVICE=auth-service -t next-auth-service:phase15d-go12510 .`
+  `docker build -f services/_template/Dockerfile --build-arg SERVICE=auth-service -t next-auth-service:<example-tag> .`
 - A patched local Trivy scan passed with zero HIGH/CRITICAL findings:
-  `aquasec/trivy:0.70.0 image --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed next-auth-service:phase15d-go12510`
+  `aquasec/trivy:0.70.0 image --scanners vuln --severity HIGH,CRITICAL --ignore-unfixed next-auth-service:<example-tag>`
 - `actionlint .github/workflows/image-build.yml` passed.
 - `git diff --check` passed.
 - `security-events: write` is present in `.github/workflows/image-build.yml`.
