@@ -6,7 +6,7 @@ on:
   push:
     branches: [main]
   schedule:
-    - cron: "0 6 * * 1"   # weekly Mon 06:00 UTC
+    - cron: "0 6 * * 1" # weekly Mon 06:00 UTC
 
 permissions:
   contents: read
@@ -18,18 +18,69 @@ jobs:
     name: CodeQL
     runs-on: ubuntu-24.04
     strategy:
+      fail-fast: false
       matrix:
         language: [javascript-typescript, go, python]
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        if: matrix.language == 'go'
+        with:
+          go-version-file: go.work
+          cache: false
       - uses: github/codeql-action/init@v3
-        with: { languages: ${{ matrix.language }} }
+        with:
+          languages: ${{ matrix.language }}
+          # Go requires 'manual' or 'autobuild'; interpreted languages use 'none'.
+          build-mode: ${{ matrix.language == 'go' && 'manual' || 'none' }}
+      # Manual Go build sequence so CodeQL can trace compilation.
+      # Generated protobuf Go code is not committed (gen/go/**/*.go is
+      # .gitignored) and gqlgen output for api-gateway is also generated, so
+      # both must be produced before tracing the workspace build.
+      - name: Setup buf
+        if: matrix.language == 'go'
+        uses: bufbuild/buf-setup-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Generate Go proto/gRPC stubs
+        if: matrix.language == 'go'
+        run: buf generate
+      - name: Generate gqlgen Go bindings
+        if: matrix.language == 'go'
+        run: go -C services/api-gateway run github.com/99designs/gqlgen generate
+      # Build every workspace module via the CodeQL-traced go binary
+      # ($CODEQL_ACTION_GO_BINARY is a bash wrapper around the real toolchain
+      # that records compilation events). Invoking the wrapper directly
+      # guarantees the extractor captures every package, which `go test`
+      # through a node helper did not achieve.
+      - name: Build Go workspace for CodeQL tracing
+        if: matrix.language == 'go'
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -z "${CODEQL_ACTION_GO_BINARY:-}" ]; then
+            echo "CODEQL_ACTION_GO_BINARY is unset; CodeQL Go tracing was not initialised." >&2
+            exit 1
+          fi
+          GO_BIN="$CODEQL_ACTION_GO_BINARY"
+          for mod in $("$GO_BIN" work edit -json | jq -r '.Use[].DiskPath'); do
+            if [ ! -f "$mod/go.mod" ]; then continue; fi
+            if ! ( cd "$mod" && "$GO_BIN" list ./... >/dev/null 2>&1 ); then
+              echo "==> $mod (skipped: no Go packages)"
+              continue
+            fi
+            echo "==> $mod: go build ./..."
+            ( cd "$mod" && "$GO_BIN" build ./... )
+          done
       - uses: github/codeql-action/analyze@v3
 
   dependency-review:
     name: Dependency review
     if: github.event_name == 'pull_request'
     runs-on: ubuntu-24.04
+    # Requires Dependency Graph enabled: Settings → Security → Dependency graph
+    # Until enabled this job is informational only and must not block merges.
+    continue-on-error: true
     steps:
       - uses: actions/checkout@v4
       - uses: actions/dependency-review-action@v4
@@ -49,7 +100,7 @@ jobs:
     runs-on: ubuntu-24.04
     steps:
       - uses: actions/checkout@v4
-      - uses: aquasecurity/trivy-action@0.28.0
+      - uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: fs
           ignore-unfixed: true
@@ -66,4 +117,6 @@ jobs:
       - uses: actions/checkout@v4
         with: { fetch-depth: 0 }
       - uses: gitleaks/gitleaks-action@v2
-        env: { GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }} }
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITLEAKS_LICENSE: ${{ secrets.GITLEAKS_LICENSE }}
