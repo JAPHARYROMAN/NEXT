@@ -46,6 +46,9 @@ jobs:
       - name: Generate Go proto/gRPC stubs
         if: matrix.language == 'go'
         run: buf generate
+      - name: Generate gqlgen Go bindings
+        if: matrix.language == 'go'
+        run: go -C services/api-gateway run github.com/99designs/gqlgen generate
       - name: Build Go workspace for CodeQL tracing
         if: matrix.language == 'go'
         run: node scripts/go-work-run.mjs test
