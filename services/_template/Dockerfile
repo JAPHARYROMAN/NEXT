@@ -2,7 +2,7 @@
 # Canonical Dockerfile for NEXT Go services.
 # Each service includes a one-line Dockerfile that ARGs SERVICE=<name> and inherits this.
 
-ARG GO_VERSION=1.25.0
+ARG GO_VERSION=1.25.10
 ARG ALPINE_VERSION=3.22
 ARG BUF_VERSION=1.45.0
 ARG PROTOC_GEN_GO_VERSION=v1.34.2
