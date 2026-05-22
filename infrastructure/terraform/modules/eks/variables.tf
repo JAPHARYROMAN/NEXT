@@ -5,10 +5,6 @@ variable "kubernetes_version" {
   type    = string
   default = "1.31"
 }
-variable "public_access_cidrs" {
-  type    = list(string)
-  default = ["0.0.0.0/0"]
-}
 variable "enable_karpenter" {
   type    = bool
   default = true
