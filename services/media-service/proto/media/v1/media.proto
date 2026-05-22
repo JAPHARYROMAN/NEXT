@@ -10,6 +10,7 @@ option go_package = "github.com/next-ecosystem/next/gen/go/media/v1;mediav1";
 // MediaService owns the Video aggregate + its processing state machine.
 service MediaService {
   rpc Ingest(IngestRequest) returns (IngestResponse);
+  rpc RegisterUpload(RegisterUploadRequest) returns (RegisterUploadResponse);
   rpc Get(GetRequest) returns (GetResponse);
   rpc Publish(PublishRequest) returns (PublishResponse);
   rpc AdvanceState(AdvanceStateRequest) returns (AdvanceStateResponse);
@@ -29,6 +30,9 @@ message Video {
   repeated Rendition renditions = 8;
   google.protobuf.Timestamp published_at = 9;
   google.protobuf.Timestamp created_at   = 10;
+  string upload_id    = 11;
+  string content_type = 12;
+  string original_filename = 13;
 }
 
 message Rendition {
@@ -47,6 +51,17 @@ message IngestRequest {
   string source_key = 3 [(buf.validate.field).string.min_len = 1];
 }
 message IngestResponse { Video video = 1; }
+
+message RegisterUploadRequest {
+  string upload_id  = 1 [(buf.validate.field).string.min_len = 1];
+  string creator_id = 2 [(buf.validate.field).string.min_len = 1];
+  string object_key = 3 [(buf.validate.field).string.min_len = 1];
+  string content_type = 4 [(buf.validate.field).string.min_len = 1, (buf.validate.field).string.max_len = 128];
+  string original_filename = 5 [(buf.validate.field).string.max_len = 255];
+  string title = 6 [(buf.validate.field).string.max_len = 200];
+  int64  total_bytes = 7 [(buf.validate.field).int64.gt = 0];
+}
+message RegisterUploadResponse { Video video = 1; }
 
 message GetRequest { string video_id = 1 [(buf.validate.field).string.min_len = 1]; }
 message GetResponse { Video video = 1; }

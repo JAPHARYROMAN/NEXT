@@ -1,0 +1,25 @@
+syntax = "proto3";
+
+package next.events.media.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/next/events/media/v1;mediaeventsv1";
+
+// MediaUploaded is emitted after upload-service finalizes an object that can be
+// registered by media-service. Category stream: media.events.v1.
+// Partition key: upload_id.
+message MediaUploaded {
+  string event_id = 1 [(buf.validate.field).string.uuid = true];
+  google.protobuf.Timestamp emitted_at = 2 [(buf.validate.field).required = true];
+
+  string upload_id = 3 [(buf.validate.field).string.min_len = 1];
+  string creator_id = 4 [(buf.validate.field).string.min_len = 1];
+  string object_key = 5 [(buf.validate.field).string.min_len = 1];
+  string content_type = 6 [(buf.validate.field).string.min_len = 1, (buf.validate.field).string.max_len = 128];
+  string filename = 7 [(buf.validate.field).string.max_len = 255];
+  string title = 8 [(buf.validate.field).string.max_len = 200];
+  int64 total_bytes = 9 [(buf.validate.field).int64.gt = 0];
+  string media_id = 10;
+}
