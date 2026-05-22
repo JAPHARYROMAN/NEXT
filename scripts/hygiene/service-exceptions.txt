@@ -1,6 +1,53 @@
-# NEXT — approved /services/* layout exceptions.
+# NEXT - approved /services/* layout exceptions.
 # One service directory name per line. Lines starting with `#` are comments.
 # Entries here are skipped by scripts/hygiene/validate-service-layout.sh.
 #
 # Adding an entry requires an architecture review note (Claude).
 # Prefer fixing the service layout over adding an exception.
+#
+# Phase 14 classification note:
+#   docs/service-layout-exceptions.md
+#
+# These entries are explicit, temporary exceptions. They are not a global
+# weakening of the validator. Do not add real drift here; real drift should keep
+# failing until the service is realigned to ADR 0038.
+
+# Not a deployable service; template material belongs in an ADR 0038 follow-up.
+_template
+
+# Approved structural exception: edge GraphQL ingress, no service datastore.
+api-gateway
+
+# Scaffold-only identity/security services; remove when implementation work
+# adds real domain logic.
+access-control-service
+account-recovery-service
+creator-identity-service
+device-graph-service
+identity-graph-service
+notification-auth-service
+trust-service
+
+# Future implementation service shells with README/proto/go.mod only or missing
+# the documented Go control plane. Remove each entry as the service becomes
+# functional.
+candidate-generation-service
+cdn-routing-service
+clip-generation-service
+community-service
+discovery-service
+live-service
+media-analytics-service
+media-metadata-service
+media-search-service
+moderation-service
+notification-service
+payment-service
+personalization-service
+playback-service
+ranking-service
+search-service
+semantic-retrieval-service
+subtitle-service
+thumbnail-service
+video-segmentation-service
