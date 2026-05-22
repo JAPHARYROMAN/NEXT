@@ -5,21 +5,27 @@
 # Adding an entry requires an architecture review note (Claude).
 # Prefer fixing the service layout over adding an exception.
 #
-# Phase 14 classification note:
+# Full classification — violation, owner, priority, reason, follow-up:
 #   docs/service-layout-exceptions.md
 #
-# These entries are explicit, temporary exceptions. They are not a global
-# weakening of the validator. Do not add real drift here; real drift should keep
-# failing until the service is realigned to ADR 0038.
+# Exception classes (see the doc for policy):
+#   - Approved exception   : permanent; recognised non-CRUD family / not a service.
+#   - Scaffold-only        : temporary; README marks the service `scaffolded`.
+#                            Remove when real internal/* domain packages appear.
+#   - Future implementation: temporary; README/proto shell only.
+#                            Remove when the service is built.
+# Real drift is NEVER listed here — it must keep failing the validator until the
+# service is realigned to ADR 0038.
 
-# Not a deployable service; template material belongs in an ADR 0038 follow-up.
+# --- Approved exceptions (permanent) -----------------------------------------
+# Not a deployable service; the service scaffolding template.
 _template
-
-# Approved structural exception: edge GraphQL ingress, no service datastore.
+# Edge GraphQL Federation ingress (ADR 0006); no service datastore by design.
 api-gateway
 
-# Scaffold-only identity/security services; remove when implementation work
-# adds real domain logic.
+# --- Scaffold-only (temporary) -----------------------------------------------
+# README status: scaffolded. Remove each entry when the service gains real
+# internal/* domain logic.
 access-control-service
 account-recovery-service
 creator-identity-service
@@ -28,9 +34,9 @@ identity-graph-service
 notification-auth-service
 trust-service
 
-# Future implementation service shells with README/proto/go.mod only or missing
-# the documented Go control plane. Remove each entry as the service becomes
-# functional.
+# --- Future implementation (temporary) ---------------------------------------
+# README/proto shell only, or the documented Go control plane is not present
+# yet. Remove each entry as the service becomes functional.
 candidate-generation-service
 cdn-routing-service
 clip-generation-service
@@ -51,3 +57,8 @@ semantic-retrieval-service
 subtitle-service
 thumbnail-service
 video-segmentation-service
+
+# --- NOT exempted: real drift (kept flagged on purpose) ----------------------
+# analytics-service, event-gateway, session-service, upload-service,
+# transcoding-service, media-processing-orchestrator remain flagged by the
+# validator as actionable debt. Do not add them here. See the docs register.
