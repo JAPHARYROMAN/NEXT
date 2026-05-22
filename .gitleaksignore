@@ -1,0 +1,6 @@
+# PR #12 Phase 15D documentation example tag false positives.
+# The documentation text was normalized in a347bca; these fingerprints remain
+# because gitleaks-action scans the pushed PR commit range and force-push is
+# intentionally prohibited.
+0bb98ba20edacb2a25d79bd0b69042ee67feddf1:docs/PHASE_15D_IMAGE_SECURITY.md:generic-api-key:94
+0bb98ba20edacb2a25d79bd0b69042ee67feddf1:docs/PHASE_15D_IMAGE_SECURITY.md:generic-api-key:96
