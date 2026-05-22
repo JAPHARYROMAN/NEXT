@@ -8,8 +8,8 @@ terraform {
 }
 
 locals {
-  az_count       = length(var.azs)
-  public_subnets = [for i, az in var.azs : cidrsubnet(var.cidr, 4, i)]
+  az_count        = length(var.azs)
+  public_subnets  = [for i, az in var.azs : cidrsubnet(var.cidr, 4, i)]
   private_subnets = [for i, az in var.azs : cidrsubnet(var.cidr, 4, i + 8)]
 }
 
@@ -39,10 +39,10 @@ resource "aws_subnet" "private" {
   cidr_block        = local.private_subnets[count.index]
   availability_zone = var.azs[count.index]
   tags = {
-    Name                                       = "${var.name}-private-${var.azs[count.index]}"
-    "kubernetes.io/role/internal-elb"          = "1"
-    "kubernetes.io/cluster/${var.name}"        = "shared"
-    "karpenter.sh/discovery"                   = var.name
+    Name                                = "${var.name}-private-${var.azs[count.index]}"
+    "kubernetes.io/role/internal-elb"   = "1"
+    "kubernetes.io/cluster/${var.name}" = "shared"
+    "karpenter.sh/discovery"            = var.name
   }
 }
 
@@ -107,11 +107,11 @@ resource "aws_vpc_endpoint" "s3" {
 data "aws_region" "current" {}
 
 resource "aws_flow_log" "this" {
-  count                = var.enable_flow_logs ? 1 : 0
-  vpc_id               = aws_vpc.this.id
-  iam_role_arn         = aws_iam_role.flow_logs[0].arn
-  log_destination      = aws_cloudwatch_log_group.flow_logs[0].arn
-  traffic_type         = "ALL"
+  count                    = var.enable_flow_logs ? 1 : 0
+  vpc_id                   = aws_vpc.this.id
+  iam_role_arn             = aws_iam_role.flow_logs[0].arn
+  log_destination          = aws_cloudwatch_log_group.flow_logs[0].arn
+  traffic_type             = "ALL"
   max_aggregation_interval = 60
 }
 
@@ -127,9 +127,9 @@ resource "aws_iam_role" "flow_logs" {
   assume_role_policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
-      Effect = "Allow"
+      Effect    = "Allow"
       Principal = { Service = "vpc-flow-logs.amazonaws.com" }
-      Action = "sts:AssumeRole"
+      Action    = "sts:AssumeRole"
     }]
   })
 }
@@ -140,8 +140,8 @@ resource "aws_iam_role_policy" "flow_logs" {
   policy = jsonencode({
     Version = "2012-10-17"
     Statement = [{
-      Effect = "Allow"
-      Action = ["logs:CreateLogStream", "logs:PutLogEvents", "logs:DescribeLogGroups", "logs:DescribeLogStreams"]
+      Effect   = "Allow"
+      Action   = ["logs:CreateLogStream", "logs:PutLogEvents", "logs:DescribeLogGroups", "logs:DescribeLogStreams"]
       Resource = "*"
     }]
   })

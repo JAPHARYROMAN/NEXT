@@ -10,6 +10,26 @@ const config: NextConfig = {
   transpilePackages: [
     '@next/ui',
     '@next/design-system',
+    '@next/animation-system',
+    '@next/theme-system',
+    '@next/layout-engine',
+    '@next/frontend-utils',
+    '@next/creator-ui',
+    '@next/media-ui',
+    '@next/player-ui',
+    '@next/feed-ui',
+    '@next/interaction-ui',
+    '@next/discovery-ui',
+    '@next/search-ui',
+    '@next/explore-ui',
+    '@next/community-ui',
+    '@next/social-ui',
+    '@next/reputation-ui',
+    '@next/live-ui',
+    '@next/remote-navigation',
+    '@next/theater-ui',
+    '@next/tv-ui',
+    '@next/icons',
     '@next/api-client',
     '@next/auth-sdk',
     '@next/feature-flags',
@@ -21,7 +41,28 @@ const config: NextConfig = {
   experimental: {
     typedRoutes: true,
     serverActions: { bodySizeLimit: '4mb' },
-    optimizePackageImports: ['@next/ui', '@next/design-system', 'framer-motion'],
+    optimizePackageImports: [
+      '@next/ui',
+      '@next/design-system',
+      '@next/animation-system',
+      '@next/layout-engine',
+      '@next/icons',
+      '@next/frontend-utils',
+      '@next/player-ui',
+      '@next/feed-ui',
+      '@next/interaction-ui',
+      '@next/discovery-ui',
+      '@next/search-ui',
+      '@next/explore-ui',
+      '@next/community-ui',
+      '@next/social-ui',
+      '@next/reputation-ui',
+      '@next/live-ui',
+      '@next/remote-navigation',
+      '@next/theater-ui',
+      '@next/tv-ui',
+      'framer-motion',
+    ],
     // ppr is canary-only — re-enable when we adopt next@canary or PPR ships stable.
   },
 
@@ -52,7 +93,7 @@ const config: NextConfig = {
   },
 
   // Outputs a self-contained build for the container image (reduces layer size).
-  output: 'standalone',
+  ...(process.platform === 'win32' ? {} : { output: 'standalone' as const }),
 };
 
 export default config;

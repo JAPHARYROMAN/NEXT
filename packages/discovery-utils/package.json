@@ -1,0 +1,24 @@
+{
+  "name": "@next/discovery-utils",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Discovery-mode inference, candidate-source budgets, and MMR diversity selection.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@next/feed-types": "workspace:*"
+  },
+  "devDependencies": {
+    "@next/config": "workspace:*",
+    "typescript": "catalog:"
+  }
+}

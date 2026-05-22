@@ -16,7 +16,9 @@
     "@next/api-client": "workspace:*",
     "@next/auth-sdk": "workspace:*",
     "@next/design-system": "workspace:*",
+    "@next/frontend-utils": "workspace:*",
     "@next/ui": "workspace:*",
+    "clsx": "^2.1.1",
     "next": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:"
@@ -24,7 +26,11 @@
   "devDependencies": {
     "@next/config": "workspace:*",
     "@types/react": "catalog:",
+    "@types/react-dom": "catalog:",
+    "autoprefixer": "catalog:",
+    "postcss": "catalog:",
     "tailwindcss": "catalog:",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

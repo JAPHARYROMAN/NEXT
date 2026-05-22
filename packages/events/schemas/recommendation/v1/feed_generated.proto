@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package next.events.recommendation.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/next/events/recommendation/v1;recommendationeventsv1";
+
+// FeedGenerated — emitted when feed-service assembles a feed page. Carries the
+// diversity + fairness measurements of the page for observability guardrails.
+// Partition key: user_id.
+message FeedGenerated {
+  string event_id  = 1 [(buf.validate.field).string.uuid = true];
+  google.protobuf.Timestamp emitted_at = 2;
+
+  string user_id    = 3 [(buf.validate.field).string.uuid = true];
+  string session_id = 4 [(buf.validate.field).string.uuid = true];
+  string surface    = 5 [(buf.validate.field).string.min_len = 1];
+  uint32 page       = 6;
+  uint32 item_count = 7;
+
+  FeedDiversity diversity = 8;
+  uint32 latency_ms       = 9;
+}
+
+// FeedDiversity — the page's measured health, checked against guardrails.
+message FeedDiversity {
+  double exploration_share   = 1;  // fraction of items that are exploration
+  double creator_gini        = 2;  // 0 = perfectly fair, 1 = monopoly
+  double topic_entropy       = 3;
+  uint32 distinct_creators   = 4;
+  double max_creator_share   = 5;  // largest single-creator fraction (cap 0.25)
+}

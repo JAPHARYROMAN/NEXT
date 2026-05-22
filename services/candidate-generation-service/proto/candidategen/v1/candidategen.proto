@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package next.candidategen.v1;
+
+import "buf/validate/validate.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/candidategen/v1;candidategenv1";
+
+// CandidateGenerationService is the recall layer — stage 0 of the funnel.
+service CandidateGenerationService {
+  rpc Generate(GenerateRequest) returns (GenerateResponse);
+}
+
+message Candidate {
+  string content_id       = 1;
+  string creator_id       = 2;
+  repeated string sources = 3;
+  double popularity_prior = 4;
+  double age_hours        = 5;
+  double affinity         = 6;
+  string topic            = 7;
+  string aesthetic        = 8;
+  double intensity        = 9;
+}
+
+message GenerateRequest {
+  string user_id  = 1 [(buf.validate.field).string.uuid = true];
+  string surface  = 2 [(buf.validate.field).string.min_len = 1];
+  double appetite = 3;   // exploration appetite — sets per-source budgets
+  uint32 k        = 4 [(buf.validate.field).uint32.lte = 5000];
+}
+message GenerateResponse {
+  repeated Candidate candidates = 1;
+  map<string, uint32> source_counts = 2;   // recall mix, for observability
+}

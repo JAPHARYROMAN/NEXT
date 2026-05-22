@@ -1,31 +1,44 @@
 # event-gateway
 
-External webhooks ↔ Kafka bridge. Receives webhooks from Stripe, Apple, Google, partners; publishes idempotent events onto Kafka. Outbound webhooks for partner-app integrations.
+HTTP to Kafka ingress for the NEXT event bus. It accepts service and client-side event envelopes, validates the canonical contract, enriches privacy-safe metadata, authenticates producers, applies per-producer rate limits, enforces idempotency, and publishes to category topics.
 
 Owner: `@next-ecosystem/platform`.
 
 ## Public API
-- `POST /webhooks/stripe`
-- `POST /webhooks/apple/server-notifications`
-- `POST /webhooks/fcm/feedback`
-- `POST /webhooks/partner/:partner_id`
 
-## Internal gRPC
-- `WebhookService.Deliver(target, payload) → Ack` (outbound).
-
-## Events
-**Emitted**: domain events derived from webhooks (e.g. Stripe `charge.succeeded` → `payment.intent.succeeded.v1`).
-**Consumed**: outbound subscriber events.
-
-## Data
-- Idempotency keys in `event_gateway_pg`.
-- Outbound delivery state machine (`pending`, `delivered`, `failed`, `dropped`) per partner.
-
-## SLO
-- `Webhook accept P95 < 100 ms` · `Translate → Kafka publish P95 < 500 ms` · `Outbound retry success > 99 %` (within 24 h).
+- `POST /v1/events`
+- `POST /v1/events/batch`
+- `GET /health`
+- `GET /metrics`
 
 ## Security
-- Signature verification (HMAC) per partner; mismatched signatures rejected and logged as security events.
-- IP allowlist + WAF rules per partner.
 
-[Runbook](../../docs/runbooks/event-gateway.md).
+- Producers are authenticated with `EVENT_PRODUCER_SECRETS=producer=secret,...`.
+- Signed requests use `X-NEXT-Timestamp` and `X-NEXT-Signature: sha256=<hmac>` over `<timestamp>.<raw-body>`.
+- `EVENT_GATEWAY_ALLOW_UNSIGNED=true` is only for local development and tests.
+- Raw IP addresses and user agents are hashed before enrichment.
+
+## Kafka
+
+Events route by `event_category`:
+
+- `identity.events.v1`
+- `session.events.v1`
+- `media.events.v1`
+- `playback.events.v1`
+- `creator.events.v1`
+- `community.events.v1`
+- `recommendation.events.v1`
+- `search.events.v1`
+- `moderation.events.v1`
+- `commerce.events.v1`
+- `system.events.v1`
+
+Partition keys prefer `media_id`, `creator_id`, `user_id`, `session_id`, `device_id`, `correlation_id`, then `event_id`.
+
+## Metrics
+
+- `events_received_total`
+- `events_published_total`
+- `events_rejected_total`
+- `kafka_publish_latency_ms`

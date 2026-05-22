@@ -1,5 +1,11 @@
 import { trace, context, propagation } from '@opentelemetry/api';
 import { Kafka, type Producer, type Message } from 'kafkajs';
+import {
+  partitionKeyForEvent,
+  validateEventEnvelope,
+  type EventEnvelope as NextEventEnvelope,
+} from './contracts/envelope';
+import { topicForCategory } from './topics';
 
 export interface ProducerConfig {
   readonly brokers: readonly string[];
@@ -8,7 +14,7 @@ export interface ProducerConfig {
   readonly sasl?: { mechanism: 'scram-sha-512'; username: string; password: string };
 }
 
-export interface EventEnvelope<T> {
+export interface KafkaEventEnvelope<T> {
   readonly topic: string;
   readonly key: string;
   readonly value: T;
@@ -28,7 +34,6 @@ export class EventProducer {
     this.producer = kafka.producer({
       idempotent: true,
       maxInFlightRequests: 5,
-      transactionalId: undefined,
       retry: { retries: 8 },
     });
   }
@@ -41,7 +46,7 @@ export class EventProducer {
     await this.producer.disconnect();
   }
 
-  async emit<T>(envelope: EventEnvelope<T>): Promise<void> {
+  async emit<T>(envelope: KafkaEventEnvelope<T>): Promise<void> {
     const tracer = trace.getTracer('@next/events');
     await tracer.startActiveSpan(`kafka.produce ${envelope.topic}`, async (span) => {
       try {
@@ -64,6 +69,23 @@ export class EventProducer {
       } finally {
         span.end();
       }
+    });
+  }
+
+  async emitEvent(event: NextEventEnvelope): Promise<void> {
+    const validated = validateEventEnvelope(event);
+    await this.emit({
+      topic: topicForCategory(validated.event_category),
+      key: partitionKeyForEvent(validated),
+      value: validated,
+      headers: {
+        'next.event_id': validated.event_id,
+        'next.event_type': validated.event_type,
+        'next.event_version': validated.event_version,
+        'next.event_category': validated.event_category,
+        'next.producer': validated.producer,
+        'next.correlation_id': validated.correlation_id ?? '',
+      },
     });
   }
 }

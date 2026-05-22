@@ -87,13 +87,17 @@ func run() error {
 	if err != nil {
 		return err
 	}
-	defer authConn.Close()
+	defer func() {
+		_ = authConn.Close()
+	}()
 
 	profileConn, err := grpc.NewClient("passthrough:///"+cfg.ProfileGRPC, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return err
 	}
-	defer profileConn.Close()
+	defer func() {
+		_ = profileConn.Close()
+	}()
 
 	rsv := &resolver.Resolver{
 		AuthUsers:   authv1.NewUserServiceClient(authConn),

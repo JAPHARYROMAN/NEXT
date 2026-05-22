@@ -7,7 +7,7 @@ version: "3"
 vars:
   ENV: '{{.ENV | default "dev"}}'
   AWS_REGION: '{{.AWS_REGION | default "us-east-1"}}'
-  CLUSTER_NAME: 'next-{{.ENV}}'
+  CLUSTER_NAME: "next-{{.ENV}}"
 
 includes:
   go:
@@ -82,7 +82,8 @@ tasks:
     cmds: ["pnpm turbo run test"]
 
   test:go:
-    cmds: ["go test -race -coverprofile=coverage.out ./services/..."]
+    deps: [codegen:proto, codegen:gqlgen]
+    cmds: ["node scripts/go-work-run.mjs test"]
 
   test:rust:
     cmds: ["cargo test --workspace"]
@@ -95,14 +96,22 @@ tasks:
     desc: "Regenerate proto / GraphQL / OpenAPI clients"
     cmds:
       - task: codegen:proto
+      - task: codegen:gqlgen
       - task: codegen:graphql
 
   codegen:proto:
-    cmds: ["buf generate"]
+    cmds:
+      - buf generate
+      - go -C gen/go mod tidy
     sources: ["**/*.proto"]
 
   codegen:graphql:
-    cmds: ["pnpm turbo run codegen"]
+    cmds:
+      - pnpm --dir packages/api-client exec graphql-codegen --config codegen.ts
+
+  codegen:gqlgen:
+    cmds:
+      - go -C services/api-gateway run github.com/99designs/gqlgen generate
 
   # ---- Lint ----
   lint:
@@ -113,7 +122,8 @@ tasks:
     cmds: ["pnpm turbo run lint"]
 
   lint:go:
-    cmds: ["golangci-lint run ./..."]
+    deps: [codegen:proto, codegen:gqlgen]
+    cmds: ["node scripts/go-work-run.mjs lint"]
 
   lint:rust:
     cmds: ["cargo clippy --workspace --all-targets -- -D warnings"]

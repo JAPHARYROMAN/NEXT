@@ -13,15 +13,26 @@
     "./native": "./src/native/index.ts",
     "./core": "./src/core/index.ts"
   },
-  "scripts": { "lint": "eslint src", "typecheck": "tsc --noEmit", "test": "vitest run" },
-  "peerDependencies": {
-    "react": "catalog:",
-    "react-dom": "catalog:"
+  "scripts": {
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
+    "@next/animation-system": "workspace:*",
     "@next/design-system": "workspace:*",
+    "@next/icons": "workspace:*",
+    "@next/frontend-utils": "workspace:*",
+    "@next/layout-engine": "workspace:*",
+    "@next/navigation-ui": "workspace:*",
+    "@next/theme-system": "workspace:*",
     "framer-motion": "catalog:",
     "clsx": "^2.1.1"
+  },
+  "peerDependencies": {
+    "next": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:"
   },
   "devDependencies": {
     "@next/config": "workspace:*",
@@ -29,6 +40,7 @@
     "react-dom": "catalog:",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "@testing-library/react": "catalog:",
     "typescript": "catalog:",
     "vitest": "catalog:"
   }

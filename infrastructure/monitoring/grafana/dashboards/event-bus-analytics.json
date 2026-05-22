@@ -1,0 +1,54 @@
+{
+  "title": "NEXT Event Bus + Analytics",
+  "tags": ["next", "events", "kafka", "clickhouse"],
+  "timezone": "utc",
+  "schemaVersion": 39,
+  "version": 1,
+  "refresh": "30s",
+  "panels": [
+    {
+      "type": "timeseries",
+      "title": "Events Received",
+      "targets": [{ "expr": "sum by (category) (rate(events_received_total[5m]))" }],
+      "gridPos": { "x": 0, "y": 0, "w": 12, "h": 8 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Events Rejected",
+      "targets": [{ "expr": "sum by (reason) (rate(events_rejected_total[5m]))" }],
+      "gridPos": { "x": 12, "y": 0, "w": 12, "h": 8 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Kafka Publish Latency p95",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(kafka_publish_latency_ms_bucket[5m])))"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 8, "w": 12, "h": 8 }
+    },
+    {
+      "type": "timeseries",
+      "title": "Kafka Consumer Lag",
+      "targets": [{ "expr": "sum by (topic, group) (kafka_consumer_lag)" }],
+      "gridPos": { "x": 12, "y": 8, "w": 12, "h": 8 }
+    },
+    {
+      "type": "timeseries",
+      "title": "ClickHouse Insert Latency p95",
+      "targets": [
+        {
+          "expr": "histogram_quantile(0.95, sum by (le) (rate(clickhouse_insert_latency_ms_bucket[5m])))"
+        }
+      ],
+      "gridPos": { "x": 0, "y": 16, "w": 12, "h": 8 }
+    },
+    {
+      "type": "timeseries",
+      "title": "DLQ Events",
+      "targets": [{ "expr": "sum by (dlq_topic, reason) (rate(dlq_events_total[5m]))" }],
+      "gridPos": { "x": 12, "y": 16, "w": 12, "h": 8 }
+    }
+  ]
+}

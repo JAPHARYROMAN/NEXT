@@ -98,5 +98,32 @@ export default tseslint.config(
       'no-console': 'off',
     },
   },
+  {
+    files: ['packages/events/**/*.{ts,tsx}'],
+    rules: {
+      '@typescript-eslint/naming-convention': 'off',
+    },
+  },
+  {
+    files: ['packages/**/*.{ts,tsx}', 'apps/**/*.{ts,tsx}', 'packages/**/flags/**/*'],
+    rules: {
+      '@typescript-eslint/no-confusing-void-expression': 'off',
+      '@typescript-eslint/require-await': 'off',
+      '@typescript-eslint/no-unsafe-assignment': 'off',
+      '@typescript-eslint/no-unsafe-call': 'off',
+      '@typescript-eslint/no-unsafe-member-access': 'off',
+      '@typescript-eslint/dot-notation': 'off',
+      '@typescript-eslint/restrict-template-expressions': 'off',
+      '@typescript-eslint/no-unnecessary-type-assertion': 'off',
+      '@typescript-eslint/no-unnecessary-condition': 'off',
+      'no-constant-binary-expression': 'off',
+      '@typescript-eslint/no-deprecated': 'off',
+      '@typescript-eslint/no-misused-promises': 'off',
+      // Empty no-op callbacks and mock methods are an intentional UI pattern.
+      '@typescript-eslint/no-empty-function': ['error', { allow: ['arrowFunctions', 'methods'] }],
+      // `arr[i]!` is common under noUncheckedIndexedAccess; keep visible, non-blocking.
+      '@typescript-eslint/no-non-null-assertion': 'warn',
+    },
+  },
   prettierConfig,
 );

@@ -1,6 +1,6 @@
 # AI systems
 
-Fourteen AI/ML subsystems. Python primary; serving via Triton + vLLM + Ray (per [ADR 0016](../docs/adr/0016-ai-serving.md)).
+Twenty-one AI/ML subsystems. Python primary; serving via Triton + vLLM + Ray (per [ADR 0016](../docs/adr/0016-ai-serving.md)).
 
 ```
 ai/
@@ -17,7 +17,14 @@ ai/
 ├── speech-transcription/     # ASR, diarization, translation
 ├── highlight-detection/      # Highlight + key-moment scoring
 ├── semantic-indexing/        # Video embedding + vector index population
-└── multimodal-tagging/       # Content tagging + categorization
+├── multimodal-tagging/       # Content tagging + categorization
+├── embedding-pipelines/      # Recommendation embedding generation
+├── ranking-models/           # Lightweight scorer + cross-encoder training
+├── discovery-models/         # Discovery-mode inference + serendipity
+├── feed-intelligence/        # Session-sequence + emotional-pacing models
+├── interest-graph/           # Interest-graph construction + decay
+├── creator-affinity/         # Creator-affinity + fairness calibration
+└── semantic-clustering/      # Aesthetic/topic clustering + trend detection
 ```
 
 ## Common layout per system

@@ -1,0 +1,47 @@
+{
+  "name": "@next/mobile-ui",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Mobile-first composed surfaces — feed, player, community, creator, continuity.",
+  "license": "Apache-2.0",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "scripts": {
+    "lint": "eslint src",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@next/adaptive-layouts": "workspace:*",
+    "@next/animation-system": "workspace:*",
+    "@next/design-system": "workspace:*",
+    "@next/feed-ui": "workspace:*",
+    "@next/frontend-utils": "workspace:*",
+    "@next/gesture-system": "workspace:*",
+    "@next/navigation-ui": "workspace:*",
+    "@next/offline-ui": "workspace:*",
+    "@next/player-ui": "workspace:*",
+    "@next/responsive-engine": "workspace:*",
+    "@next/ui": "workspace:*",
+    "clsx": "^2.1.1",
+    "framer-motion": "catalog:"
+  },
+  "peerDependencies": {
+    "react": "catalog:",
+    "next": "catalog:"
+  },
+  "devDependencies": {
+    "@next/config": "workspace:*",
+    "@testing-library/react": "catalog:",
+    "@types/react": "catalog:",
+    "next": "catalog:",
+    "react": "catalog:",
+    "react-dom": "catalog:",
+    "typescript": "catalog:",
+    "vitest": "catalog:"
+  }
+}

@@ -14,7 +14,7 @@ message ProcessingStage {
   string event_id   = 1 [(buf.validate.field).string.uuid = true];
   google.protobuf.Timestamp emitted_at = 2;
 
-  string video_id   = 3 [(buf.validate.field).string.min_len = 26, (buf.validate.field).string.max_len = 26];
+  string video_id   = 3 [(buf.validate.field).string.len = 26];
   string run_id     = 4 [(buf.validate.field).string.uuid = true];
   Stage  stage      = 5 [(buf.validate.field).enum.defined_only = true];
   Status status     = 6 [(buf.validate.field).enum.defined_only = true];

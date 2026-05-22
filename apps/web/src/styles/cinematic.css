@@ -1,0 +1,6 @@
+/* Cinematic ambient layers — subtle, non-distracting */
+.next-ambient {
+  background:
+    radial-gradient(ellipse 80% 50% at 50% -20%, rgb(var(--next-color-brand) / 0.08), transparent),
+    rgb(var(--next-color-bg));
+}

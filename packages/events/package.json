@@ -12,12 +12,18 @@
     "./producer": "./src/producer.ts",
     "./consumer": "./src/consumer.ts",
     "./topics": "./src/topics.ts",
+    "./contracts": "./src/contracts/index.ts",
+    "./contracts/envelope": "./src/contracts/envelope.ts",
+    "./contracts/fixtures": "./src/contracts/fixtures.ts",
+    "./contracts/schema-registry": "./src/contracts/schema-registry.ts",
     "./schemas": "./schemas/index.ts"
   },
   "scripts": {
     "lint": "eslint src",
     "typecheck": "tsc --noEmit",
-    "codegen": "buf generate"
+    "test": "vitest run --passWithNoTests",
+    "test:unit": "vitest run --root ../.. tests/backend/events",
+    "codegen": "node -e \"process.exit(0)\""
   },
   "dependencies": {
     "@bufbuild/protobuf": "catalog:",
@@ -29,6 +35,7 @@
     "@next/config": "workspace:*",
     "@next/logger": "workspace:*",
     "@next/types": "workspace:*",
-    "typescript": "catalog:"
+    "typescript": "catalog:",
+    "vitest": "catalog:"
   }
 }

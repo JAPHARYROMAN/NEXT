@@ -1,0 +1,38 @@
+groups:
+  - name: next-event-bus
+    rules:
+      - alert: EventGatewayRejectRateHigh
+        expr: sum(rate(events_rejected_total[10m])) / clamp_min(sum(rate(events_received_total[10m])), 1) > 0.02
+        for: 15m
+        labels:
+          severity: warning
+          service: event-gateway
+        annotations:
+          summary: Event gateway rejection rate is above 2%
+
+      - alert: KafkaConsumerLagHigh
+        expr: max(kafka_consumer_lag{group="analytics-service-v1"}) > 100000
+        for: 15m
+        labels:
+          severity: warning
+          service: analytics-service
+        annotations:
+          summary: Analytics consumer lag is high
+
+      - alert: ClickHouseInsertFailures
+        expr: sum(rate(clickhouse_write_failures_total[10m])) > 0
+        for: 10m
+        labels:
+          severity: critical
+          service: analytics-service
+        annotations:
+          summary: ClickHouse analytics inserts are failing
+
+      - alert: DLQEventsIncreasing
+        expr: sum(rate(dlq_events_total[10m])) > 1
+        for: 10m
+        labels:
+          severity: warning
+          service: analytics-service
+        annotations:
+          summary: Events are being routed to DLQ topics

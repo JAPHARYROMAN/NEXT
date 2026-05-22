@@ -9,12 +9,12 @@ export interface FlagsConfig {
 
 let client: Client | undefined;
 
-export async function initFlags(_config: FlagsConfig): Promise<Client> {
-  if (client) return client;
-  // GrowthBook provider wiring happens at app boot — keep this thin so the
+export function initFlags(_config: FlagsConfig): Promise<Client> {
+  if (client) return Promise.resolve(client);
+  // GrowthBook provider wiring happens at app boot - keep this thin so the
   // package stays tree-shakeable and the provider can be swapped (per ADR 0013).
   client = OpenFeature.getClient('next');
-  return client;
+  return Promise.resolve(client);
 }
 
 export async function evaluate<T extends string | boolean | number>(
@@ -29,5 +29,5 @@ export async function evaluate<T extends string | boolean | number>(
   if (typeof defaultValue === 'number') {
     return (await client.getNumberValue(flag, defaultValue, context)) as T;
   }
-  return (await client.getStringValue(flag, defaultValue as string, context)) as T;
+  return (await client.getStringValue(flag, defaultValue, context)) as T;
 }

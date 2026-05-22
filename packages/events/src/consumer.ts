@@ -1,5 +1,6 @@
 import { context, propagation, trace } from '@opentelemetry/api';
 import { Kafka, type Consumer, type EachMessagePayload } from 'kafkajs';
+import { safeValidateEventEnvelope, type EventEnvelope } from './contracts/envelope';
 
 export interface ConsumerConfig {
   readonly brokers: readonly string[];
@@ -11,7 +12,13 @@ export interface ConsumerConfig {
 
 export type EventHandler<T> = (
   payload: T,
-  meta: { topic: string; partition: number; offset: string; key: string; headers: Record<string, string> },
+  meta: {
+    topic: string;
+    partition: number;
+    offset: string;
+    key: string;
+    headers: Record<string, string>;
+  },
 ) => Promise<void>;
 
 export class EventConsumer {
@@ -72,7 +79,26 @@ export class EventConsumer {
     });
   }
 
+  async subscribeEvents(topic: string, handler: EventHandler<EventEnvelope>): Promise<void> {
+    await this.subscribe<unknown>(topic, async (payload, meta) => {
+      const result = safeValidateEventEnvelope(payload);
+      if (!result.success) {
+        throw new Error(`invalid NEXT event envelope: ${result.error.message}`);
+      }
+      await handler(result.data, meta);
+    });
+  }
+
   async disconnect(): Promise<void> {
     await this.consumer.disconnect();
   }
+}
+
+export function parseEventMessage(value: Buffer | string | null | undefined): EventEnvelope {
+  const raw = typeof value === 'string' ? value : value?.toString();
+  const result = safeValidateEventEnvelope(JSON.parse(raw ?? 'null'));
+  if (!result.success) {
+    throw new Error(`invalid NEXT event envelope: ${result.error.message}`);
+  }
+  return result.data;
 }

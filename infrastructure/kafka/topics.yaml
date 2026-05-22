@@ -1,0 +1,138 @@
+# NEXT Phase 5 Kafka topic catalog.
+# Applied by platform automation against MSK/Kafka Admin APIs.
+
+defaults:
+  partitions: 96
+  replicationFactor: 3
+  configs:
+    cleanup.policy: delete
+    min.insync.replicas: "2"
+    unclean.leader.election.enable: "false"
+    compression.type: producer
+    message.timestamp.type: CreateTime
+    segment.ms: "86400000"
+
+topics:
+  - name: identity.events.v1
+    owner: identity-platform
+    partitionKey: user_id
+    retentionMs: 604800000
+    schemaCompatibility: BACKWARD
+
+  - name: session.events.v1
+    owner: identity-platform
+    partitionKey: session_id
+    retentionMs: 604800000
+    schemaCompatibility: BACKWARD
+
+  - name: media.events.v1
+    owner: media-platform
+    partitionKey: media_id
+    partitions: 192
+    retentionMs: 2592000000
+    schemaCompatibility: BACKWARD
+
+  - name: playback.events.v1
+    owner: media-platform
+    partitionKey: media_id
+    partitions: 384
+    retentionMs: 604800000
+    schemaCompatibility: BACKWARD
+
+  - name: creator.events.v1
+    owner: creator-platform
+    partitionKey: creator_id
+    retentionMs: 2592000000
+    schemaCompatibility: BACKWARD
+
+  - name: community.events.v1
+    owner: social-platform
+    partitionKey: community_id
+    retentionMs: 2592000000
+    schemaCompatibility: BACKWARD
+
+  - name: recommendation.events.v1
+    owner: intelligence-platform
+    partitionKey: user_id
+    partitions: 384
+    retentionMs: 604800000
+    schemaCompatibility: BACKWARD
+
+  - name: search.events.v1
+    owner: discovery-platform
+    partitionKey: user_id
+    retentionMs: 604800000
+    schemaCompatibility: BACKWARD
+
+  - name: moderation.events.v1
+    owner: trust-and-safety
+    partitionKey: media_id
+    retentionMs: 2592000000
+    schemaCompatibility: BACKWARD
+
+  - name: commerce.events.v1
+    owner: commerce-platform
+    partitionKey: user_id
+    retentionMs: 2592000000
+    schemaCompatibility: BACKWARD
+
+  - name: system.events.v1
+    owner: platform
+    partitionKey: service_name
+    retentionMs: 604800000
+    schemaCompatibility: BACKWARD
+
+deadLetterTopics:
+  - name: identity.events.dlq.v1
+    sourceFamilies: ["identity.events.v1"]
+    partitions: 24
+    retentionMs: 2592000000
+
+  - name: media.events.dlq.v1
+    sourceFamilies: ["media.events.v1"]
+    partitions: 48
+    retentionMs: 2592000000
+
+  - name: playback.events.dlq.v1
+    sourceFamilies: ["playback.events.v1"]
+    partitions: 96
+    retentionMs: 2592000000
+
+  - name: analytics.events.dlq.v1
+    sourceFamilies:
+      - session.events.v1
+      - creator.events.v1
+      - community.events.v1
+      - recommendation.events.v1
+      - search.events.v1
+      - moderation.events.v1
+      - commerce.events.v1
+      - system.events.v1
+    partitions: 96
+    retentionMs: 2592000000
+
+consumerGroups:
+  - name: analytics-service-v1
+    topics:
+      - identity.events.v1
+      - session.events.v1
+      - media.events.v1
+      - playback.events.v1
+      - creator.events.v1
+      - community.events.v1
+      - recommendation.events.v1
+      - search.events.v1
+      - moderation.events.v1
+      - commerce.events.v1
+      - system.events.v1
+    maxPollIntervalMs: 300000
+    staticMembership: true
+    cooperativeRebalancing: true
+
+replay:
+  strategy: offset-and-timestamp
+  tool: scripts/kafka-replay
+  guardrails:
+    - replay into the original topic only for idempotent consumers
+    - otherwise replay into replay.<source-topic>.<yyyyMMddHHmm>
+    - all replay jobs must carry request_id and operator identity in headers

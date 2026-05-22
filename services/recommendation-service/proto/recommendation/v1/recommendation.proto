@@ -1,0 +1,99 @@
+syntax = "proto3";
+
+package next.recommendation.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/recommendation/v1;recommendationv1";
+
+// RecommendationService orchestrates the four-stage ranking funnel: it takes
+// candidates (from candidate-generation-service), infers the discovery mode,
+// ranks, diversity-balances, and reranks into a served slate.
+service RecommendationService {
+  rpc Recommend(RecommendRequest) returns (RecommendResponse);
+  rpc RecordFeedback(RecordFeedbackRequest) returns (RecordFeedbackResponse);
+  rpc GetSlate(GetSlateRequest) returns (GetSlateResponse);
+}
+
+// Candidate — a content item before ranking, carrying scalar features.
+// Heavy semantic scoring is the Rust ranker's job; this funnel works on these.
+message Candidate {
+  string content_id       = 1 [(buf.validate.field).string.min_len = 1];
+  string creator_id       = 2 [(buf.validate.field).string.uuid = true];
+  repeated string sources = 3;   // collaborative|semantic|creator_affinity|...
+  double popularity_prior = 4;   // [0,1] coarse popularity
+  double age_hours        = 5;
+  double affinity         = 6;   // [0,1] creator/interest affinity to this user
+  string topic            = 7;
+  string aesthetic        = 8;   // aesthetic-cluster id
+  double intensity        = 9;   // [0,1] emotional energy
+}
+
+// SessionSignals drive discovery-mode inference.
+message SessionSignals {
+  int64  session_length_ms        = 1;
+  double skip_rate                = 2;
+  uint32 rewatch_count            = 3;
+  bool   search_driven_entry      = 4;
+  double dwell_variance           = 5;
+  int64  ms_since_novel_engagement = 6;
+  double fatigue                  = 7;
+}
+
+// ScoredItem — a candidate after the full funnel. The breakdown is replayable.
+message ScoredItem {
+  string content_id       = 1;
+  string creator_id       = 2;
+  uint32 position         = 3;
+  double relevance        = 4;
+  double novelty          = 5;
+  double diversity_margin = 6;
+  double final_score      = 7;
+  bool   exploration      = 8;
+  repeated string sources = 9;
+}
+
+// DiversityMetrics — the measured health of a slate; checked against guardrails.
+message DiversityMetrics {
+  double exploration_share = 1;
+  double creator_gini      = 2;
+  double topic_entropy     = 3;
+  uint32 distinct_creators = 4;
+  double max_creator_share = 5;
+}
+
+message RecommendRequest {
+  string user_id     = 1 [(buf.validate.field).string.uuid = true];
+  string session_id  = 2 [(buf.validate.field).string.uuid = true];
+  string surface     = 3 [(buf.validate.field).string.min_len = 1];
+  uint32 limit       = 4 [(buf.validate.field).uint32.lte = 200];
+  SessionSignals signals      = 5;
+  repeated Candidate candidates = 6;
+  double appetite_hint        = 7;   // optional surface nudge; <0 = unset
+}
+message RecommendResponse {
+  string slate_id  = 1;
+  string mode      = 2;   // precision|discovery|chaos
+  double appetite  = 3;
+  repeated ScoredItem items   = 4;
+  DiversityMetrics diversity  = 5;
+}
+
+message RecordFeedbackRequest {
+  string slate_id   = 1 [(buf.validate.field).string.uuid = true];
+  string content_id = 2 [(buf.validate.field).string.min_len = 1];
+  string kind       = 3 [(buf.validate.field).string.min_len = 1];  // impression|click|skip|complete|hide
+  int64  dwell_ms   = 4;
+}
+message RecordFeedbackResponse {}
+
+message GetSlateRequest { string slate_id = 1 [(buf.validate.field).string.uuid = true]; }
+message GetSlateResponse {
+  string slate_id = 1;
+  string user_id  = 2;
+  string mode     = 3;
+  repeated ScoredItem items  = 4;
+  DiversityMetrics diversity = 5;
+  google.protobuf.Timestamp created_at = 6;
+}

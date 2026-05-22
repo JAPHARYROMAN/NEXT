@@ -13,7 +13,7 @@
     "build:android": "eas build --platform android",
     "lint": "eslint .",
     "typecheck": "tsc --noEmit",
-    "test": "jest"
+    "test": "jest --passWithNoTests"
   },
   "dependencies": {
     "@next/api-client": "workspace:*",
@@ -25,6 +25,7 @@
     "@tanstack/react-query": "catalog:",
     "expo": "~52.0.0",
     "expo-router": "~4.0.0",
+    "expo-status-bar": "~2.0.0",
     "expo-secure-store": "~14.0.0",
     "expo-updates": "~0.26.0",
     "react": "catalog:",

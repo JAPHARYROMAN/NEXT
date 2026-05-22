@@ -1,0 +1,31 @@
+syntax = "proto3";
+
+package next.events.recommendation.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/next/events/recommendation/v1;recommendationeventsv1";
+
+// DiscoveryModeChanged — emitted when a session's discovery mode shifts
+// materially. Consumed by the pacing model + observability.
+// Partition key: user_id.
+message DiscoveryModeChanged {
+  string event_id  = 1 [(buf.validate.field).string.uuid = true];
+  google.protobuf.Timestamp emitted_at = 2;
+
+  string user_id    = 3 [(buf.validate.field).string.uuid = true];
+  string session_id = 4 [(buf.validate.field).string.uuid = true];
+
+  Mode   from_mode  = 5 [(buf.validate.field).enum.defined_only = true];
+  Mode   to_mode    = 6 [(buf.validate.field).enum.defined_only = true];
+  double appetite   = 7;   // exploration appetite scalar in [0,1]
+  string reason     = 8;   // dominant signal: skip_rate|session_length|fatigue|search_entry
+
+  enum Mode {
+    MODE_UNSPECIFIED = 0;
+    MODE_PRECISION   = 1;
+    MODE_DISCOVERY   = 2;
+    MODE_CHAOS       = 3;
+  }
+}
