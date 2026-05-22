@@ -18,6 +18,7 @@ jobs:
     name: CodeQL
     runs-on: ubuntu-24.04
     strategy:
+      fail-fast: false
       matrix:
         language: [javascript-typescript, go, python]
     steps:
@@ -30,7 +31,15 @@ jobs:
       - uses: github/codeql-action/init@v3
         with:
           languages: ${{ matrix.language }}
-          build-mode: none
+          # Go requires 'manual' or 'autobuild'; interpreted languages use 'none'.
+          build-mode: ${{ matrix.language == 'go' && 'manual' || 'none' }}
+      # Manual Go build sequence so CodeQL can trace compilation.
+      # go-work-run.mjs iterates every workspace module, skipping stub services
+      # that contain no Go source ("matched no packages"). gen/go is committed,
+      # so no extra codegen is required at this stage.
+      - name: Build Go workspace for CodeQL tracing
+        if: matrix.language == 'go'
+        run: node scripts/go-work-run.mjs test
       - uses: github/codeql-action/analyze@v3
 
   dependency-review:
