@@ -64,6 +64,13 @@ resource "aws_cloudfront_distribution" "this" {
 
   viewer_certificate {
     cloudfront_default_certificate = true
+    # Enforce a modern viewer TLS floor (Phase 15A security remediation).
+    # NOTE: while cloudfront_default_certificate = true, AWS governs the
+    # effective policy via the default *.cloudfront.net certificate. This value
+    # becomes runtime-effective only once a custom ACM certificate is adopted
+    # (acm_certificate_arn + ssl_support_method) — that migration is the tracked
+    # residual follow-up. Keep this floor at least as strict when it lands.
+    minimum_protocol_version = "TLSv1.2_2021"
   }
 
   logging_config {
