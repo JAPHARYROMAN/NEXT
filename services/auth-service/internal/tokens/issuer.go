@@ -12,6 +12,7 @@ import (
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"math/big"
 	"net/http"
@@ -23,16 +24,17 @@ import (
 
 // Config controls token issuance.
 type Config struct {
-	Issuer       string        // iss claim (https://auth.next.local)
-	Audience     string        // aud claim (next-api)
-	AccessTTL    time.Duration // 15 min default
-	Tier         string        // claim under next.tier; defaults to authenticated
+	Issuer    string        // iss claim (https://auth.next.local)
+	Audience  string        // aud claim (next-api)
+	AccessTTL time.Duration // 15 min default
+	Tier      string        // claim under next.tier; defaults to authenticated
 }
 
 // Claims are the payload of every NEXT access token.
 type Claims struct {
 	jwt.RegisteredClaims
-	Next NextClaim `json:"next"`
+	SessionID string    `json:"sid,omitempty"`
+	Next      NextClaim `json:"next"`
 }
 
 // NextClaim is the platform-specific claim namespace.
@@ -72,6 +74,11 @@ func NewIssuer(cfg Config) (*Issuer, error) {
 
 // Mint produces a signed access token for `subject` with optional handle.
 func (i *Issuer) Mint(subject, handle string) (token string, expiresAt time.Time, err error) {
+	return i.MintForSession(subject, "", handle)
+}
+
+// MintForSession produces a signed access token for a concrete auth session.
+func (i *Issuer) MintForSession(subject, sessionID, handle string) (token string, expiresAt time.Time, err error) {
 	i.mu.RLock()
 	defer i.mu.RUnlock()
 	now := time.Now().UTC()
@@ -89,6 +96,7 @@ func (i *Issuer) Mint(subject, handle string) (token string, expiresAt time.Time
 		},
 		Next: NextClaim{Tier: i.cfg.Tier, Handle: handle},
 	}
+	claims.SessionID = sessionID
 	t := jwt.NewWithClaims(jwt.SigningMethodRS256, claims)
 	t.Header["kid"] = i.kid
 	signed, err := t.SignedString(i.key)
@@ -96,6 +104,39 @@ func (i *Issuer) Mint(subject, handle string) (token string, expiresAt time.Time
 		return "", time.Time{}, fmt.Errorf("sign: %w", err)
 	}
 	return signed, expiresAt, nil
+}
+
+// Verify parses and validates an access token minted by this issuer.
+func (i *Issuer) Verify(tokenString string) (*Claims, error) {
+	i.mu.RLock()
+	defer i.mu.RUnlock()
+
+	claims := &Claims{}
+	tok, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (any, error) {
+		if token.Method != jwt.SigningMethodRS256 {
+			return nil, fmt.Errorf("unexpected signing method %q", token.Header["alg"])
+		}
+		return &i.key.PublicKey, nil
+	},
+		jwt.WithIssuer(i.cfg.Issuer),
+		jwt.WithAudience(i.cfg.Audience),
+		jwt.WithValidMethods([]string{"RS256"}),
+		jwt.WithLeeway(30*time.Second),
+	)
+	if err != nil {
+		return nil, fmt.Errorf("verify: %w", err)
+	}
+	if tok == nil || !tok.Valid {
+		return nil, errors.New("invalid token")
+	}
+	return claims, nil
+}
+
+// AccessTTL returns the configured access-token lifetime.
+func (i *Issuer) AccessTTL() time.Duration {
+	i.mu.RLock()
+	defer i.mu.RUnlock()
+	return i.cfg.AccessTTL
 }
 
 // JWKS returns the JWK Set containing the current public key, in the format

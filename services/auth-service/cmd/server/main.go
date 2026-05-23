@@ -145,7 +145,7 @@ func run() error {
 		return err
 	}
 
-	sessionSvc := api.NewSessionService(pg, rd)
+	sessionSvc := api.NewSessionService(pg, rd, tokenIssuer)
 	userSvc := api.NewUserService(pg, producer, tokenIssuer)
 
 	httpSrv := newHTTPServer(cfg, pg, rd, tokenIssuer, &ready)

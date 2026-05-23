@@ -17,6 +17,10 @@ import (
 	"go.opentelemetry.io/otel/attribute"
 	"go.opentelemetry.io/otel/propagation"
 	"go.opentelemetry.io/otel/trace"
+	"google.golang.org/protobuf/encoding/protojson"
+	"google.golang.org/protobuf/types/known/timestamppb"
+
+	authv1 "github.com/next-ecosystem/next/gen/go/auth/v1"
 )
 
 // Topics — keep aligned with packages/events/src/topics.ts.
@@ -70,6 +74,20 @@ type envelope struct {
 }
 
 func (p *Producer) emit(ctx context.Context, topic, key string, body any) error {
+	raw, err := json.Marshal(body)
+	if err != nil {
+		return err
+	}
+	env := envelope{
+		EventID:   uuid.NewString(),
+		EmittedAt: time.Now().UTC().Format(time.RFC3339Nano),
+		Type:      topic,
+		Payload:   raw,
+	}
+	return p.emitEnvelope(ctx, topic, key, env)
+}
+
+func (p *Producer) emitEnvelope(ctx context.Context, topic, key string, env envelope) error {
 	if p == nil || p.w == nil {
 		return nil
 	}
@@ -84,17 +102,6 @@ func (p *Producer) emit(ctx context.Context, topic, key string, body any) error 
 	)
 	defer span.End()
 
-	raw, err := json.Marshal(body)
-	if err != nil {
-		span.RecordError(err)
-		return err
-	}
-	env := envelope{
-		EventID:   uuid.NewString(),
-		EmittedAt: time.Now().UTC().Format(time.RFC3339Nano),
-		Type:      topic,
-		Payload:   raw,
-	}
 	payload, err := json.Marshal(env)
 	if err != nil {
 		span.RecordError(err)
@@ -147,5 +154,30 @@ type UserRegistered struct {
 // EmitUserRegistered publishes the event with user_id as the partition key
 // so consumers can preserve per-user ordering.
 func (p *Producer) EmitUserRegistered(ctx context.Context, body UserRegistered) error {
-	return p.emit(ctx, TopicUserRegistered, body.UserID, body)
+	env, err := userRegisteredEnvelope(time.Now().UTC(), body)
+	if err != nil {
+		return err
+	}
+	return p.emitEnvelope(ctx, TopicUserRegistered, body.UserID, env)
+}
+
+func userRegisteredEnvelope(now time.Time, body UserRegistered) (envelope, error) {
+	event := &authv1.UserRegistered{
+		EventId:     uuid.NewString(),
+		EmittedAt:   timestamppb.New(now.UTC()),
+		UserId:      body.UserID,
+		Handle:      body.Handle,
+		DisplayName: body.DisplayName,
+		IpCountry:   body.IPCountry,
+	}
+	raw, err := protojson.MarshalOptions{UseProtoNames: true}.Marshal(event)
+	if err != nil {
+		return envelope{}, err
+	}
+	return envelope{
+		EventID:   event.GetEventId(),
+		EmittedAt: now.UTC().Format(time.RFC3339Nano),
+		Type:      TopicUserRegistered,
+		Payload:   raw,
+	}, nil
 }

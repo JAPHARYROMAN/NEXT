@@ -5,6 +5,7 @@ import (
 	"log/slog"
 	"regexp"
 	"strings"
+	"time"
 
 	"github.com/google/uuid"
 	"google.golang.org/grpc/codes"
@@ -12,6 +13,7 @@ import (
 	"google.golang.org/protobuf/types/known/timestamppb"
 
 	authv1 "github.com/next-ecosystem/next/gen/go/auth/v1"
+	"github.com/next-ecosystem/next/services/auth-service/internal/domain"
 	"github.com/next-ecosystem/next/services/auth-service/internal/eventbus"
 	"github.com/next-ecosystem/next/services/auth-service/internal/store"
 	"github.com/next-ecosystem/next/services/auth-service/internal/tokens"
@@ -25,14 +27,36 @@ var handleRegex = regexp.MustCompile(`^[a-z][a-z0-9_]{2,29}$`)
 type UserService struct {
 	authv1.UnimplementedUserServiceServer
 
-	pg     *store.Postgres
-	events *eventbus.Producer
-	issuer *tokens.Issuer
+	users  registrationStore
+	events registrationEvents
+	issuer tokenIssuer
+	clock  func() time.Time
+}
+
+type registrationStore interface {
+	RegisterUserWithSession(context.Context, uuid.UUID, string, store.Session) (uuid.UUID, store.Session, error)
+}
+
+type registrationEvents interface {
+	EmitUserRegistered(context.Context, eventbus.UserRegistered) error
+}
+
+type tokenIssuer interface {
+	AccessTTL() time.Duration
+	MintForSession(subject, sessionID, handle string) (token string, expiresAt time.Time, err error)
 }
 
 // NewUserService constructs the handler.
 func NewUserService(pg *store.Postgres, ev *eventbus.Producer, iss *tokens.Issuer) *UserService {
-	return &UserService{pg: pg, events: ev, issuer: iss}
+	var events registrationEvents
+	if ev != nil {
+		events = ev
+	}
+	var issuer tokenIssuer
+	if iss != nil {
+		issuer = iss
+	}
+	return &UserService{users: pg, events: events, issuer: issuer, clock: time.Now}
 }
 
 // RegisterUser creates the user row and emits auth.user.registered.v1.
@@ -53,7 +77,13 @@ func (s *UserService) RegisterUser(ctx context.Context, req *authv1.RegisterUser
 		preID = parsed
 	}
 
-	userID, err := s.pg.RegisterUser(ctx, preID, handle)
+	session := store.Session{
+		ID:        uuid.New(),
+		FamilyID:  uuid.New(),
+		Method:    string(domain.MethodMagicLink),
+		ExpiresAt: s.sessionExpiresAt(),
+	}
+	userID, createdSession, err := s.users.RegisterUserWithSession(ctx, preID, handle, session)
 	if err != nil {
 		// Postgres unique violations on handle bubble up; we surface them as AlreadyExists.
 		if strings.Contains(err.Error(), "23505") {
@@ -82,7 +112,7 @@ func (s *UserService) RegisterUser(ctx context.Context, req *authv1.RegisterUser
 	// Mint an access token so the client is authenticated immediately after
 	// signup. The refresh side is left empty until session-service.Refresh lands.
 	if s.issuer != nil {
-		access, expiresAt, err := s.issuer.Mint(userID.String(), handle)
+		access, expiresAt, err := s.issuer.MintForSession(userID.String(), createdSession.ID.String(), handle)
 		if err != nil {
 			slog.WarnContext(ctx, "mint access token failed", "err", err)
 		} else {
@@ -95,4 +125,16 @@ func (s *UserService) RegisterUser(ctx context.Context, req *authv1.RegisterUser
 	}
 
 	return resp, nil
+}
+
+func (s *UserService) sessionExpiresAt() time.Time {
+	ttl := 15 * time.Minute
+	if s.issuer != nil {
+		ttl = s.issuer.AccessTTL()
+	}
+	clock := s.clock
+	if clock == nil {
+		clock = time.Now
+	}
+	return clock().UTC().Add(ttl)
 }
