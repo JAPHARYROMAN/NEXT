@@ -56,6 +56,7 @@ See [`proto/auth/v1/auth.proto`](proto/auth/v1/auth.proto).
 
 | Topic | When |
 | --- | --- |
+| `auth.user.registered.v1` | User registration succeeds |
 | `auth.session.started.v1` | Successful login |
 | `auth.session.ended.v1` | Logout, revoke, refresh-token reuse |
 | `auth.credential.rotated.v1` | Passkey added/removed; password change |

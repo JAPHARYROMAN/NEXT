@@ -101,7 +101,7 @@ func pgPoolFromStore(t *testing.T, _ *store.Postgres) *pgxpool.Pool {
 
 func TestValidate_ActiveSession(t *testing.T) {
 	pg, rd := openTestDeps(t)
-	svc := NewSessionService(pg, rd)
+	svc := NewSessionService(pg, rd, nil)
 	userID := seedUser(t, pg)
 
 	created, err := pg.CreateSession(context.Background(), store.Session{
@@ -130,7 +130,7 @@ func TestValidate_ActiveSession(t *testing.T) {
 
 func TestValidate_ExpiredSession(t *testing.T) {
 	pg, rd := openTestDeps(t)
-	svc := NewSessionService(pg, rd)
+	svc := NewSessionService(pg, rd, nil)
 	userID := seedUser(t, pg)
 
 	created, err := pg.CreateSession(context.Background(), store.Session{
@@ -153,7 +153,7 @@ func TestValidate_ExpiredSession(t *testing.T) {
 
 func TestRevokeThenValidate(t *testing.T) {
 	pg, rd := openTestDeps(t)
-	svc := NewSessionService(pg, rd)
+	svc := NewSessionService(pg, rd, nil)
 	userID := seedUser(t, pg)
 
 	created, err := pg.CreateSession(context.Background(), store.Session{
@@ -182,7 +182,7 @@ func TestRevokeThenValidate(t *testing.T) {
 
 func TestValidate_UnknownSession(t *testing.T) {
 	pg, rd := openTestDeps(t)
-	svc := NewSessionService(pg, rd)
+	svc := NewSessionService(pg, rd, nil)
 	_, err := svc.Validate(context.Background(), &authv1.ValidateRequest{
 		AccessToken: uuid.NewString(),
 	})

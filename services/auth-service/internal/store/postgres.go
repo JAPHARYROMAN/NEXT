@@ -56,23 +56,64 @@ func (p *Postgres) RegisterUser(ctx context.Context, id uuid.UUID, handle string
 	return out, nil
 }
 
+// RegisterUserWithSession inserts a new user and first session atomically.
+func (p *Postgres) RegisterUserWithSession(ctx context.Context, id uuid.UUID, handle string, session Session) (uuid.UUID, Session, error) {
+	tx, err := p.pool.BeginTx(ctx, pgx.TxOptions{IsoLevel: pgx.Serializable})
+	if err != nil {
+		return uuid.Nil, Session{}, fmt.Errorf("begin register tx: %w", err)
+	}
+	defer func() { _ = tx.Rollback(ctx) }()
+
+	var userID uuid.UUID
+	if id == uuid.Nil {
+		err = tx.QueryRow(ctx,
+			`INSERT INTO users (handle) VALUES ($1) RETURNING id`, handle,
+		).Scan(&userID)
+	} else {
+		err = tx.QueryRow(ctx,
+			`INSERT INTO users (id, handle) VALUES ($1, $2) RETURNING id`, id, handle,
+		).Scan(&userID)
+	}
+	if err != nil {
+		return uuid.Nil, Session{}, fmt.Errorf("register user: %w", err)
+	}
+
+	session.UserID = userID
+	created, err := insertSession(ctx, tx, session)
+	if err != nil {
+		return uuid.Nil, Session{}, err
+	}
+	if err := tx.Commit(ctx); err != nil {
+		return uuid.Nil, Session{}, fmt.Errorf("commit register tx: %w", err)
+	}
+	return userID, created, nil
+}
+
 // Session models a row of the sessions table.
 type Session struct {
-	ID         uuid.UUID
-	UserID     uuid.UUID
-	FamilyID   uuid.UUID
-	DeviceID   string
-	Method     string
-	IPCountry  string
-	UserAgent  string
-	CreatedAt  time.Time
-	ExpiresAt  time.Time
-	RevokedAt  *time.Time
+	ID        uuid.UUID
+	UserID    uuid.UUID
+	FamilyID  uuid.UUID
+	DeviceID  string
+	Method    string
+	IPCountry string
+	UserAgent string
+	CreatedAt time.Time
+	ExpiresAt time.Time
+	RevokedAt *time.Time
 }
 
 // CreateSession inserts a new session.
 func (p *Postgres) CreateSession(ctx context.Context, s Session) (Session, error) {
-	row := p.pool.QueryRow(ctx, `
+	return insertSession(ctx, p.pool, s)
+}
+
+type sessionInserter interface {
+	QueryRow(ctx context.Context, sql string, args ...any) pgx.Row
+}
+
+func insertSession(ctx context.Context, db sessionInserter, s Session) (Session, error) {
+	row := db.QueryRow(ctx, `
 		INSERT INTO sessions (id, user_id, family_id, device_id, method, ip_country, user_agent, expires_at)
 		VALUES (COALESCE($1, gen_random_uuid()), $2, $3, NULLIF($4,''), $5, NULLIF($6,''), NULLIF($7,''), $8)
 		RETURNING id, created_at`,
