@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"errors"
 	"testing"
 	"time"
 
@@ -169,5 +168,3 @@ func (f *fakeRevocationCache) MarkSessionRevoked(_ context.Context, sessionID st
 	f.marked = sessionID
 	return nil
 }
-
-var errTestStore = errors.New("test store error")

@@ -42,7 +42,8 @@ func TestUserRegisteredEnvelopeUsesProtoPayload(t *testing.T) {
 		t.Fatalf("payload event_id = %q, want envelope event_id %q", payload.GetEventId(), env.EventID)
 	}
 	if payload.GetUserId() != userID || payload.GetHandle() != "creator" || payload.GetDisplayName() != "Creator" || payload.GetIpCountry() != "KE" {
-		t.Fatalf("payload = %+v", payload)
+		t.Fatalf("payload fields = user_id:%q handle:%q display_name:%q ip_country:%q",
+			payload.GetUserId(), payload.GetHandle(), payload.GetDisplayName(), payload.GetIpCountry())
 	}
 
 	var raw map[string]any
