@@ -40,6 +40,7 @@ message GetFeedRequest {
   string cursor     = 4;   // opaque; empty = first page
   uint32 limit      = 5 [(buf.validate.field).uint32.lte = 100];
   repeated RankedItem ranked = 6;
+  string slate_id   = 7;   // recommendation-service slate correlated to this page
 }
 message GetFeedResponse {
   repeated FeedItem items = 1;
@@ -47,6 +48,8 @@ message GetFeedResponse {
   bool   has_more         = 3;
   double fatigue          = 4;   // session fatigue after this page, [0,1]
   bool   breathe          = 5;   // pacing recommends a calmer next page
+  string feed_view_id     = 6;   // opaque correlation id emitted with feed.viewed
+  string slate_id         = 7;
 }
 
 message RecordImpressionRequest {
@@ -55,6 +58,8 @@ message RecordImpressionRequest {
   string content_id = 3 [(buf.validate.field).string.min_len = 1];
   string kind       = 4 [(buf.validate.field).string.min_len = 1];  // view|click|skip|complete
   int64  dwell_ms   = 5;
+  string feed_view_id = 6;
+  uint32 position     = 7;
 }
 message RecordImpressionResponse {}
 

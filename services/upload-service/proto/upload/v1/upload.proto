@@ -24,13 +24,16 @@ message UploadSession {
   string state         = 6;     // open|finalizing|completed|failed
   string object_key    = 7;     // S3 key once finalized
   google.protobuf.Timestamp created_at = 8;
+  string title         = 9;
+  string filename      = 10;
 }
 
 message CreateSessionRequest {
   string creator_id   = 1 [(buf.validate.field).string.min_len = 1];
   string content_type = 2 [(buf.validate.field).string.min_len = 1];
   int64  total_bytes  = 3 [(buf.validate.field).int64.gt = 0];
-  string filename     = 4;
+  string filename     = 4 [(buf.validate.field).string.max_len = 255];
+  string title        = 5 [(buf.validate.field).string.max_len = 200];
 }
 message CreateSessionResponse { UploadSession session = 1; }
 
@@ -48,6 +51,11 @@ message GetSessionResponse { UploadSession session = 1; }
 
 message FinalizeRequest { string session_id = 1 [(buf.validate.field).string.uuid = true]; }
 message FinalizeResponse {
-  string object_key = 1;
-  int64  total_bytes = 2;
+  string object_key    = 1;
+  int64  total_bytes   = 2;
+  string upload_id     = 3;
+  string creator_id    = 4;
+  string content_type  = 5;
+  string filename      = 6;
+  string title         = 7;
 }

@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package next.events.recommendation.v1;
+
+import "buf/validate/validate.proto";
+import "google/protobuf/timestamp.proto";
+
+option go_package = "github.com/next-ecosystem/next/gen/go/next/events/recommendation/v1;recommendationeventsv1";
+
+// FeedViewed is emitted when a feed page is served or observed by the runtime
+// slice. Category stream: recommendation.events.v1. Partition key: user_id.
+message FeedViewed {
+  string event_id = 1 [(buf.validate.field).string.uuid = true];
+  google.protobuf.Timestamp emitted_at = 2 [(buf.validate.field).required = true];
+
+  string user_id = 3 [(buf.validate.field).string.uuid = true];
+  string session_id = 4 [(buf.validate.field).string.uuid = true];
+  string feed_view_id = 5 [(buf.validate.field).string.min_len = 1];
+  string slate_id = 6;
+  string surface = 7 [(buf.validate.field).string.min_len = 1];
+  uint32 item_count = 8 [(buf.validate.field).uint32.lte = 100];
+  repeated string content_ids = 9;
+  int64 dwell_ms = 10 [(buf.validate.field).int64.gte = 0];
+}

@@ -22,7 +22,7 @@ Outputs land in `gen/go`, `gen/ts`, `gen/python`. Generated code is gitignored; 
 ## Adding a new event
 
 1. Add a new `.proto` file under the right `<domain>/v1/` subdirectory.
-2. Add the topic constant to [`packages/events/src/topics.ts`](../src/topics.ts).
+2. Route it through the existing category stream (`<category>.events.v1`) and document the envelope `event_type`. Do not add a new per-event Kafka topic.
 3. Add a producer call in the owning service.
 4. Add the consumer in the receiving service(s).
 5. Update the topic catalog in [docs/event-architecture.md](../../../docs/event-architecture.md).
